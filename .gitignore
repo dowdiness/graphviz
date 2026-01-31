@@ -1,3 +1,10 @@
+.DS_Store
+target
 target/
 .mooncakes/
-.DS_Store
+.moonagent/
+node_modules/
+dist/
+.env
+_build
+.grepai/
