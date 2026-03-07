@@ -765,6 +765,62 @@ test "format_id_quotes_keywords_and_digit_leading_mixed_ids" {
 }
 
 ///|
+test "parse_dotted_ids_as_single_tokens" {
+  let input = "digraph { .5; 1.; .foo }"
+  match parse_dot(input) {
+    Some(graph) => {
+      assert_eq(graph.statements.length(), 3)
+      match graph.statements[0] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, ".5")
+        _ => abort("Expected first statement to be NodeStmt")
+      }
+      match graph.statements[1] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, "1.")
+        _ => abort("Expected second statement to be NodeStmt")
+      }
+      match graph.statements[2] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, ".foo")
+        _ => abort("Expected third statement to be NodeStmt")
+      }
+    }
+    None => abort("Failed to parse dotted id variants")
+  }
+}
+
+///|
+test "format_graph_roundtrips_dotted_ids" {
+  let graph : Graph = {
+    strict: false,
+    directed: true,
+    id: None,
+    statements: [
+      NodeStmt({ id: ".5", port: None }, None),
+      NodeStmt({ id: "1.", port: None }, None),
+      NodeStmt({ id: ".foo", port: None }, None),
+    ],
+  }
+  let formatted = format_graph(graph)
+  match parse_dot(formatted) {
+    Some(parsed) => {
+      assert_eq(parsed.statements.length(), 3)
+      match parsed.statements[0] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, ".5")
+        _ => abort("Expected first roundtripped statement to be NodeStmt")
+      }
+      match parsed.statements[1] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, "1.")
+        _ => abort("Expected second roundtripped statement to be NodeStmt")
+      }
+      match parsed.statements[2] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, ".foo")
+        _ => abort("Expected third roundtripped statement to be NodeStmt")
+      }
+    }
+    None => abort("Failed to roundtrip dotted ids")
+  }
+}
+
+///|
 test "parse_attributes_requires_full_input_consumption" {
   let valid = parse_attributes("a=b, c=d")
   assert_eq(valid.length(), 2)
@@ -830,4 +886,224 @@ test "format_edge_stmt_preserves_compass_only_ports" {
     }
     None => abort("Failed to parse graph with compass-only ports")
   }
+}
+
+///|
+test "parse_dot rejects trailing tokens after closing brace" {
+  let parsed = parse_dot("digraph { a -> b; } garbage")
+  inspect(parsed == None, content="true")
+}
+
+///|
+test "parse_dot handles non-comment slash without hanging" {
+  let parsed = parse_dot("/")
+  inspect(parsed == None, content="true")
+}
+
+///|
+test "parse_dot still accepts valid comments in graph body" {
+  let parsed = parse_dot("digraph { a -> b; // trailing comment\n }")
+  match parsed {
+    Some(graph) => {
+      inspect(graph.directed, content="true")
+      inspect(graph.statements.length(), content="1")
+    }
+    None => abort("expected parser to accept valid comment")
+  }
+}
+
+///|
+test "parse_dot rejects unterminated block comments" {
+  let parsed = parse_dot("digraph { a -> b; /* unterminated")
+  inspect(parsed == None, content="true")
+}
+
+///|
+test "parse_attributes accepts decimal numerals" {
+  let attrs = parse_attributes("penwidth=1.5")
+  inspect(attrs.length(), content="1")
+  inspect(attrs[0].key, content="penwidth")
+  inspect(attrs[0].value, content="1.5")
+}
+
+///|
+test "parse_dot accepts edge statement with subgraph start operand" {
+  let parsed = parse_dot("digraph { subgraph { a } -> b; }")
+  match parsed {
+    Some(graph) => {
+      inspect(graph.statements.length(), content="1")
+      match graph.statements[0] {
+        EdgeStmt(start, edges, _) => {
+          inspect(start.id, content="a")
+          inspect(edges.length(), content="1")
+          inspect(edges[0].1.id, content="b")
+        }
+        _ => abort("expected edge statement")
+      }
+    }
+    None => abort("expected parser to accept subgraph edge start operand")
+  }
+}
+
+///|
+test "parse_dot accepts edge statement with subgraph target operand" {
+  let parsed = parse_dot("digraph { a -> subgraph { b }; }")
+  match parsed {
+    Some(graph) => {
+      inspect(graph.statements.length(), content="1")
+      match graph.statements[0] {
+        EdgeStmt(start, edges, _) => {
+          inspect(start.id, content="a")
+          inspect(edges.length(), content="1")
+          inspect(edges[0].1.id, content="b")
+        }
+        _ => abort("expected edge statement")
+      }
+    }
+    None => abort("expected parser to accept subgraph edge target operand")
+  }
+}
+
+///|
+test "parse_dot expands subgraph start operand with multiple nodes" {
+  let parsed = parse_dot("digraph { { a; b; } -> c; }")
+  match parsed {
+    Some(graph) => {
+      inspect(graph.statements.length(), content="2")
+      match graph.statements[0] {
+        EdgeStmt(start, edges, _) => {
+          inspect(start.id, content="a")
+          inspect(edges.length(), content="1")
+          inspect(edges[0].1.id, content="c")
+        }
+        _ => abort("expected expanded edge statement")
+      }
+      match graph.statements[1] {
+        EdgeStmt(start, edges, _) => {
+          inspect(start.id, content="b")
+          inspect(edges.length(), content="1")
+          inspect(edges[0].1.id, content="c")
+        }
+        _ => abort("expected expanded edge statement")
+      }
+    }
+    None => abort("expected parser to expand multi-node subgraph start")
+  }
+}
+
+///|
+test "parse_dot expands subgraph target operand with multiple nodes" {
+  let parsed = parse_dot("digraph { a -> { b; c; }; }")
+  match parsed {
+    Some(graph) => {
+      inspect(graph.statements.length(), content="2")
+      match graph.statements[0] {
+        EdgeStmt(start, edges, _) => {
+          inspect(start.id, content="a")
+          inspect(edges[0].1.id, content="b")
+        }
+        _ => abort("expected expanded edge statement")
+      }
+      match graph.statements[1] {
+        EdgeStmt(start, edges, _) => {
+          inspect(start.id, content="a")
+          inspect(edges[0].1.id, content="c")
+        }
+        _ => abort("expected expanded edge statement")
+      }
+    }
+    None => abort("expected parser to expand multi-node subgraph target")
+  }
+}
+
+///|
+test "parse_dot accepts edge statement from empty subgraph endpoint as no-op" {
+  let parsed = parse_dot("digraph { subgraph cluster_0 { } -> b; }")
+  match parsed {
+    Some(graph) => inspect(graph.statements.length(), content="0")
+    None => abort("expected parser to accept empty subgraph edge operand")
+  }
+}
+
+///|
+test "parse_dot continues after empty subgraph edge no-op" {
+  let parsed = parse_dot("digraph { subgraph { } -> b; c; }")
+  match parsed {
+    Some(graph) => {
+      inspect(graph.statements.length(), content="1")
+      match graph.statements[0] {
+        NodeStmt(node_id, _) => inspect(node_id.id, content="c")
+        _ => abort("expected node statement after no-op edge")
+      }
+    }
+    None => abort("expected parser to continue after empty subgraph edge")
+  }
+}
+
+///|
+test "parse_dot accepts empty subgraph target operand as no-op" {
+  let parsed = parse_dot("digraph { a -> subgraph { }; b; }")
+  match parsed {
+    Some(graph) => {
+      inspect(graph.statements.length(), content="1")
+      match graph.statements[0] {
+        NodeStmt(node_id, _) => inspect(node_id.id, content="b")
+        _ => abort("expected node statement after no-op edge")
+      }
+    }
+    None => abort("expected parser to accept empty subgraph edge target")
+  }
+}
+
+///|
+test "parse_dot rejects missing port id after colon" {
+  let parsed = parse_dot("digraph { a: -> b; }")
+  inspect(parsed == None, content="true")
+}
+
+///|
+test "parse_dot rejects trailing colon without compass point" {
+  let parsed = parse_dot("digraph { a:port: -> b; }")
+  inspect(parsed == None, content="true")
+}
+
+///|
+test "parse_dot accepts valid port with compass point" {
+  let parsed = parse_dot("digraph { a:port:n -> b; }")
+  match parsed {
+    Some(graph) => inspect(graph.statements.length(), content="1")
+    None => abort("expected parser to accept valid port syntax")
+  }
+}
+
+///|
+test "parse_dot accepts compass-like port id with explicit compass suffix" {
+  let parsed = parse_dot("digraph { a:n:sw -> b; }")
+  match parsed {
+    Some(graph) =>
+      match graph.statements[0] {
+        EdgeStmt(start, _edges, _) =>
+          match start.port {
+            Some(port) => {
+              match port.id {
+                Some(id) => inspect(id, content="n")
+                None => abort("expected explicit port id")
+              }
+              match port.compass {
+                Some(SW) => inspect(true, content="true")
+                _ => abort("expected sw compass point")
+              }
+            }
+            None => abort("expected parsed port")
+          }
+        _ => abort("expected edge statement")
+      }
+    None => abort("expected parser to accept a:n:sw")
+  }
+}
+
+///|
+test "parse_dot rejects malformed edge rhs after consumed operator" {
+  let parsed = parse_dot("digraph { a -> ; }")
+  inspect(parsed == None, content="true")
 }
