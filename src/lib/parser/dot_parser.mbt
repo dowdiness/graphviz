@@ -742,10 +742,23 @@ fn needs_quoting(s : String) -> Bool {
   if chars.length() == 0 {
     return true
   }
+  if (match s {
+    "strict" | "graph" | "digraph" | "node" | "edge" | "subgraph" => true
+    _ => false
+  }) {
+    return true
+  }
+  let mut has_ascii_alpha = false
   for c in chars {
+    if c.is_ascii_alphabetic() {
+      has_ascii_alpha = true
+    }
     if c.is_ascii_alphabetic() || c == '_' || c.is_numeric() {
       continue
     }
+    return true
+  }
+  if chars[0].is_numeric() && has_ascii_alpha {
     return true
   }
   false
@@ -783,8 +796,8 @@ pub fn parse_attributes(input : String) -> Array[Attribute] {
   }
   let parser = Parser::new("[" + input + "]")
   match parser.parse_attr_list() {
-    Some(attr_list) => attr_list.attributes
-    None => []
+    Some(attr_list) if parser.current_token == EOF => attr_list.attributes
+    _ => []
   }
 }
 
@@ -806,33 +819,43 @@ pub fn format_graph(graph : Graph) -> String {
   }
   buf.write_string(" {\n")
   for stmt in graph.statements {
-    buf.write_string("  ")
-    buf.write_string(format_statement(stmt))
+    buf.write_string(format_indent(1))
+    buf.write_string(format_statement_with_indent(stmt, 1))
     buf.write_string(";\n")
   }
   buf.write_string("}\n")
   buf.to_string()
 }
 
-///|
-fn format_statement(stmt : Statement) -> String {
-  match stmt {
-    NodeStmt(node_id, attr_list) => {
-      let mut result = format_id(node_id.id)
-      match node_id.port {
-        Some(port) => {
-          result = result + ":"
-          match port.id {
-            Some(port_id) => result = result + format_id(port_id)
-            None => ()
-          }
-          match port.compass {
-            Some(compass) => result = result + ":" + format_compass(compass)
-            None => ()
-          }
-        }
+fn format_node_id(node_id : NodeId) -> String {
+  let mut result = format_id(node_id.id)
+  match node_id.port {
+    Some(port) => {
+      result = result + ":"
+      match port.id {
+        Some(port_id) => result = result + format_id(port_id)
         None => ()
       }
+      match port.compass {
+        Some(compass) => result = result + ":" + format_compass(compass)
+        None => ()
+      }
+    }
+    None => ()
+  }
+  result
+}
+
+///|
+fn format_indent(level : Int) -> String {
+  "  ".repeat(level)
+}
+
+///|
+fn format_statement_with_indent(stmt : Statement, indent_level : Int) -> String {
+  match stmt {
+    NodeStmt(node_id, attr_list) => {
+      let mut result = format_node_id(node_id)
       match attr_list {
         Some(attrs) => result = result + " " + format_attr_list(attrs)
         None => ()
@@ -840,14 +863,14 @@ fn format_statement(stmt : Statement) -> String {
       result
     }
     EdgeStmt(start_node, edges, attr_list) => {
-      let mut result = loop (edges[:], format_id(start_node.id)) {
+      let mut result = loop (edges[:], format_node_id(start_node)) {
         ([], acc) => break acc
         ([(edge_op, node_id), .. rest], acc) => {
           let op_str = match edge_op {
             Directed => " -> "
             Undirected => " -- "
           }
-          continue (rest, acc + op_str + format_id(node_id.id))
+          continue (rest, acc + op_str + format_node_id(node_id))
         }
       }
       match attr_list {
@@ -865,7 +888,14 @@ fn format_statement(stmt : Statement) -> String {
         Some(id) => result = result + " " + format_id(id)
         None => ()
       }
-      result = result + " { ... }"
+      result = result + " {\n"
+      for nested_stmt in subgraph.statements {
+        result = result + format_indent(indent_level + 1)
+        result =
+          result + format_statement_with_indent(nested_stmt, indent_level + 1)
+        result = result + ";\n"
+      }
+      result = result + format_indent(indent_level) + "}"
       result
     }
   }
@@ -895,7 +925,7 @@ fn format_attr_list(attr_list : AttributeList) -> String {
     if not(first) {
       result = result + ", "
     }
-    result = result + attr.key + "=" + escape_and_quote(attr.value)
+    result = result + format_id(attr.key) + "=" + escape_and_quote(attr.value)
     first = false
   }
   result = result + "]"
