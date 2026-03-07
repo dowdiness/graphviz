@@ -245,21 +245,23 @@ fn Lexer::read_identifier(self : Lexer) -> String {
 }
 
 ///|
+fn Lexer::read_dotted_identifier(self : Lexer) -> String {
+  self.advance()
+  "." + self.read_identifier()
+}
+
+///|
 fn Lexer::read_number(self : Lexer) -> String {
-  loop (self.current_char, "", false) {
-    (Some(c), acc, has_dot) if c.is_numeric() => {
+  loop (self.current_char, "", false, false) {
+    (Some(c), acc, has_dot, _) if c.is_numeric() => {
       self.advance()
-      continue (self.current_char, acc + c.to_string(), has_dot)
+      continue (self.current_char, acc + c.to_string(), has_dot, true)
     }
-    (Some('.'), acc, false) =>
-      match self.peek_char() {
-        Some(next) if next.is_numeric() => {
-          self.advance()
-          continue (self.current_char, acc + ".", true)
-        }
-        _ => break acc
-      }
-    (_, acc, _) => break acc
+    (Some('.'), acc, false, has_digit) => {
+      self.advance()
+      continue (self.current_char, acc + ".", true, has_digit)
+    }
+    (_, acc, _, _) => break acc
   }
 }
 
@@ -379,6 +381,21 @@ fn Lexer::next_token(self : Lexer) -> Token {
         let word = self.read_number()
         return ID(word)
       }
+      Some('.') =>
+        match self.peek_char() {
+          Some(next) if next.is_numeric() => {
+            let word = self.read_number()
+            return ID(word)
+          }
+          Some(next) if next.is_ascii_alphabetic() || next == '_' => {
+            let word = self.read_dotted_identifier()
+            return ID(word)
+          }
+          _ => {
+            self.advance()
+            return ID(".")
+          }
+        }
       Some(c) => {
         self.advance()
         return ID(c.to_string())

@@ -765,6 +765,62 @@ test "format_id_quotes_keywords_and_digit_leading_mixed_ids" {
 }
 
 ///|
+test "parse_dotted_ids_as_single_tokens" {
+  let input = "digraph { .5; 1.; .foo }"
+  match parse_dot(input) {
+    Some(graph) => {
+      assert_eq(graph.statements.length(), 3)
+      match graph.statements[0] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, ".5")
+        _ => abort("Expected first statement to be NodeStmt")
+      }
+      match graph.statements[1] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, "1.")
+        _ => abort("Expected second statement to be NodeStmt")
+      }
+      match graph.statements[2] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, ".foo")
+        _ => abort("Expected third statement to be NodeStmt")
+      }
+    }
+    None => abort("Failed to parse dotted id variants")
+  }
+}
+
+///|
+test "format_graph_roundtrips_dotted_ids" {
+  let graph : Graph = {
+    strict: false,
+    directed: true,
+    id: None,
+    statements: [
+      NodeStmt({ id: ".5", port: None }, None),
+      NodeStmt({ id: "1.", port: None }, None),
+      NodeStmt({ id: ".foo", port: None }, None),
+    ],
+  }
+  let formatted = format_graph(graph)
+  match parse_dot(formatted) {
+    Some(parsed) => {
+      assert_eq(parsed.statements.length(), 3)
+      match parsed.statements[0] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, ".5")
+        _ => abort("Expected first roundtripped statement to be NodeStmt")
+      }
+      match parsed.statements[1] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, "1.")
+        _ => abort("Expected second roundtripped statement to be NodeStmt")
+      }
+      match parsed.statements[2] {
+        NodeStmt(node_id, _) => assert_eq(node_id.id, ".foo")
+        _ => abort("Expected third roundtripped statement to be NodeStmt")
+      }
+    }
+    None => abort("Failed to roundtrip dotted ids")
+  }
+}
+
+///|
 test "parse_attributes_requires_full_input_consumption" {
   let valid = parse_attributes("a=b, c=d")
   assert_eq(valid.length(), 2)
