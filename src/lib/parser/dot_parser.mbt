@@ -205,6 +205,7 @@ fn Lexer::skip_comment(self : Lexer) -> Bool {
           // Consume '/' and '*'
           self.advance()
           self.advance()
+          let mut closed = false
           // Multi-line comment
           loop self.current_char {
             None => break
@@ -213,6 +214,7 @@ fn Lexer::skip_comment(self : Lexer) -> Bool {
               match self.current_char {
                 Some('/') => {
                   self.advance()
+                  closed = true
                   break
                 }
                 _ => continue self.current_char
@@ -223,7 +225,7 @@ fn Lexer::skip_comment(self : Lexer) -> Bool {
               continue self.current_char
             }
           }
-          true
+          closed
         }
         _ => false
       }

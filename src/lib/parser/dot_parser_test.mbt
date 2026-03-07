@@ -857,6 +857,12 @@ test "parse_dot still accepts valid comments in graph body" {
 }
 
 ///|
+test "parse_dot rejects unterminated block comments" {
+  let parsed = parse_dot("digraph { a -> b; /* unterminated")
+  inspect(parsed == None, content="true")
+}
+
+///|
 test "parse_attributes accepts decimal numerals" {
   let attrs = parse_attributes("penwidth=1.5")
   inspect(attrs.length(), content="1")
