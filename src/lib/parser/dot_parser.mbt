@@ -394,13 +394,14 @@ fn Lexer::next_token(self : Lexer) -> Token {
 pub(all) struct Parser {
   lexer : Lexer
   mut current_token : Token
+  mut pending_statements : Array[Statement]
 }
 
 ///|
 fn Parser::new(input : String) -> Parser {
   let lexer = Lexer::new(input)
   let current_token = lexer.next_token()
-  { lexer, current_token }
+  { lexer, current_token, pending_statements: [] }
 }
 
 ///|
@@ -491,37 +492,59 @@ fn Parser::parse_node_id(self : Parser) -> NodeId? {
 }
 
 ///|
-fn first_node_id_in_subgraph(subgraph : Subgraph) -> NodeId? {
-  for stmt in subgraph.statements {
-    match stmt {
-      NodeStmt(node_id, _) => return Some(node_id)
-      EdgeStmt(start, _, _) => return Some(start)
-      Subgraph(nested) =>
-        match first_node_id_in_subgraph(nested) {
-          Some(node_id) => return Some(node_id)
-          None => ()
-        }
-      _ => ()
+fn push_unique_node_id(node_ids : Array[NodeId], node_id : NodeId) -> Unit {
+  for existing in node_ids {
+    if existing == node_id {
+      return
     }
   }
-  None
+  node_ids.push(node_id)
 }
 
 ///|
-fn subgraph_as_node_id(subgraph : Subgraph) -> NodeId? {
-  match subgraph.id {
-    Some(id) => Some({ id, port: None })
-    None => first_node_id_in_subgraph(subgraph)
+fn collect_node_ids_from_statement(stmt : Statement, node_ids : Array[NodeId]) -> Unit {
+  match stmt {
+    NodeStmt(node_id, _) => push_unique_node_id(node_ids, node_id)
+    EdgeStmt(start, edges, _) => {
+      push_unique_node_id(node_ids, start)
+      for edge in edges {
+        let (_, target) = edge
+        push_unique_node_id(node_ids, target)
+      }
+    }
+    Subgraph(nested) => collect_node_ids_from_subgraph(nested, node_ids)
+    _ => ()
   }
 }
 
 ///|
-fn Parser::parse_edge_endpoint_node_id(self : Parser) -> NodeId? {
+fn collect_node_ids_from_subgraph(subgraph : Subgraph, node_ids : Array[NodeId]) -> Unit {
+  for stmt in subgraph.statements {
+    collect_node_ids_from_statement(stmt, node_ids)
+  }
+}
+
+///|
+fn node_ids_in_subgraph(subgraph : Subgraph) -> Array[NodeId] {
+  let node_ids = []
+  collect_node_ids_from_subgraph(subgraph, node_ids)
+  node_ids
+}
+
+///|
+fn Parser::parse_edge_endpoint_node_ids(self : Parser) -> Array[NodeId]? {
   match self.parse_node_id() {
-    Some(node_id) => Some(node_id)
+    Some(node_id) => Some([node_id])
     None =>
       match self.parse_subgraph() {
-        Some(subgraph) => subgraph_as_node_id(subgraph)
+        Some(subgraph) => {
+          let node_ids = node_ids_in_subgraph(subgraph)
+          if node_ids.is_empty() {
+            None
+          } else {
+            Some(node_ids)
+          }
+        }
         None => None
       }
   }
@@ -589,7 +612,7 @@ fn Parser::parse_attr_list(self : Parser) -> AttributeList? {
 ///|
 priv enum EdgeRhsParseResult {
   NoEdgeOp
-  Parsed(Array[(EdgeOp, NodeId)])
+  Parsed(Array[(EdgeOp, Array[NodeId])])
   Malformed
 }
 
@@ -608,8 +631,8 @@ fn Parser::parse_edge_rhs(self : Parser) -> EdgeRhsParseResult {
       }
       _ => break
     }
-    match self.parse_edge_endpoint_node_id() {
-      Some(node_id) => edges.push((edge_op, node_id))
+    match self.parse_edge_endpoint_node_ids() {
+      Some(endpoint_nodes) => edges.push((edge_op, endpoint_nodes))
       None => return Malformed
     }
   }
@@ -621,7 +644,43 @@ fn Parser::parse_edge_rhs(self : Parser) -> EdgeRhsParseResult {
 }
 
 ///|
+fn expand_edge_statements(
+  start_nodes : Array[NodeId],
+  edge_chain : Array[(EdgeOp, Array[NodeId])],
+  attr_list : AttributeList?,
+) -> Array[Statement] {
+  let expanded = []
+  let mut current_sources = start_nodes
+  for edge_step in edge_chain {
+    let (edge_op, targets) = edge_step
+    for source in current_sources {
+      for target in targets {
+        expanded.push(EdgeStmt(source, [(edge_op, target)], attr_list))
+      }
+    }
+    current_sources = targets
+  }
+  expanded
+}
+
+///|
+fn Parser::emit_expanded_statements(self : Parser, statements : Array[Statement]) -> Statement? {
+  if statements.is_empty() {
+    return None
+  }
+  for i = statements.length() - 1; i > 0; i = i - 1 {
+    self.pending_statements.push(statements[i])
+  }
+  Some(statements[0])
+}
+
+///|
 fn Parser::parse_statement(self : Parser) -> Statement? {
+  match self.pending_statements.pop() {
+    Some(stmt) => return Some(stmt)
+    None => ()
+  }
+
   match self.current_token {
     // Attribute statement
     Graph | Node | Edge => {
@@ -650,21 +709,23 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
     Subgraph | LeftBrace =>
       match self.parse_subgraph() {
         Some(subgraph) =>
-          match subgraph_as_node_id(subgraph) {
-            Some(start_node) =>
-              match self.parse_edge_rhs() {
-                Parsed(edges) => {
-                  let attr_list = self.parse_attr_list()
-                  Some(EdgeStmt(start_node, edges, attr_list))
-                }
-                NoEdgeOp => Some(Subgraph(subgraph))
-                Malformed => None
+          match self.parse_edge_rhs() {
+            Parsed(edge_chain) => {
+              let start_nodes = node_ids_in_subgraph(subgraph)
+              if start_nodes.is_empty() {
+                None
+              } else {
+                let attr_list = self.parse_attr_list()
+                let expanded = expand_edge_statements(
+                  start_nodes,
+                  edge_chain,
+                  attr_list,
+                )
+                self.emit_expanded_statements(expanded)
               }
-            None =>
-              match self.current_token {
-                Arrow | Line => None
-                _ => Some(Subgraph(subgraph))
-              }
+            }
+            NoEdgeOp => Some(Subgraph(subgraph))
+            Malformed => None
           }
         None => None
       }
@@ -688,9 +749,14 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
         Some(node_id) =>
           // Check if this is an edge or node statement
           match self.parse_edge_rhs() {
-            Parsed(edges) => {
+            Parsed(edge_chain) => {
               let attr_list = self.parse_attr_list()
-              Some(EdgeStmt(node_id, edges, attr_list))
+              let expanded = expand_edge_statements(
+                [node_id],
+                edge_chain,
+                attr_list,
+              )
+              self.emit_expanded_statements(expanded)
             }
             NoEdgeOp =>
               // Check for assignment

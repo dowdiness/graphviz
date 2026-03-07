@@ -909,6 +909,64 @@ test "parse_dot accepts edge statement with subgraph target operand" {
 }
 
 ///|
+test "parse_dot expands subgraph start operand with multiple nodes" {
+  let parsed = parse_dot("digraph { { a; b; } -> c; }")
+  match parsed {
+    Some(graph) => {
+      inspect(graph.statements.length(), content="2")
+      match graph.statements[0] {
+        EdgeStmt(start, edges, _) => {
+          inspect(start.id, content="a")
+          inspect(edges.length(), content="1")
+          inspect(edges[0].1.id, content="c")
+        }
+        _ => abort("expected expanded edge statement")
+      }
+      match graph.statements[1] {
+        EdgeStmt(start, edges, _) => {
+          inspect(start.id, content="b")
+          inspect(edges.length(), content="1")
+          inspect(edges[0].1.id, content="c")
+        }
+        _ => abort("expected expanded edge statement")
+      }
+    }
+    None => abort("expected parser to expand multi-node subgraph start")
+  }
+}
+
+///|
+test "parse_dot expands subgraph target operand with multiple nodes" {
+  let parsed = parse_dot("digraph { a -> { b; c; }; }")
+  match parsed {
+    Some(graph) => {
+      inspect(graph.statements.length(), content="2")
+      match graph.statements[0] {
+        EdgeStmt(start, edges, _) => {
+          inspect(start.id, content="a")
+          inspect(edges[0].1.id, content="b")
+        }
+        _ => abort("expected expanded edge statement")
+      }
+      match graph.statements[1] {
+        EdgeStmt(start, edges, _) => {
+          inspect(start.id, content="a")
+          inspect(edges[0].1.id, content="c")
+        }
+        _ => abort("expected expanded edge statement")
+      }
+    }
+    None => abort("expected parser to expand multi-node subgraph target")
+  }
+}
+
+///|
+test "parse_dot rejects edge statement from empty subgraph endpoint" {
+  let parsed = parse_dot("digraph { subgraph cluster_0 { } -> b; }")
+  inspect(parsed == None, content="true")
+}
+
+///|
 test "parse_dot rejects missing port id after colon" {
   let parsed = parse_dot("digraph { a: -> b; }")
   inspect(parsed == None, content="true")
