@@ -738,15 +738,15 @@ pub fn parse_dot(input : String) -> Graph? {
 
 ///|
 fn needs_quoting(s : String) -> Bool {
-  if s.length() == 0 {
+  let chars = s.to_array()
+  if chars.length() == 0 {
     return true
   }
-  for i = 0; i < s.length(); i = i + 1 {
-    match s.code_unit_at(i).to_char() {
-      Some(c) if c.is_ascii_alphabetic() || c == '_' || c.is_numeric() =>
-        continue
-      _ => return true
+  for c in chars {
+    if c.is_ascii_alphabetic() || c == '_' || c.is_numeric() {
+      continue
     }
+    return true
   }
   false
 }
@@ -755,13 +755,12 @@ fn needs_quoting(s : String) -> Bool {
 fn escape_and_quote(s : String) -> String {
   let buf = StringBuilder::new()
   buf.write_char('"')
-  for i = 0; i < s.length(); i = i + 1 {
-    match s.code_unit_at(i).to_char() {
-      Some('"') => buf.write_string("\\\"")
-      Some('\\') => buf.write_string("\\\\")
-      Some('\n') => buf.write_string("\\n")
-      Some(c) => buf.write_char(c)
-      None => ()
+  for c in s.to_array() {
+    match c {
+      '"' => buf.write_string("\\\"")
+      '\\' => buf.write_string("\\\\")
+      '\n' => buf.write_string("\\n")
+      _ => buf.write_char(c)
     }
   }
   buf.write_char('"')

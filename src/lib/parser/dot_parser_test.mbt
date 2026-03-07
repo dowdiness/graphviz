@@ -726,3 +726,32 @@ test "format_strict_graph" {
     None => abort("Failed to parse strict graph")
   }
 }
+
+///|
+test "format_preserves_non_bmp_identifier" {
+  let graph : Graph = {
+    strict: false,
+    directed: true,
+    id: Some("🚀"),
+    statements: []
+  }
+  let formatted = format_graph(graph)
+  assert_true(formatted.contains("🚀"))
+}
+
+///|
+test "format_preserves_non_bmp_attribute_value" {
+  let graph : Graph = {
+    strict: false,
+    directed: true,
+    id: None,
+    statements: [
+      NodeStmt(
+        { id: "a", port: None },
+        Some({ attributes: [{ key: "label", value: "go 🚀" }] }),
+      ),
+    ],
+  }
+  let formatted = format_graph(graph)
+  assert_true(formatted.contains("go 🚀"))
+}
