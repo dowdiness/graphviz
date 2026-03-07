@@ -39,22 +39,19 @@ pub(all) enum Token {
   LeftBrace
 
   // Operators and punctuation
-  RightBrace // {
-  LeftBracket // }
-  RightBracket // [
-  Colon // ]
-  Semicolon // :
-  Comma // ;
-  Equals // ,
-  Arrow // =
-  Line // ->
-  // --
+  RightBrace // }
+  LeftBracket // [
+  RightBracket // ]
+  Colon // :
+  Semicolon // ;
+  Comma // ,
+  Equals // =
+  Arrow // ->
+  Line // --
 
   // Compass points
-  CompassPt(String)
-  EOF // n, ne, e, se, s, sw, w, nw, c, _
-
-  // End of file
+  CompassPt(String) // n, ne, e, se, s, sw, w, nw, c, _
+  EOF // End of file
 } derive(Eq, Show)
 
 // AST node types
@@ -87,12 +84,9 @@ pub(all) struct NodeId {
 
 ///|
 pub(all) enum EdgeOp {
-  Directed
-  Undirected // ->
-} derive ( // --
-  Eq,
-  Show,
-)
+  Directed // ->
+  Undirected // --
+} derive(Eq, Show)
 
 ///|
 pub(all) struct Attribute {
@@ -158,6 +152,15 @@ fn Lexer::advance(self : Lexer) -> Unit {
 }
 
 ///|
+fn Lexer::peek_char(self : Lexer) -> Char? {
+  if self.position >= self.input.length() {
+    None
+  } else {
+    UInt16::to_char(self.input.at(self.position))
+  }
+}
+
+///|
 fn Lexer::skip_whitespace(self : Lexer) -> Unit {
   match self.current_char {
     Some(' ') | Some('\t') | Some('\n') | Some('\r') => {
@@ -169,12 +172,25 @@ fn Lexer::skip_whitespace(self : Lexer) -> Unit {
 }
 
 ///|
-fn Lexer::skip_comment(self : Lexer) -> Unit {
+fn Lexer::skip_comment(self : Lexer) -> Bool {
   match self.current_char {
-    Some('/') => {
-      self.advance()
-      match self.current_char {
-        Some('/') =>
+    Some('#') => {
+      // Hash comment: consume until newline or EOF
+      loop self.current_char {
+        Some('\n') | None => break
+        _ => {
+          self.advance()
+          continue self.current_char
+        }
+      }
+      true
+    }
+    Some('/') =>
+      match self.peek_char() {
+        Some('/') => {
+          // Consume both slashes
+          self.advance()
+          self.advance()
           // Single line comment
           loop self.current_char {
             Some('\n') | None => break
@@ -183,14 +199,18 @@ fn Lexer::skip_comment(self : Lexer) -> Unit {
               continue self.current_char
             }
           }
+          true
+        }
         Some('*') => {
-          // Multi-line comment
+          // Consume '/' and '*'
           self.advance()
+          self.advance()
+          // Multi-line comment
           loop self.current_char {
             None => break
             Some('*') => {
               self.advance()
-              loop self.current_char {
+              match self.current_char {
                 Some('/') => {
                   self.advance()
                   break
@@ -203,24 +223,11 @@ fn Lexer::skip_comment(self : Lexer) -> Unit {
               continue self.current_char
             }
           }
+          true
         }
-        _ => {
-          // Not a comment, backtrack
-          self.position -= 1
-          self.current_char = Some('/')
-        }
+        _ => false
       }
-    }
-    Some('#') =>
-      // Hash comment
-      loop self.current_char {
-        Some('\n') | None => break
-        _ => {
-          self.advance()
-          continue self.current_char
-        }
-      }
-    _ => ()
+    _ => false
   }
 }
 
@@ -232,6 +239,25 @@ fn Lexer::read_identifier(self : Lexer) -> String {
       continue (self.current_char, acc + c.to_string())
     }
     (_, acc) => break acc
+  }
+}
+
+///|
+fn Lexer::read_number(self : Lexer) -> String {
+  loop (self.current_char, "", false) {
+    (Some(c), acc, has_dot) if c.is_numeric() => {
+      self.advance()
+      continue (self.current_char, acc + c.to_string(), has_dot)
+    }
+    (Some('.'), acc, false) =>
+      match self.peek_char() {
+        Some(next) if next.is_numeric() => {
+          self.advance()
+          continue (self.current_char, acc + ".", true)
+        }
+        _ => break acc
+      }
+    (_, acc, _) => break acc
   }
 }
 
@@ -285,9 +311,13 @@ fn Lexer::next_token(self : Lexer) -> Token {
     self.skip_whitespace()
     match self.current_char {
       None => return EOF
-      Some('/') | Some('#') => {
-        self.skip_comment()
-        continue
+      Some('#') => self.skip_comment() |> ignore
+      Some('/') => {
+        if self.skip_comment() {
+          continue
+        }
+        self.advance()
+        return ID("/")
       }
       Some('{') => {
         self.advance()
@@ -339,12 +369,12 @@ fn Lexer::next_token(self : Lexer) -> Token {
         let str = self.read_quoted_string()
         return ID(str)
       }
-      Some(c) if c.is_numeric() || c.is_ascii_alphabetic() || c == '_' => {
+      Some(c) if c.is_ascii_alphabetic() || c == '_' => {
         let word = self.read_identifier()
         return keyword_or_id(word)
       }
       Some(c) if c.is_numeric() => {
-        let word = self.read_identifier()
+        let word = self.read_number()
         return ID(word)
       }
       Some(c) => {
@@ -417,26 +447,24 @@ fn Parser::parse_port(self : Parser) -> Port? {
     return None
   }
   let port = { id: None, compass: None }
-  match self.current_token {
-    ID(id) =>
-      // Check if this ID is a compass point
-      if is_compass_point(id) {
-        port.compass = Some(parse_compass_point(id))
+  let first = match self.current_token {
+    ID(id) => id
+    _ => return None
+  }
+  ignore(self.eat(ID("")))
+  if self.eat(Colon) {
+    match self.current_token {
+      ID(compass_str) if is_compass_point(compass_str) => {
+        port.id = Some(first)
+        port.compass = Some(parse_compass_point(compass_str))
         ignore(self.eat(ID("")))
-      } else {
-        port.id = Some(id)
-        ignore(self.eat(ID("")))
-        if self.eat(Colon) {
-          match self.current_token {
-            ID(compass_str) if is_compass_point(compass_str) => {
-              port.compass = Some(parse_compass_point(compass_str))
-              ignore(self.eat(ID("")))
-            }
-            _ => ()
-          }
-        }
       }
-    _ => ()
+      _ => return None
+    }
+  } else if is_compass_point(first) {
+    port.compass = Some(parse_compass_point(first))
+  } else {
+    port.id = Some(first)
   }
   Some(port)
 }
@@ -446,10 +474,54 @@ fn Parser::parse_node_id(self : Parser) -> NodeId? {
   match self.current_token {
     ID(id) => {
       ignore(self.eat(ID("")))
-      let port = self.parse_port()
+      let port = match self.current_token {
+        Colon =>
+          match self.parse_port() {
+            Some(port) => Some(port)
+            None => return None
+          }
+        _ => None
+      }
       Some({ id, port })
     }
     _ => None
+  }
+}
+
+///|
+fn first_node_id_in_subgraph(subgraph : Subgraph) -> NodeId? {
+  for stmt in subgraph.statements {
+    match stmt {
+      NodeStmt(node_id, _) => return Some(node_id)
+      EdgeStmt(start, _, _) => return Some(start)
+      Subgraph(nested) =>
+        match first_node_id_in_subgraph(nested) {
+          Some(node_id) => return Some(node_id)
+          None => ()
+        }
+      _ => ()
+    }
+  }
+  None
+}
+
+///|
+fn subgraph_as_node_id(subgraph : Subgraph) -> NodeId? {
+  match subgraph.id {
+    Some(id) => Some({ id, port: None })
+    None => first_node_id_in_subgraph(subgraph)
+  }
+}
+
+///|
+fn Parser::parse_edge_endpoint_node_id(self : Parser) -> NodeId? {
+  match self.parse_node_id() {
+    Some(node_id) => Some(node_id)
+    None =>
+      match self.parse_subgraph() {
+        Some(subgraph) => subgraph_as_node_id(subgraph)
+        None => None
+      }
   }
 }
 
@@ -513,7 +585,14 @@ fn Parser::parse_attr_list(self : Parser) -> AttributeList? {
 }
 
 ///|
-fn Parser::parse_edge_rhs(self : Parser) -> Array[(EdgeOp, NodeId)]? {
+priv enum EdgeRhsParseResult {
+  NoEdgeOp
+  Parsed(Array[(EdgeOp, NodeId)])
+  Malformed
+}
+
+///|
+fn Parser::parse_edge_rhs(self : Parser) -> EdgeRhsParseResult {
   let edges = []
   while true {
     let edge_op = match self.current_token {
@@ -527,15 +606,15 @@ fn Parser::parse_edge_rhs(self : Parser) -> Array[(EdgeOp, NodeId)]? {
       }
       _ => break
     }
-    match self.parse_node_id() {
+    match self.parse_edge_endpoint_node_id() {
       Some(node_id) => edges.push((edge_op, node_id))
-      None => break
+      None => return Malformed
     }
   }
   if edges.is_empty() {
-    None
+    NoEdgeOp
   } else {
-    Some(edges)
+    Parsed(edges)
   }
 }
 
@@ -565,17 +644,32 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
       }
     }
 
-    // Subgraph
-    Subgraph =>
+    // Subgraph (explicit or anonymous)
+    Subgraph | LeftBrace =>
       match self.parse_subgraph() {
-        Some(subgraph) => Some(Subgraph(subgraph))
+        Some(subgraph) =>
+          match subgraph_as_node_id(subgraph) {
+            Some(start_node) =>
+              match self.parse_edge_rhs() {
+                Parsed(edges) => {
+                  let attr_list = self.parse_attr_list()
+                  Some(EdgeStmt(start_node, edges, attr_list))
+                }
+                NoEdgeOp => Some(Subgraph(subgraph))
+                Malformed => None
+              }
+            None =>
+              match self.current_token {
+                Arrow | Line => None
+                _ => Some(Subgraph(subgraph))
+              }
+          }
         None => None
       }
 
     // Unhandled tokens
     Digraph
     | Strict
-    | LeftBrace
     | RightBrace
     | LeftBracket
     | RightBracket
@@ -592,11 +686,11 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
         Some(node_id) =>
           // Check if this is an edge or node statement
           match self.parse_edge_rhs() {
-            Some(edges) => {
+            Parsed(edges) => {
               let attr_list = self.parse_attr_list()
               Some(EdgeStmt(node_id, edges, attr_list))
             }
-            None =>
+            NoEdgeOp =>
               // Check for assignment
               match node_id.port {
                 Some(_) => {
@@ -623,6 +717,7 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
                     }
                   }
               }
+            Malformed => None
           }
         None => None
       }
@@ -733,7 +828,14 @@ fn Parser::parse_graph(self : Parser) -> Graph? {
 ///|
 pub fn parse_dot(input : String) -> Graph? {
   let parser = Parser::new(input)
-  parser.parse_graph()
+  match parser.parse_graph() {
+    Some(graph) =>
+      match parser.current_token {
+        EOF => Some(graph)
+        _ => None
+      }
+    None => None
+  }
 }
 
 ///|
@@ -743,9 +845,9 @@ fn needs_quoting(s : String) -> Bool {
     return true
   }
   if (match s {
-    "strict" | "graph" | "digraph" | "node" | "edge" | "subgraph" => true
-    _ => false
-  }) {
+      "strict" | "graph" | "digraph" | "node" | "edge" | "subgraph" => true
+      _ => false
+    }) {
     return true
   }
   let mut has_ascii_alpha = false
@@ -754,6 +856,9 @@ fn needs_quoting(s : String) -> Bool {
       has_ascii_alpha = true
     }
     if c.is_ascii_alphabetic() || c == '_' || c.is_numeric() {
+      continue
+    }
+    if c == '.' && not(has_ascii_alpha) {
       continue
     }
     return true
@@ -827,18 +932,22 @@ pub fn format_graph(graph : Graph) -> String {
   buf.to_string()
 }
 
+///|
 fn format_node_id(node_id : NodeId) -> String {
   let mut result = format_id(node_id.id)
   match node_id.port {
-    Some(port) => {
+    Some(port) =>
       match (port.id, port.compass) {
         (Some(port_id), Some(compass)) =>
-          result = result + ":" + format_id(port_id) + ":" + format_compass(compass)
+          result = result +
+            ":" +
+            format_id(port_id) +
+            ":" +
+            format_compass(compass)
         (Some(port_id), None) => result = result + ":" + format_id(port_id)
         (None, Some(compass)) => result = result + ":" + format_compass(compass)
         (None, None) => result = result + ":"
       }
-    }
     None => ()
   }
   result
@@ -889,8 +998,8 @@ fn format_statement_with_indent(stmt : Statement, indent_level : Int) -> String 
       result = result + " {\n"
       for nested_stmt in subgraph.statements {
         result = result + format_indent(indent_level + 1)
-        result =
-          result + format_statement_with_indent(nested_stmt, indent_level + 1)
+        result = result +
+          format_statement_with_indent(nested_stmt, indent_level + 1)
         result = result + ";\n"
       }
       result = result + format_indent(indent_level) + "}"
