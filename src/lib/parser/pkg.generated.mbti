@@ -73,6 +73,7 @@ pub impl Show for NodeId
 pub(all) struct Parser {
   lexer : Lexer
   mut current_token : Token
+  mut pending_statements : Array[Statement]
 }
 
 pub(all) struct Port {

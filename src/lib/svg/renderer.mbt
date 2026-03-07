@@ -120,6 +120,11 @@ fn build_node_element(
   node : @layout.LayoutNode,
   config : SvgConfig,
 ) -> @svg.SvgElement {
+  // Per-node colors with config fallback
+  let fill = node.fillcolor.unwrap_or(config.node_fill)
+  let stroke = node.color.unwrap_or(config.node_stroke)
+  let text_fill = node.fontcolor.unwrap_or(config.text_color)
+
   // Rectangle
   let node_rect = @svg.rect(
       x=node.position.x,
@@ -128,8 +133,8 @@ fn build_node_element(
       height=node.size.height,
       rx=Some(4.0),
     )
-    .fill(config.node_fill)
-    .stroke(config.node_stroke)
+    .fill(fill)
+    .stroke(stroke)
     .stroke_width(config.node_stroke_width)
 
   // Text label (centered in node)
@@ -137,7 +142,7 @@ fn build_node_element(
   let text_y = node.position.y + node.size.height / 2.0 + config.font_size / 3.0
   let node_text = @svg.text(node.label, x=text_x, y=text_y)
     .with_attr(@svg.text_anchor("middle"))
-    .fill(config.text_color)
+    .fill(text_fill)
     .with_attr(@svg.font_size(config.font_size))
     .with_attr(@svg.font_family(config.font_family))
 

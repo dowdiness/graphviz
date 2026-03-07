@@ -34,6 +34,9 @@ pub struct LayoutNode {
   size : Size // Node dimensions
   layer : Int // Vertical layer assignment (0 = top)
   order : Int // Horizontal position within layer
+  color : String? // Per-node border color override
+  fontcolor : String? // Per-node text color override
+  fillcolor : String? // Per-node fill color override
 } derive(Eq, Show)
 
 // Edge with routing waypoints
@@ -72,6 +75,9 @@ pub(all) struct NodeInfo {
   mut label : String // Display label from DOT attributes (mutable to update from NodeStmt)
   mut incoming : Array[String] // Incoming edge sources
   mut outgoing : Array[String] // Outgoing edge targets
+  mut color : String? // Per-node border color
+  mut fontcolor : String? // Per-node text color
+  mut fillcolor : String? // Per-node fill color
 } derive(Show)
 
 ///|

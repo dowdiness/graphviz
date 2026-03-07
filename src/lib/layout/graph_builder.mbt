@@ -28,6 +28,21 @@ fn extract_label(node_id : String, attrs : @parser.AttributeList?) -> String {
 }
 
 ///|
+fn extract_attr(key : String, attrs : @parser.AttributeList?) -> String? {
+  match attrs {
+    Some(attr_list) => {
+      for attr in attr_list.attributes {
+        if attr.key == key {
+          return Some(attr.value)
+        }
+      }
+      None
+    }
+    None => None
+  }
+}
+
+///|
 fn collect_nodes(
   statements : Array[@parser.Statement],
 ) -> Map[String, NodeInfo] {
@@ -36,19 +51,27 @@ fn collect_nodes(
     match stmt {
       @parser.NodeStmt(node_id, attrs) => {
         let label = extract_label(node_id.id, attrs)
+        let color = extract_attr("color", attrs)
+        let fontcolor = extract_attr("fontcolor", attrs)
+        let fillcolor = extract_attr("fillcolor", attrs)
         // Update node if it exists (might have been added from EdgeStmt without label)
         // or create new node with label
         match nodes.get(node_id.id) {
-          Some(existing_node) =>
-            // Update the existing node's label
+          Some(existing_node) => {
             existing_node.label = label
+            existing_node.color = color
+            existing_node.fontcolor = fontcolor
+            existing_node.fillcolor = fillcolor
+          }
           None =>
-            // Create new node
             nodes.set(node_id.id, {
               id: node_id.id,
               label,
               incoming: [],
               outgoing: [],
+              color,
+              fontcolor,
+              fillcolor,
             })
         }
       }
@@ -60,6 +83,9 @@ fn collect_nodes(
             label: start_node.id,
             incoming: [],
             outgoing: [],
+            color: None,
+            fontcolor: None,
+            fillcolor: None,
           })
         }
         // Add all target nodes from edge chain
@@ -71,6 +97,9 @@ fn collect_nodes(
               label: target_node.id,
               incoming: [],
               outgoing: [],
+              color: None,
+              fontcolor: None,
+              fillcolor: None,
             })
           }
         }

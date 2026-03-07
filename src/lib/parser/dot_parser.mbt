@@ -519,7 +519,10 @@ fn push_unique_node_id(node_ids : Array[NodeId], node_id : NodeId) -> Unit {
 }
 
 ///|
-fn collect_node_ids_from_statement(stmt : Statement, node_ids : Array[NodeId]) -> Unit {
+fn collect_node_ids_from_statement(
+  stmt : Statement,
+  node_ids : Array[NodeId],
+) -> Unit {
   match stmt {
     NodeStmt(node_id, _) => push_unique_node_id(node_ids, node_id)
     EdgeStmt(start, edges, _) => {
@@ -535,7 +538,10 @@ fn collect_node_ids_from_statement(stmt : Statement, node_ids : Array[NodeId]) -
 }
 
 ///|
-fn collect_node_ids_from_subgraph(subgraph : Subgraph, node_ids : Array[NodeId]) -> Unit {
+fn collect_node_ids_from_subgraph(
+  subgraph : Subgraph,
+  node_ids : Array[NodeId],
+) -> Unit {
   for stmt in subgraph.statements {
     collect_node_ids_from_statement(stmt, node_ids)
   }
@@ -674,7 +680,10 @@ fn expand_edge_statements(
 }
 
 ///|
-fn Parser::emit_expanded_statements(self : Parser, statements : Array[Statement]) -> Statement? {
+fn Parser::emit_expanded_statements(
+  self : Parser,
+  statements : Array[Statement],
+) -> Statement? {
   if statements.is_empty() {
     loop self.current_token {
       Semicolon => {
@@ -731,9 +740,7 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
               let start_nodes = node_ids_in_subgraph(subgraph)
               let attr_list = self.parse_attr_list()
               let expanded = expand_edge_statements(
-                start_nodes,
-                edge_chain,
-                attr_list,
+                start_nodes, edge_chain, attr_list,
               )
               self.emit_expanded_statements(expanded)
             }

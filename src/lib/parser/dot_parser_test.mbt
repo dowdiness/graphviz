@@ -733,7 +733,7 @@ test "format_preserves_non_bmp_identifier" {
     strict: false,
     directed: true,
     id: Some("🚀"),
-    statements: []
+    statements: [],
   }
   let formatted = format_graph(graph)
   assert_true(formatted.contains("🚀"))

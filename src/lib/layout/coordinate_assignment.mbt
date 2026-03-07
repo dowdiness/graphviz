@@ -58,10 +58,16 @@ fn compute_node_positions_in_layer(
     let node_id = layer_nodes[i]
     let x = start_x + i.to_double() * (config.node_width + config.node_spacing)
 
-    // Get label from NodeInfo, default to node_id if not found
-    let label = match nodes.get(node_id) {
-      Some(node_info) => node_info.label
-      None => node_id
+    // Get label and colors from NodeInfo, default to node_id if not found
+    let (label, color, fontcolor, fillcolor) = match nodes.get(node_id) {
+      Some(node_info) =>
+        (
+          node_info.label,
+          node_info.color,
+          node_info.fontcolor,
+          node_info.fillcolor,
+        )
+      None => (node_id, None, None, None)
     }
     let layout_node : LayoutNode = {
       id: node_id,
@@ -70,6 +76,9 @@ fn compute_node_positions_in_layer(
       size: { width: config.node_width, height: config.node_height },
       layer: layer_index,
       order: i,
+      color,
+      fontcolor,
+      fillcolor,
     }
     positions.push((node_id, layout_node))
   }
