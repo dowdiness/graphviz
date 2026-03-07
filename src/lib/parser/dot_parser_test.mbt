@@ -1017,9 +1017,42 @@ test "parse_dot expands subgraph target operand with multiple nodes" {
 }
 
 ///|
-test "parse_dot rejects edge statement from empty subgraph endpoint" {
+test "parse_dot accepts edge statement from empty subgraph endpoint as no-op" {
   let parsed = parse_dot("digraph { subgraph cluster_0 { } -> b; }")
-  inspect(parsed == None, content="true")
+  match parsed {
+    Some(graph) => inspect(graph.statements.length(), content="0")
+    None => abort("expected parser to accept empty subgraph edge operand")
+  }
+}
+
+///|
+test "parse_dot continues after empty subgraph edge no-op" {
+  let parsed = parse_dot("digraph { subgraph { } -> b; c; }")
+  match parsed {
+    Some(graph) => {
+      inspect(graph.statements.length(), content="1")
+      match graph.statements[0] {
+        NodeStmt(node_id, _) => inspect(node_id.id, content="c")
+        _ => abort("expected node statement after no-op edge")
+      }
+    }
+    None => abort("expected parser to continue after empty subgraph edge")
+  }
+}
+
+///|
+test "parse_dot accepts empty subgraph target operand as no-op" {
+  let parsed = parse_dot("digraph { a -> subgraph { }; b; }")
+  match parsed {
+    Some(graph) => {
+      inspect(graph.statements.length(), content="1")
+      match graph.statements[0] {
+        NodeStmt(node_id, _) => inspect(node_id.id, content="b")
+        _ => abort("expected node statement after no-op edge")
+      }
+    }
+    None => abort("expected parser to accept empty subgraph edge target")
+  }
 }
 
 ///|
