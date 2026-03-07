@@ -816,3 +816,18 @@ test "format_edge_stmt_preserves_ports_and_compass" {
     None => abort("Failed to parse graph with ported edge")
   }
 }
+
+///|
+test "format_edge_stmt_preserves_compass_only_ports" {
+  let input = "digraph { a:n -> b:s }"
+  match parse_dot(input) {
+    Some(graph) => {
+      let formatted = format_graph(graph)
+      assert_true(formatted.contains("a:n -> b:s"))
+      assert_true(not(formatted.contains("a::n")))
+      assert_true(not(formatted.contains("b::s")))
+      assert_true(parse_dot(formatted) != None)
+    }
+    None => abort("Failed to parse graph with compass-only ports")
+  }
+}

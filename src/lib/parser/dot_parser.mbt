@@ -831,14 +831,12 @@ fn format_node_id(node_id : NodeId) -> String {
   let mut result = format_id(node_id.id)
   match node_id.port {
     Some(port) => {
-      result = result + ":"
-      match port.id {
-        Some(port_id) => result = result + format_id(port_id)
-        None => ()
-      }
-      match port.compass {
-        Some(compass) => result = result + ":" + format_compass(compass)
-        None => ()
+      match (port.id, port.compass) {
+        (Some(port_id), Some(compass)) =>
+          result = result + ":" + format_id(port_id) + ":" + format_compass(compass)
+        (Some(port_id), None) => result = result + ":" + format_id(port_id)
+        (None, Some(compass)) => result = result + ":" + format_compass(compass)
+        (None, None) => result = result + ":"
       }
     }
     None => ()
