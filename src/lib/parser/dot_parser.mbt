@@ -736,41 +736,95 @@ pub fn parse_dot(input : String) -> Graph? {
   parser.parse_graph()
 }
 
-// Helper function to format the AST for debugging
+///|
+fn needs_quoting(s : String) -> Bool {
+  if s.length() == 0 {
+    return true
+  }
+  for i = 0; i < s.length(); i = i + 1 {
+    match s.code_unit_at(i).to_char() {
+      Some(c) if c.is_ascii_alphabetic() || c == '_' || c.is_numeric() =>
+        continue
+      _ => return true
+    }
+  }
+  false
+}
+
+///|
+fn escape_and_quote(s : String) -> String {
+  let buf = StringBuilder::new()
+  buf.write_char('"')
+  for i = 0; i < s.length(); i = i + 1 {
+    match s.code_unit_at(i).to_char() {
+      Some('"') => buf.write_string("\\\"")
+      Some('\\') => buf.write_string("\\\\")
+      Some('\n') => buf.write_string("\\n")
+      Some(c) => buf.write_char(c)
+      None => ()
+    }
+  }
+  buf.write_char('"')
+  buf.to_string()
+}
+
+///|
+pub fn format_id(s : String) -> String {
+  if needs_quoting(s) {
+    escape_and_quote(s)
+  } else {
+    s
+  }
+}
+
+///|
+pub fn parse_attributes(input : String) -> Array[Attribute] {
+  if input == "" {
+    return []
+  }
+  let parser = Parser::new("[" + input + "]")
+  match parser.parse_attr_list() {
+    Some(attr_list) => attr_list.attributes
+    None => []
+  }
+}
+
+// Format the AST back to DOT string
 
 ///|
 pub fn format_graph(graph : Graph) -> String {
-  let mut result = ""
+  let buf = StringBuilder::new()
   if graph.strict {
-    result = result + "strict "
+    buf.write_string("strict ")
   }
-  if graph.directed {
-    result = result + "digraph"
-  } else {
-    result = result + "graph"
-  }
+  buf.write_string(if graph.directed { "digraph" } else { "graph" })
   match graph.id {
-    Some(id) => result = result + " " + id
+    Some(id) => {
+      buf.write_string(" ")
+      buf.write_string(format_id(id))
+    }
     None => ()
   }
-  result = result + " {\n"
+  buf.write_string(" {\n")
   for stmt in graph.statements {
-    result = result + "  " + format_statement(stmt) + "\n"
+    buf.write_string("  ")
+    buf.write_string(format_statement(stmt))
+    buf.write_string(";\n")
   }
-  result = result + "}"
-  result
+  buf.write_string("}\n")
+  buf.to_string()
 }
 
 ///|
 fn format_statement(stmt : Statement) -> String {
   match stmt {
     NodeStmt(node_id, attr_list) => {
-      let mut result = node_id.id
+      let mut result = format_id(node_id.id)
       match node_id.port {
         Some(port) => {
           result = result + ":"
           match port.id {
-            Some(port_id) => result = result + port_id
+            Some(port_id) => result = result + format_id(port_id)
             None => ()
           }
           match port.compass {
@@ -787,14 +841,14 @@ fn format_statement(stmt : Statement) -> String {
       result
     }
     EdgeStmt(start_node, edges, attr_list) => {
-      let mut result = loop (edges[:], start_node.id) {
+      let mut result = loop (edges[:], format_id(start_node.id)) {
         ([], acc) => break acc
         ([(edge_op, node_id), .. rest], acc) => {
           let op_str = match edge_op {
             Directed => " -> "
             Undirected => " -- "
           }
-          continue (rest, acc + op_str + node_id.id)
+          continue (rest, acc + op_str + format_id(node_id.id))
         }
       }
       match attr_list {
@@ -805,11 +859,11 @@ fn format_statement(stmt : Statement) -> String {
     }
     AttrStmt(attr_type, attr_list) =>
       attr_type + " " + format_attr_list(attr_list)
-    Assignment(key, value) => key + " = " + value
+    Assignment(key, value) => format_id(key) + " = " + format_id(value)
     Subgraph(subgraph) => {
       let mut result = "subgraph"
       match subgraph.id {
-        Some(id) => result = result + " " + id
+        Some(id) => result = result + " " + format_id(id)
         None => ()
       }
       result = result + " { ... }"
@@ -842,7 +896,7 @@ fn format_attr_list(attr_list : AttributeList) -> String {
     if not(first) {
       result = result + ", "
     }
-    result = result + attr.key + "=" + attr.value
+    result = result + attr.key + "=" + escape_and_quote(attr.value)
     first = false
   }
   result = result + "]"

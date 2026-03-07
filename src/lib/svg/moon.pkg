@@ -1,0 +1,13 @@
+import {
+  "antisatori/graphviz/lib/layout",
+  "antisatori/svg-dsl/lib" @svg,
+  "moonbitlang/x/fs",
+}
+
+import {
+  "antisatori/graphviz/lib/parser",
+} for "test"
+
+options(
+  is_main: false,
+)

@@ -4,7 +4,15 @@ package "antisatori/graphviz/lib/parser"
 // Values
 pub fn format_graph(Graph) -> String
 
+pub fn format_id(String) -> String
+
+pub fn[T : FromDot] from_dot_string(String) -> T?
+
+pub fn parse_attributes(String) -> Array[Attribute]
+
 pub fn parse_dot(String) -> Graph?
+
+pub fn[T : ToDot] to_dot_string(T) -> String
 
 // Errors
 
@@ -118,4 +126,11 @@ pub impl Show for Token
 // Type aliases
 
 // Traits
+pub(open) trait FromDot {
+  from_graph(Graph) -> Self?
+}
+
+pub(open) trait ToDot {
+  to_graph(Self) -> Graph
+}
 
