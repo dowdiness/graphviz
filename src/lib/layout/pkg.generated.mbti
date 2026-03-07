@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "antisatori/graphviz/lib/layout"
 
-import(
-  "antisatori/graphviz/lib/parser"
-)
+import {
+  "antisatori/graphviz/lib/parser",
+}
 
 // Values
 pub fn assign_coordinates(Array[Array[String]], Map[String, NodeInfo], LayoutConfig) -> Map[String, LayoutNode]

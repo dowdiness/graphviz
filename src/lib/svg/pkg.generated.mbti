@@ -1,9 +1,9 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "antisatori/graphviz/lib/svg"
 
-import(
-  "antisatori/graphviz/lib/layout"
-)
+import {
+  "antisatori/graphviz/lib/layout",
+}
 
 // Values
 pub fn render_html(@layout.GraphLayout, String) -> String

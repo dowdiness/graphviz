@@ -1,0 +1,9 @@
+import {
+  "antisatori/graphviz/lib/parser",
+  "antisatori/graphviz/lib/layout",
+  "antisatori/graphviz/lib/svg",
+}
+
+options(
+  link: { "js": { "exports": [ "render_dot_to_svg" ] } },
+)

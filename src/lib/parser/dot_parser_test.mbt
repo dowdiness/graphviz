@@ -726,3 +726,108 @@ test "format_strict_graph" {
     None => abort("Failed to parse strict graph")
   }
 }
+
+///|
+test "format_preserves_non_bmp_identifier" {
+  let graph : Graph = {
+    strict: false,
+    directed: true,
+    id: Some("🚀"),
+    statements: []
+  }
+  let formatted = format_graph(graph)
+  assert_true(formatted.contains("🚀"))
+}
+
+///|
+test "format_preserves_non_bmp_attribute_value" {
+  let graph : Graph = {
+    strict: false,
+    directed: true,
+    id: None,
+    statements: [
+      NodeStmt(
+        { id: "a", port: None },
+        Some({ attributes: [{ key: "label", value: "go 🚀" }] }),
+      ),
+    ],
+  }
+  let formatted = format_graph(graph)
+  assert_true(formatted.contains("go 🚀"))
+}
+
+///|
+test "format_id_quotes_keywords_and_digit_leading_mixed_ids" {
+  assert_eq(format_id("graph"), "\"graph\"")
+  assert_eq(format_id("strict"), "\"strict\"")
+  assert_eq(format_id("1foo"), "\"1foo\"")
+  assert_eq(format_id("123"), "123")
+}
+
+///|
+test "parse_attributes_requires_full_input_consumption" {
+  let valid = parse_attributes("a=b, c=d")
+  assert_eq(valid.length(), 2)
+
+  let invalid = parse_attributes("a=b] trailing")
+  assert_eq(invalid.length(), 0)
+}
+
+///|
+test "format_subgraph_renders_nested_statements" {
+  let input = "digraph { subgraph cluster_0 { a; b -> c } }"
+  match parse_dot(input) {
+    Some(graph) => {
+      let formatted = format_graph(graph)
+      assert_true(formatted.contains("subgraph cluster_0 {"))
+      assert_true(formatted.contains("a;"))
+      assert_true(formatted.contains("b -> c;"))
+      assert_true(not(formatted.contains("{ ... }")))
+    }
+    None => abort("Failed to parse graph with subgraph")
+  }
+}
+
+///|
+test "format_attr_list_quotes_keyword_attribute_keys" {
+  let graph : Graph = {
+    strict: false,
+    directed: true,
+    id: None,
+    statements: [
+      NodeStmt(
+        { id: "a", port: None },
+        Some({ attributes: [{ key: "graph", value: "x" }] }),
+      ),
+    ],
+  }
+  let formatted = format_graph(graph)
+  assert_true(formatted.contains("\"graph\"=\"x\""))
+}
+
+///|
+test "format_edge_stmt_preserves_ports_and_compass" {
+  let input = "digraph { a:out:ne -> b:in:sw }"
+  match parse_dot(input) {
+    Some(graph) => {
+      let formatted = format_graph(graph)
+      assert_true(formatted.contains("a:out:ne -> b:in:sw"))
+    }
+    None => abort("Failed to parse graph with ported edge")
+  }
+}
+
+///|
+test "format_edge_stmt_preserves_compass_only_ports" {
+  let input = "digraph { a:n -> b:s }"
+  match parse_dot(input) {
+    Some(graph) => {
+      let formatted = format_graph(graph)
+      assert_true(formatted.contains("a:n -> b:s"))
+      assert_true(not(formatted.contains("a::n")))
+      assert_true(not(formatted.contains("b::s")))
+      assert_true(parse_dot(formatted) != None)
+    }
+    None => abort("Failed to parse graph with compass-only ports")
+  }
+}
