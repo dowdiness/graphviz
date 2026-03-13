@@ -939,3 +939,24 @@ test "parse_dot rejects malformed edge rhs after consumed operator" {
   let parsed = parse_dot("digraph { a -> ; }")
   inspect(parsed is Err(_), content="true")
 }
+
+///|
+test "parse_dot_error_has_position_for_missing_brace" {
+  match parse_dot("digraph") {
+    Ok(_) => abort("should fail")
+    Err(e) => {
+      inspect(e.position > 0, content="true")
+      inspect(e.message.length() > 0, content="true")
+    }
+  }
+}
+
+///|
+test "parse_dot_error_has_position_for_trailing_tokens" {
+  match parse_dot("digraph { a } extra") {
+    Ok(_) => abort("should fail")
+    Err(e) => {
+      inspect(e.message.contains("unexpected"), content="true")
+    }
+  }
+}
