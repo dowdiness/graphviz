@@ -101,6 +101,32 @@ fn build_adjacency(edges : Array[EdgeData]) -> (Map[String, Array[String]], Map[
 
 Called internally by phases that need adjacency (cycle removal, layer assignment, crossing minimization). Not exposed in the orchestrator pipeline. Each phase that needs adjacency calls this function on its input edges.
 
+### Future optimization: explicit adjacency parameter
+
+The initial implementation has each phase calling `build_adjacency` independently (3 times). As a follow-up, introduce an explicit `Adjacency` type and compute it only at the two points where the edge list changes:
+
+```moonbit
+struct Adjacency {
+  incoming : Map[String, Array[String]]
+  outgoing : Map[String, Array[String]]
+}
+```
+
+The orchestrator computes it twice — once after `extract_graph`, once after `remove_cycles` — and passes it to downstream phases:
+
+```moonbit
+let (nodes, edges) = extract_graph(graph)
+let adj1 = build_adjacency(edges)
+let (acyclic_edges, reversed) = remove_cycles(edges, adj1)
+let adj2 = build_adjacency(acyclic_edges)
+let layers = assign_layers(nodes, adj2)
+let ordered = minimize_crossings(adj2, layers, 24)
+let positions = assign_coordinates(ordered, nodes, config)
+let routed = route_edges(acyclic_edges, reversed, positions, config)
+```
+
+This reduces adjacency computation from 3 to 2, and phases stay pure (adjacency is input, not computed internally). Implement this after the initial refactor is stable.
+
 ### Eliminated types
 
 - `InternalGraph` — replaced by `(nodes, edges)` pairs
