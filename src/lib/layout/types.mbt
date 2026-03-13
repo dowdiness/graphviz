@@ -92,3 +92,22 @@ pub(all) enum EdgeDirection {
   Forward
   Backward // Edge was reversed during cycle removal
 } derive(Eq, Show)
+
+// Immutable node data extracted from AST
+
+///|
+struct NodeData {
+  id : String
+  label : String
+  color : String?
+  fontcolor : String?
+  fillcolor : String?
+} derive(Show)
+
+// Immutable edge data
+
+///|
+struct EdgeData {
+  from : String
+  to : String
+} derive(Eq, Show)
