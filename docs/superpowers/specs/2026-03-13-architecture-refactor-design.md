@@ -121,7 +121,7 @@ Graph, Statement, Subgraph, NodeId, Port, CompassPoint, EdgeOp, Attribute, Attri
 // Error type (new, lives in ast.mbt)
 pub(all) struct ParseError {
   message : String
-  position : Int  // character index (matches Lexer.position)
+  position : Int  // UTF-16 code unit index (matches Lexer.position; equivalent to character index for ASCII)
 } derive(Show)
 
 // Functions
@@ -134,7 +134,7 @@ pub fn parse_attributes(String) -> Array[Attribute]    // uses Parser internally
 pub(open) trait ToDot { to_graph(Self) -> Graph }
 pub(open) trait FromDot { from_graph(Graph) -> Self? }
 pub fn to_dot_string[T : ToDot](T) -> String
-pub fn from_dot_string[T : FromDot](String) -> T?     // updated: propagates ParseError silently (returns None on Err)
+pub fn from_dot_string[T : FromDot](String) -> T?     // updated: maps Err to None, discards ParseError
 ```
 
 ### Parser package — private
@@ -213,7 +213,7 @@ These only use public API (`parse_dot`, `format_graph`), so blackbox is sufficie
 **Error reporting tests (additions to `parser_test.mbt`):**
 - Unterminated graph → `Err` with position past `{`
 - Invalid syntax → `Err` with meaningful message
-- Position values match character indices in input
+- Position values match UTF-16 code unit indices in input
 
 **SVG snapshot tests (additions to `renderer_test.mbt`):**
 - Known 3-node graph → `inspect` snapshot of full SVG output
