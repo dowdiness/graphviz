@@ -1,26 +1,23 @@
 // Convert DOT AST to internal graph representation
 
 ///|
-pub fn extract_graph(graph : @parser.Graph) -> InternalGraph {
+fn extract_graph(
+  graph : @parser.Graph,
+) -> (Map[String, NodeData], Array[EdgeData]) {
   let nodes = collect_nodes(graph.statements)
   let edges = collect_edges(graph.statements, graph.directed)
-  { nodes, edges, directed: graph.directed }
+  (nodes, edges)
 }
 
 ///|
-
-///|
-/// Extract label from attribute list, defaulting to node ID
 fn extract_label(node_id : String, attrs : @parser.AttributeList?) -> String {
   match attrs {
     Some(attr_list) => {
-      // Search for "label" attribute
       for attr in attr_list.attributes {
         if attr.key == "label" {
           return attr.value
         }
       }
-      // No label found, use node ID
       node_id
     }
     None => node_id
@@ -45,8 +42,8 @@ fn extract_attr(key : String, attrs : @parser.AttributeList?) -> String? {
 ///|
 fn collect_nodes(
   statements : Array[@parser.Statement],
-) -> Map[String, NodeInfo] {
-  let nodes : Map[String, NodeInfo] = Map::new()
+) -> Map[String, NodeData] {
+  let nodes : Map[String, NodeData] = Map::new()
   for stmt in statements {
     match stmt {
       @parser.NodeStmt(node_id, attrs) => {
@@ -54,67 +51,35 @@ fn collect_nodes(
         let color = extract_attr("color", attrs)
         let fontcolor = extract_attr("fontcolor", attrs)
         let fillcolor = extract_attr("fillcolor", attrs)
-        // Update node if it exists (might have been added from EdgeStmt without label)
-        // or create new node with label
-        match nodes.get(node_id.id) {
-          Some(existing_node) => {
-            existing_node.label = label
-            existing_node.color = color
-            existing_node.fontcolor = fontcolor
-            existing_node.fillcolor = fillcolor
-          }
-          None =>
-            nodes.set(node_id.id, {
-              id: node_id.id,
-              label,
-              incoming: [],
-              outgoing: [],
-              color,
-              fontcolor,
-              fillcolor,
-            })
-        }
+        nodes.set(node_id.id, { id: node_id.id, label, color, fontcolor, fillcolor })
       }
       @parser.EdgeStmt(start_node, edges, _attrs) => {
-        // Add start node
         if not(nodes.contains(start_node.id)) {
           nodes.set(start_node.id, {
-            id: start_node.id,
-            label: start_node.id,
-            incoming: [],
-            outgoing: [],
-            color: None,
-            fontcolor: None,
-            fillcolor: None,
+            id: start_node.id, label: start_node.id,
+            color: None, fontcolor: None, fillcolor: None,
           })
         }
-        // Add all target nodes from edge chain
         for edge_pair in edges {
           let (_edge_op, target_node) = edge_pair
           if not(nodes.contains(target_node.id)) {
             nodes.set(target_node.id, {
-              id: target_node.id,
-              label: target_node.id,
-              incoming: [],
-              outgoing: [],
-              color: None,
-              fontcolor: None,
-              fillcolor: None,
+              id: target_node.id, label: target_node.id,
+              color: None, fontcolor: None, fillcolor: None,
             })
           }
         }
       }
       @parser.Subgraph(subgraph) => {
-        // Recursively collect nodes from subgraph
         let subgraph_nodes = collect_nodes(subgraph.statements)
-        subgraph_nodes.each(fn(id, node_info) {
+        subgraph_nodes.each(fn(id, node_data) {
           if not(nodes.contains(id)) {
-            nodes.set(id, node_info)
+            nodes.set(id, node_data)
           }
         })
       }
-      @parser.AttrStmt(_attr_type, _attr_list) => ()
-      @parser.Assignment(_key, _value) => ()
+      @parser.AttrStmt(_, _) => ()
+      @parser.Assignment(_, _) => ()
     }
   }
   nodes
@@ -124,62 +89,31 @@ fn collect_nodes(
 fn collect_edges(
   statements : Array[@parser.Statement],
   directed : Bool,
-) -> Array[Edge] {
-  let edges : Array[Edge] = []
+) -> Array[EdgeData] {
+  let edges : Array[EdgeData] = []
   for stmt in statements {
     match stmt {
       @parser.EdgeStmt(start_node, edge_list, _attrs) => {
-        // Handle edge chains: a -> b -> c becomes [(a,b), (b,c)]
         let mut current = start_node.id
         for edge_pair in edge_list {
           let (edge_op, target_node) = edge_pair
-          // Create edge
-          edges.push({
-            from: current,
-            to: target_node.id,
-            original_direction: Forward,
-          })
-
-          // For undirected graphs, create reverse edge too
+          edges.push({ from: current, to: target_node.id })
           if not(directed) || edge_op == @parser.Undirected {
-            edges.push({
-              from: target_node.id,
-              to: current,
-              original_direction: Forward,
-            })
+            edges.push({ from: target_node.id, to: current })
           }
-
-          // Move to next in chain
           current = target_node.id
         }
       }
       @parser.Subgraph(subgraph) => {
-        // Recursively collect edges from subgraph
         let subgraph_edges = collect_edges(subgraph.statements, directed)
         for edge in subgraph_edges {
           edges.push(edge)
         }
       }
-      @parser.NodeStmt(_node_id, _attrs) => ()
-      @parser.AttrStmt(_attr_type, _attr_list) => ()
-      @parser.Assignment(_key, _value) => ()
+      @parser.NodeStmt(_, _) => ()
+      @parser.AttrStmt(_, _) => ()
+      @parser.Assignment(_, _) => ()
     }
   }
   edges
-}
-
-///|
-pub fn build_adjacency_lists(graph : InternalGraph) -> InternalGraph {
-  // Build incoming/outgoing lists for each node
-  for edge in graph.edges {
-    match graph.nodes.get(edge.from) {
-      Some(from_node) => from_node.outgoing.push(edge.to)
-      None => ()
-    }
-    match graph.nodes.get(edge.to) {
-      Some(to_node) => to_node.incoming.push(edge.from)
-      None => ()
-    }
-  }
-  graph
 }
