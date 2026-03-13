@@ -4,12 +4,12 @@
 test "format_simple_graph" {
   let input = "graph { a }"
   match parse_dot(input) {
-    Some(graph) => {
+    Ok(graph) => {
       let formatted = format_graph(graph)
       assert_true(formatted.contains("graph"))
       assert_true(formatted.contains("a"))
     }
-    None => abort("Failed to parse simple graph")
+    Err(_) => abort("Failed to parse simple graph")
   }
 }
 
@@ -17,11 +17,11 @@ test "format_simple_graph" {
 test "format_digraph" {
   let input = "digraph { a -> b }"
   match parse_dot(input) {
-    Some(graph) => {
+    Ok(graph) => {
       let formatted = format_graph(graph)
       assert_true(formatted.contains("digraph"))
     }
-    None => abort("Failed to parse digraph")
+    Err(_) => abort("Failed to parse digraph")
   }
 }
 
@@ -29,11 +29,11 @@ test "format_digraph" {
 test "format_strict_graph" {
   let input = "strict graph { a }"
   match parse_dot(input) {
-    Some(graph) => {
+    Ok(graph) => {
       let formatted = format_graph(graph)
       assert_true(formatted.contains("strict"))
     }
-    None => abort("Failed to parse strict graph")
+    Err(_) => abort("Failed to parse strict graph")
   }
 }
 
@@ -88,7 +88,7 @@ test "format_graph_roundtrips_dotted_ids" {
   }
   let formatted = format_graph(graph)
   match parse_dot(formatted) {
-    Some(parsed) => {
+    Ok(parsed) => {
       assert_eq(parsed.statements.length(), 3)
       match parsed.statements[0] {
         NodeStmt(node_id, _) => assert_eq(node_id.id, ".5")
@@ -103,7 +103,7 @@ test "format_graph_roundtrips_dotted_ids" {
         _ => abort("Expected third roundtripped statement to be NodeStmt")
       }
     }
-    None => abort("Failed to roundtrip dotted ids")
+    Err(_) => abort("Failed to roundtrip dotted ids")
   }
 }
 
@@ -111,14 +111,14 @@ test "format_graph_roundtrips_dotted_ids" {
 test "format_subgraph_renders_nested_statements" {
   let input = "digraph { subgraph cluster_0 { a; b -> c } }"
   match parse_dot(input) {
-    Some(graph) => {
+    Ok(graph) => {
       let formatted = format_graph(graph)
       assert_true(formatted.contains("subgraph cluster_0 {"))
       assert_true(formatted.contains("a;"))
       assert_true(formatted.contains("b -> c;"))
       assert_true(not(formatted.contains("{ ... }")))
     }
-    None => abort("Failed to parse graph with subgraph")
+    Err(_) => abort("Failed to parse graph with subgraph")
   }
 }
 
@@ -143,11 +143,11 @@ test "format_attr_list_quotes_keyword_attribute_keys" {
 test "format_edge_stmt_preserves_ports_and_compass" {
   let input = "digraph { a:out:ne -> b:in:sw }"
   match parse_dot(input) {
-    Some(graph) => {
+    Ok(graph) => {
       let formatted = format_graph(graph)
       assert_true(formatted.contains("a:out:ne -> b:in:sw"))
     }
-    None => abort("Failed to parse graph with ported edge")
+    Err(_) => abort("Failed to parse graph with ported edge")
   }
 }
 
@@ -155,13 +155,13 @@ test "format_edge_stmt_preserves_ports_and_compass" {
 test "format_edge_stmt_preserves_compass_only_ports" {
   let input = "digraph { a:n -> b:s }"
   match parse_dot(input) {
-    Some(graph) => {
+    Ok(graph) => {
       let formatted = format_graph(graph)
       assert_true(formatted.contains("a:n -> b:s"))
       assert_true(not(formatted.contains("a::n")))
       assert_true(not(formatted.contains("b::s")))
-      assert_true(parse_dot(formatted) != None)
+      assert_true(parse_dot(formatted) is Ok(_))
     }
-    None => abort("Failed to parse graph with compass-only ports")
+    Err(_) => abort("Failed to parse graph with compass-only ports")
   }
 }

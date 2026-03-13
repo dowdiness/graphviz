@@ -507,15 +507,20 @@ fn Parser::parse_graph(self : Parser) -> Graph? {
 // Public API
 
 ///|
-pub fn parse_dot(input : String) -> Graph? {
+pub fn parse_dot(input : String) -> Result[Graph, ParseError] {
   let parser = Parser::new(input)
   match parser.parse_graph() {
     Some(graph) =>
       match parser.current_token {
-        EOF => Some(graph)
-        _ => None
+        EOF => Ok(graph)
+        _ =>
+          Err({
+            message: "unexpected tokens after graph",
+            position: parser.lexer.position,
+          })
       }
-    None => None
+    None =>
+      Err({ message: "failed to parse graph", position: parser.lexer.position })
   }
 }
 

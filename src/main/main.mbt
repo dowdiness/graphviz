@@ -2,7 +2,7 @@
 fn test_layout(name : String, dot : String) -> Unit {
   println("=== \{name} ===\n")
   match @parser.parse_dot(dot) {
-    Some(graph) => {
+    Ok(graph) => {
       let layout = @layout.compute_layout(graph)
       println("Layout Results:")
       println("  Nodes: \{layout.nodes.length()}")
@@ -39,7 +39,7 @@ fn test_layout(name : String, dot : String) -> Unit {
       println(@svg.render_svg(layout))
       println("---\n")
     }
-    None => println("Parse error\n")
+    Err(_) => println("Parse error\n")
   }
 }
 
@@ -48,8 +48,8 @@ fn test_layout(name : String, dot : String) -> Unit {
 /// Returns empty string on parse error
 pub fn parse_dot(dot_string : String) -> String {
   match @parser.parse_dot(dot_string) {
-    Some(graph) => @parser.format_graph(graph)
-    None => ""
+    Ok(graph) => @parser.format_graph(graph)
+    Err(_) => ""
   }
 }
 
@@ -58,11 +58,11 @@ pub fn parse_dot(dot_string : String) -> String {
 /// Returns SVG string, or empty string on error
 pub fn render_dot_to_svg(dot_string : String) -> String {
   match @parser.parse_dot(dot_string) {
-    Some(graph) => {
+    Ok(graph) => {
       let layout = @layout.compute_layout(graph)
       @svg.render_svg(layout)
     }
-    None => ""
+    Err(_) => ""
   }
 }
 

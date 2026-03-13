@@ -10,7 +10,7 @@ pub fn[T : FromDot] from_dot_string(String) -> T?
 
 pub fn parse_attributes(String) -> Array[Attribute]
 
-pub fn parse_dot(String) -> Graph?
+pub fn parse_dot(String) -> Result[Graph, ParseError]
 
 pub fn[T : ToDot] to_dot_string(T) -> String
 

@@ -4,13 +4,13 @@
 test "graph_extraction_simple" {
   let dot = "digraph { a -> b }"
   match @parser.parse_dot(dot) {
-    Some(graph) => {
+    Ok(graph) => {
       let internal = extract_graph(graph)
       inspect(internal.nodes.length(), content="2")
       inspect(internal.edges.length(), content="1")
       inspect(internal.directed, content="true")
     }
-    None => {
+    Err(_) => {
       println("Parse failed: graph_extraction_simple")
       inspect(true, content="false")
     }
@@ -25,7 +25,7 @@ test "full_layout_simple_chain" {
     #|  b -> c
     #|}
   match @parser.parse_dot(dot) {
-    Some(graph) => {
+    Ok(graph) => {
       let layout = compute_layout(graph)
       inspect(layout.nodes.length(), content="3")
       inspect(layout.edges.length(), content="2")
@@ -38,7 +38,7 @@ test "full_layout_simple_chain" {
         println("All nodes have layout positions")
       }
     }
-    None => println("Parse error: full_layout_simple_chain")
+    Err(_) => println("Parse error: full_layout_simple_chain")
   }
 }
 
@@ -52,13 +52,13 @@ test "full_layout_diamond" {
     #|  c -> d;
     #|}
   match @parser.parse_dot(dot) {
-    Some(graph) => {
+    Ok(graph) => {
       let layout = compute_layout(graph)
       inspect(layout.nodes.length(), content="4")
       inspect(layout.edges.length(), content="4")
       inspect(layout.layers.length(), content="3")
     }
-    None => println("Parse error: full_layout_diamond")
+    Err(_) => println("Parse error: full_layout_diamond")
   }
 }
 
@@ -74,10 +74,10 @@ test "full_layout_automaton" {
     #|  4 -> 4
     #|}
   match @parser.parse_dot(dot_automaton) {
-    Some(graph) => {
+    Ok(graph) => {
       let layout = compute_layout(graph)
       inspect(layout.nodes.length(), content="6")
     }
-    None => println("Parse error: full_layout_automaton")
+    Err(_) => println("Parse error: full_layout_automaton")
   }
 }
