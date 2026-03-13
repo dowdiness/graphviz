@@ -10,21 +10,6 @@ fn extract_graph(
 }
 
 ///|
-fn extract_label(node_id : String, attrs : @parser.AttributeList?) -> String {
-  match attrs {
-    Some(attr_list) => {
-      for attr in attr_list.attributes {
-        if attr.key == "label" {
-          return attr.value
-        }
-      }
-      node_id
-    }
-    None => node_id
-  }
-}
-
-///|
 fn extract_attr(key : String, attrs : @parser.AttributeList?) -> String? {
   match attrs {
     Some(attr_list) => {
@@ -47,7 +32,7 @@ fn collect_nodes(
   for stmt in statements {
     match stmt {
       @parser.NodeStmt(node_id, attrs) => {
-        let label = extract_label(node_id.id, attrs)
+        let label = extract_attr("label", attrs).or(node_id.id)
         let color = extract_attr("color", attrs)
         let fontcolor = extract_attr("fontcolor", attrs)
         let fillcolor = extract_attr("fillcolor", attrs)

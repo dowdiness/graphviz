@@ -19,8 +19,9 @@ fn route_edges(
           x: to_node.position.x + to_node.size.width / 2.0,
           y: to_node.position.y,
         }
-        let is_reversed = reversed.contains(make_edge_key(edge.from, edge.to)) ||
-          reversed.contains(make_edge_key(edge.to, edge.from))
+        // reversed set stores original-direction keys; edges are physically
+        // flipped after cycle removal, so check the (to, from) key
+        let is_reversed = reversed.contains(make_edge_key(edge.to, edge.from))
         layout_edges.push({
           from: edge.from,
           to: edge.to,
