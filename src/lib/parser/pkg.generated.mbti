@@ -61,8 +61,6 @@ pub(all) struct Graph {
 pub impl Eq for Graph
 pub impl Show for Graph
 
-type Lexer
-
 pub(all) struct NodeId {
   id : String
   port : Port?
@@ -70,11 +68,11 @@ pub(all) struct NodeId {
 pub impl Eq for NodeId
 pub impl Show for NodeId
 
-pub(all) struct Parser {
-  lexer : Lexer
-  mut current_token : Token
-  mut pending_statements : Array[Statement]
+pub(all) struct ParseError {
+  message : String
+  position : Int
 }
+pub impl Show for ParseError
 
 pub(all) struct Port {
   mut id : String?
@@ -99,30 +97,6 @@ pub(all) struct Subgraph {
 }
 pub impl Eq for Subgraph
 pub impl Show for Subgraph
-
-pub(all) enum Token {
-  Strict
-  Graph
-  Digraph
-  Node
-  Edge
-  Subgraph
-  ID(String)
-  LeftBrace
-  RightBrace
-  LeftBracket
-  RightBracket
-  Colon
-  Semicolon
-  Comma
-  Equals
-  Arrow
-  Line
-  CompassPt(String)
-  EOF
-}
-pub impl Eq for Token
-pub impl Show for Token
 
 // Type aliases
 

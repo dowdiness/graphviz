@@ -530,4 +530,3 @@ pub fn parse_attributes(input : String) -> Array[Attribute] {
     _ => []
   }
 }
-
