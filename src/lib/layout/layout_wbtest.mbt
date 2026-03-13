@@ -5,7 +5,7 @@ test "extract_graph_simple" {
   match @parser.parse_dot("digraph { a -> b }") {
     Ok(graph) => {
       let (nodes, edges) = extract_graph(graph)
-      inspect(nodes.size(), content="2")
+      inspect(nodes.length(), content="2")
       inspect(edges.length(), content="1")
     }
     Err(_) => abort("parse failed")
@@ -14,10 +14,7 @@ test "extract_graph_simple" {
 
 ///|
 test "cycle_removal_acyclic_unchanged" {
-  let edges : Array[EdgeData] = [
-    { from: "a", to: "b" },
-    { from: "b", to: "c" },
-  ]
+  let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let (result, reversed) = remove_cycles(edges)
   inspect(result.length(), content="2")
   inspect(reversed.length(), content="0")
@@ -25,10 +22,7 @@ test "cycle_removal_acyclic_unchanged" {
 
 ///|
 test "cycle_removal_single_cycle" {
-  let edges : Array[EdgeData] = [
-    { from: "a", to: "b" },
-    { from: "b", to: "a" },
-  ]
+  let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "a" }]
   let (result, reversed) = remove_cycles(edges)
   inspect(result.length(), content="2")
   // Exactly one edge should be reversed
@@ -38,22 +32,28 @@ test "cycle_removal_single_cycle" {
 ///|
 test "layer_assignment_sources_at_zero" {
   let nodes : Map[String, NodeData] = Map::new()
-  nodes.set(
-    "a",
-    { id: "a", label: "a", color: None, fontcolor: None, fillcolor: None },
-  )
-  nodes.set(
-    "b",
-    { id: "b", label: "b", color: None, fontcolor: None, fillcolor: None },
-  )
-  nodes.set(
-    "c",
-    { id: "c", label: "c", color: None, fontcolor: None, fillcolor: None },
-  )
-  let edges : Array[EdgeData] = [
-    { from: "a", to: "b" },
-    { from: "b", to: "c" },
-  ]
+  nodes.set("a", {
+    id: "a",
+    label: "a",
+    color: None,
+    fontcolor: None,
+    fillcolor: None,
+  })
+  nodes.set("b", {
+    id: "b",
+    label: "b",
+    color: None,
+    fontcolor: None,
+    fillcolor: None,
+  })
+  nodes.set("c", {
+    id: "c",
+    label: "c",
+    color: None,
+    fontcolor: None,
+    fillcolor: None,
+  })
+  let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let layers = assign_layers(nodes, edges)
   inspect(layers.get("a"), content="Some(0)")
 }
@@ -61,22 +61,28 @@ test "layer_assignment_sources_at_zero" {
 ///|
 test "layer_assignment_edges_go_lower_to_higher" {
   let nodes : Map[String, NodeData] = Map::new()
-  nodes.set(
-    "a",
-    { id: "a", label: "a", color: None, fontcolor: None, fillcolor: None },
-  )
-  nodes.set(
-    "b",
-    { id: "b", label: "b", color: None, fontcolor: None, fillcolor: None },
-  )
-  nodes.set(
-    "c",
-    { id: "c", label: "c", color: None, fontcolor: None, fillcolor: None },
-  )
-  let edges : Array[EdgeData] = [
-    { from: "a", to: "b" },
-    { from: "b", to: "c" },
-  ]
+  nodes.set("a", {
+    id: "a",
+    label: "a",
+    color: None,
+    fontcolor: None,
+    fillcolor: None,
+  })
+  nodes.set("b", {
+    id: "b",
+    label: "b",
+    color: None,
+    fontcolor: None,
+    fillcolor: None,
+  })
+  nodes.set("c", {
+    id: "c",
+    label: "c",
+    color: None,
+    fontcolor: None,
+    fillcolor: None,
+  })
+  let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let layers = assign_layers(nodes, edges)
   let a_layer = layers.get("a").unwrap()
   let b_layer = layers.get("b").unwrap()
@@ -87,10 +93,7 @@ test "layer_assignment_edges_go_lower_to_higher" {
 
 ///|
 test "crossing_minimization_preserves_nodes" {
-  let edges : Array[EdgeData] = [
-    { from: "a", to: "c" },
-    { from: "b", to: "d" },
-  ]
+  let edges : Array[EdgeData] = [{ from: "a", to: "c" }, { from: "b", to: "d" }]
   let layers : Array[Array[String]] = [["a", "b"], ["c", "d"]]
   let result = minimize_crossings(edges, layers, 4)
   // Same number of layers
@@ -103,14 +106,20 @@ test "crossing_minimization_preserves_nodes" {
 ///|
 test "coordinate_assignment_no_overlap" {
   let nodes : Map[String, NodeData] = Map::new()
-  nodes.set(
-    "a",
-    { id: "a", label: "a", color: None, fontcolor: None, fillcolor: None },
-  )
-  nodes.set(
-    "b",
-    { id: "b", label: "b", color: None, fontcolor: None, fillcolor: None },
-  )
+  nodes.set("a", {
+    id: "a",
+    label: "a",
+    color: None,
+    fontcolor: None,
+    fillcolor: None,
+  })
+  nodes.set("b", {
+    id: "b",
+    label: "b",
+    color: None,
+    fontcolor: None,
+    fillcolor: None,
+  })
   let layers : Array[Array[String]] = [["a", "b"]]
   let config = LayoutConfig::default()
   let positions = assign_coordinates(layers, nodes, config)

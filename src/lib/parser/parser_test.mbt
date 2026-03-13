@@ -955,8 +955,6 @@ test "parse_dot_error_has_position_for_missing_brace" {
 test "parse_dot_error_has_position_for_trailing_tokens" {
   match parse_dot("digraph { a } extra") {
     Ok(_) => abort("should fail")
-    Err(e) => {
-      inspect(e.message.contains("unexpected"), content="true")
-    }
+    Err(e) => inspect(e.message.contains("unexpected"), content="true")
   }
 }
