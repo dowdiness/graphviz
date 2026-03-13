@@ -557,6 +557,12 @@ test "parse_record_shaped_node" {
   }
 }
 
+///|
+test "parse_dot rejects malformed attribute_without_value" {
+  let parsed = parse_dot("digraph { a [color] }")
+  inspect(parsed is Err(_), content="true")
+}
+
 // Whitespace and comment tests
 
 ///|
@@ -908,6 +914,45 @@ test "parse_dot preserves_nontrivial_subgraph_start_operand_contents" {
       }
     }
     Err(_) => abort("expected parser to preserve non-trivial subgraph operand")
+  }
+}
+
+///|
+test "parse_dot preserves_nontrivial_subgraph_target_operand_contents" {
+  let parsed = parse_dot("digraph { a -> subgraph { b [color=red]; c -> d }; }")
+  match parsed {
+    Ok(graph) => {
+      inspect(graph.statements.length(), content="4")
+      match graph.statements[0] {
+        Subgraph(subgraph) => {
+          inspect(subgraph.statements.length(), content="2")
+          match subgraph.statements[0] {
+            NodeStmt(node_id, Some(attrs)) => {
+              inspect(node_id.id, content="b")
+              inspect(attrs.attributes[0].key, content="color")
+              inspect(attrs.attributes[0].value, content="red")
+            }
+            _ => abort("expected attributed node in preserved subgraph")
+          }
+          match subgraph.statements[1] {
+            EdgeStmt(start, edges, _) => {
+              inspect(start.id, content="c")
+              inspect(edges[0].1.id, content="d")
+            }
+            _ => abort("expected inner edge in preserved subgraph")
+          }
+        }
+        _ => abort("expected preserved subgraph statement")
+      }
+      match graph.statements[1] {
+        EdgeStmt(start, edges, _) => {
+          inspect(start.id, content="a")
+          inspect(edges[0].1.id, content="b")
+        }
+        _ => abort("expected expanded edge into preserved subgraph node")
+      }
+    }
+    Err(_) => abort("expected parser to preserve non-trivial subgraph target")
   }
 }
 

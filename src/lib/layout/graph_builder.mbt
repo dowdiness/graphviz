@@ -65,6 +65,9 @@ fn collect_nodes_with_defaults(
           node_id.id,
           merge_attrs(node_defaults, attrs),
           has_attr("label", attrs),
+          has_attr("color", attrs),
+          has_attr("fontcolor", attrs),
+          has_attr("fillcolor", attrs),
         )
       @parser.EdgeStmt(start_node, edges, _attrs) => {
         ensure_node(nodes, start_node.id, node_defaults)
@@ -86,12 +89,25 @@ fn build_node_data(
   node_id : String,
   attrs : @parser.AttributeList?,
   label_explicit : Bool,
+  color_explicit : Bool,
+  fontcolor_explicit : Bool,
+  fillcolor_explicit : Bool,
 ) -> NodeData {
   let label = extract_attr("label", attrs).unwrap_or(node_id)
   let color = extract_attr("color", attrs)
   let fontcolor = extract_attr("fontcolor", attrs)
   let fillcolor = extract_attr("fillcolor", attrs)
-  { id: node_id, label, label_explicit, color, fontcolor, fillcolor }
+  {
+    id: node_id,
+    label,
+    label_explicit,
+    color,
+    color_explicit,
+    fontcolor,
+    fontcolor_explicit,
+    fillcolor,
+    fillcolor_explicit,
+  }
 }
 
 ///|
@@ -107,18 +123,20 @@ fn merge_node_data(
       existing.label
     },
     label_explicit: existing.label_explicit || update.label_explicit,
-    color: match update.color {
-      Some(_) => update.color
-      None => existing.color
+    color: if update.color_explicit { update.color } else { existing.color },
+    color_explicit: existing.color_explicit || update.color_explicit,
+    fontcolor: if update.fontcolor_explicit {
+      update.fontcolor
+    } else {
+      existing.fontcolor
     },
-    fontcolor: match update.fontcolor {
-      Some(_) => update.fontcolor
-      None => existing.fontcolor
+    fontcolor_explicit: existing.fontcolor_explicit || update.fontcolor_explicit,
+    fillcolor: if update.fillcolor_explicit {
+      update.fillcolor
+    } else {
+      existing.fillcolor
     },
-    fillcolor: match update.fillcolor {
-      Some(_) => update.fillcolor
-      None => existing.fillcolor
-    },
+    fillcolor_explicit: existing.fillcolor_explicit || update.fillcolor_explicit,
   }
 }
 
@@ -128,8 +146,18 @@ fn upsert_node(
   node_id : String,
   attrs : @parser.AttributeList?,
   label_explicit : Bool,
+  color_explicit : Bool,
+  fontcolor_explicit : Bool,
+  fillcolor_explicit : Bool,
 ) -> Unit {
-  let node_data = build_node_data(node_id, attrs, label_explicit)
+  let node_data = build_node_data(
+    node_id,
+    attrs,
+    label_explicit,
+    color_explicit,
+    fontcolor_explicit,
+    fillcolor_explicit,
+  )
   match nodes.get(node_id) {
     Some(existing) => nodes.set(node_id, merge_node_data(existing, node_data))
     None => nodes.set(node_id, node_data)
@@ -143,7 +171,7 @@ fn ensure_node(
   attrs : @parser.AttributeList?,
 ) -> Unit {
   if not(nodes.contains(node_id)) {
-    nodes.set(node_id, build_node_data(node_id, attrs, false))
+    nodes.set(node_id, build_node_data(node_id, attrs, false, false, false, false))
   }
 }
 

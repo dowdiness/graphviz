@@ -75,6 +75,22 @@ test "extract_graph_default_label_does_not_overwrite_existing_explicit_label" {
 }
 
 ///|
+test "extract_graph_default_styles_do_not_overwrite_existing_explicit_styles" {
+  match @parser.parse_dot(
+    "digraph { a [color=blue, fontcolor=white, fillcolor=black]; node [color=red, fontcolor=yellow, fillcolor=green]; a }",
+  ) {
+    Ok(graph) => {
+      let (nodes, _edges) = extract_graph(graph)
+      let node = nodes.get("a").unwrap()
+      inspect(node.color, content="Some(\"blue\")")
+      inspect(node.fontcolor, content="Some(\"white\")")
+      inspect(node.fillcolor, content="Some(\"black\")")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
+
+///|
 test "cycle_removal_acyclic_unchanged" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let (result, reversed) = remove_cycles(edges)
@@ -99,24 +115,33 @@ test "layer_assignment_sources_at_zero" {
     label: "a",
     label_explicit: false,
     color: None,
+    color_explicit: false,
     fontcolor: None,
+    fontcolor_explicit: false,
     fillcolor: None,
+    fillcolor_explicit: false,
   })
   nodes.set("b", {
     id: "b",
     label: "b",
     label_explicit: false,
     color: None,
+    color_explicit: false,
     fontcolor: None,
+    fontcolor_explicit: false,
     fillcolor: None,
+    fillcolor_explicit: false,
   })
   nodes.set("c", {
     id: "c",
     label: "c",
     label_explicit: false,
     color: None,
+    color_explicit: false,
     fontcolor: None,
+    fontcolor_explicit: false,
     fillcolor: None,
+    fillcolor_explicit: false,
   })
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let layers = assign_layers(nodes, edges)
@@ -131,24 +156,33 @@ test "layer_assignment_edges_go_lower_to_higher" {
     label: "a",
     label_explicit: false,
     color: None,
+    color_explicit: false,
     fontcolor: None,
+    fontcolor_explicit: false,
     fillcolor: None,
+    fillcolor_explicit: false,
   })
   nodes.set("b", {
     id: "b",
     label: "b",
     label_explicit: false,
     color: None,
+    color_explicit: false,
     fontcolor: None,
+    fontcolor_explicit: false,
     fillcolor: None,
+    fillcolor_explicit: false,
   })
   nodes.set("c", {
     id: "c",
     label: "c",
     label_explicit: false,
     color: None,
+    color_explicit: false,
     fontcolor: None,
+    fontcolor_explicit: false,
     fillcolor: None,
+    fillcolor_explicit: false,
   })
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let layers = assign_layers(nodes, edges)
@@ -179,16 +213,22 @@ test "coordinate_assignment_no_overlap" {
     label: "a",
     label_explicit: false,
     color: None,
+    color_explicit: false,
     fontcolor: None,
+    fontcolor_explicit: false,
     fillcolor: None,
+    fillcolor_explicit: false,
   })
   nodes.set("b", {
     id: "b",
     label: "b",
     label_explicit: false,
     color: None,
+    color_explicit: false,
     fontcolor: None,
+    fontcolor_explicit: false,
     fillcolor: None,
+    fillcolor_explicit: false,
   })
   let layers : Array[Array[String]] = [["a", "b"]]
   let config = LayoutConfig::default()

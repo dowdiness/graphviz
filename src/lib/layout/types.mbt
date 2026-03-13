@@ -68,8 +68,11 @@ struct NodeData {
   label : String
   label_explicit : Bool
   color : String?
+  color_explicit : Bool
   fontcolor : String?
+  fontcolor_explicit : Bool
   fillcolor : String?
+  fillcolor_explicit : Bool
 } derive(Show)
 
 // Immutable edge data
