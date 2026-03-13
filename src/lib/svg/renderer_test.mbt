@@ -143,3 +143,35 @@ test "save_html_creates_file" {
     }
   }
 }
+
+///|
+test "render_svg_snapshot_simple_digraph" {
+  let dot = "digraph { a -> b -> c }"
+  match @parser.parse_dot(dot) {
+    Ok(graph) => {
+      let layout = @layout.compute_layout(graph)
+      let svg = render_svg(layout)
+      // Verify key structural elements
+      inspect(svg.contains("<rect"), content="true")
+      inspect(svg.contains("<text"), content="true")
+      inspect(svg.contains("<polyline"), content="true")
+      inspect(svg.contains("arrowhead"), content="true")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
+
+///|
+test "render_svg_respects_node_colors" {
+  let dot = "digraph { a [color=red, fillcolor=blue, fontcolor=white]; a -> b }"
+  match @parser.parse_dot(dot) {
+    Ok(graph) => {
+      let layout = @layout.compute_layout(graph)
+      let svg = render_svg(layout)
+      inspect(svg.contains("blue"), content="true")
+      inspect(svg.contains("red"), content="true")
+      inspect(svg.contains("white"), content="true")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
