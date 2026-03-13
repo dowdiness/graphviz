@@ -13,6 +13,44 @@ test "extract_graph_simple" {
 }
 
 ///|
+test "extract_graph_node_defaults_allow_explicit_override" {
+  match @parser.parse_dot("digraph { node [color=red]; a [color=blue] }") {
+    Ok(graph) => {
+      let (nodes, _edges) = extract_graph(graph)
+      let node = nodes.get("a").unwrap()
+      inspect(node.color, content="Some(\"blue\")")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
+
+///|
+test "extract_graph_node_defaults_accumulate" {
+  match
+    @parser.parse_dot("digraph { node [color=red]; node [fontcolor=white]; a }") {
+    Ok(graph) => {
+      let (nodes, _edges) = extract_graph(graph)
+      let node = nodes.get("a").unwrap()
+      inspect(node.color, content="Some(\"red\")")
+      inspect(node.fontcolor, content="Some(\"white\")")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
+
+///|
+test "extract_graph_subgraph_inherits_parent_node_defaults" {
+  match @parser.parse_dot("digraph { node [color=red]; subgraph { a } }") {
+    Ok(graph) => {
+      let (nodes, _edges) = extract_graph(graph)
+      let node = nodes.get("a").unwrap()
+      inspect(node.color, content="Some(\"red\")")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
+
+///|
 test "cycle_removal_acyclic_unchanged" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let (result, reversed) = remove_cycles(edges)

@@ -29,88 +29,96 @@ fn collect_nodes(
   statements : Array[@parser.Statement],
 ) -> Map[String, NodeData] {
   let nodes : Map[String, NodeData] = Map::new()
-  let mut node_defaults : @parser.AttributeList? = None
+  collect_nodes_with_defaults(statements, None, nodes)
+  nodes
+}
+
+///|
+fn collect_nodes_with_defaults(
+  statements : Array[@parser.Statement],
+  inherited_defaults : @parser.AttributeList?,
+  nodes : Map[String, NodeData],
+) -> Unit {
+  let mut node_defaults = inherited_defaults
   for stmt in statements {
     match stmt {
-      @parser.AttrStmt("node", attr_list) => node_defaults = Some(attr_list)
-      @parser.NodeStmt(node_id, attrs) => {
-        let merged_attrs = merge_attrs(node_defaults, attrs)
-        let label = extract_attr("label", merged_attrs).unwrap_or(node_id.id)
-        let color = extract_attr("color", merged_attrs)
-        let fontcolor = extract_attr("fontcolor", merged_attrs)
-        let fillcolor = extract_attr("fillcolor", merged_attrs)
-        match nodes.get(node_id.id) {
-          Some(existing) =>
-            nodes.set(node_id.id, {
-              id: node_id.id,
-              label: if label != node_id.id {
-                label
-              } else {
-                existing.label
-              },
-              color: match color {
-                Some(_) => color
-                None => existing.color
-              },
-              fontcolor: match fontcolor {
-                Some(_) => fontcolor
-                None => existing.fontcolor
-              },
-              fillcolor: match fillcolor {
-                Some(_) => fillcolor
-                None => existing.fillcolor
-              },
-            })
-          None =>
-            nodes.set(node_id.id, {
-              id: node_id.id,
-              label,
-              color,
-              fontcolor,
-              fillcolor,
-            })
-        }
-      }
+      @parser.AttrStmt("node", attr_list) =>
+        node_defaults = merge_attrs(node_defaults, Some(attr_list))
+      @parser.NodeStmt(node_id, attrs) =>
+        upsert_node(nodes, node_id.id, merge_attrs(node_defaults, attrs))
       @parser.EdgeStmt(start_node, edges, _attrs) => {
-        if not(nodes.contains(start_node.id)) {
-          let merged_attrs = merge_attrs(node_defaults, None)
-          nodes.set(start_node.id, {
-            id: start_node.id,
-            label: extract_attr("label", merged_attrs).unwrap_or(start_node.id),
-            color: extract_attr("color", merged_attrs),
-            fontcolor: extract_attr("fontcolor", merged_attrs),
-            fillcolor: extract_attr("fillcolor", merged_attrs),
-          })
-        }
+        ensure_node(nodes, start_node.id, node_defaults)
         for edge_pair in edges {
           let (_edge_op, target_node) = edge_pair
-          if not(nodes.contains(target_node.id)) {
-            let merged_attrs = merge_attrs(node_defaults, None)
-            nodes.set(target_node.id, {
-              id: target_node.id,
-              label: extract_attr("label", merged_attrs).unwrap_or(
-                target_node.id,
-              ),
-              color: extract_attr("color", merged_attrs),
-              fontcolor: extract_attr("fontcolor", merged_attrs),
-              fillcolor: extract_attr("fillcolor", merged_attrs),
-            })
-          }
+          ensure_node(nodes, target_node.id, node_defaults)
         }
       }
-      @parser.Subgraph(subgraph) => {
-        let subgraph_nodes = collect_nodes(subgraph.statements)
-        subgraph_nodes.each(fn(id, node_data) {
-          if not(nodes.contains(id)) {
-            nodes.set(id, node_data)
-          }
-        })
-      }
+      @parser.Subgraph(subgraph) =>
+        collect_nodes_with_defaults(subgraph.statements, node_defaults, nodes)
       @parser.AttrStmt(_, _) => ()
       @parser.Assignment(_, _) => ()
     }
   }
-  nodes
+}
+
+///|
+fn build_node_data(
+  node_id : String,
+  attrs : @parser.AttributeList?,
+) -> NodeData {
+  let label = extract_attr("label", attrs).unwrap_or(node_id)
+  let color = extract_attr("color", attrs)
+  let fontcolor = extract_attr("fontcolor", attrs)
+  let fillcolor = extract_attr("fillcolor", attrs)
+  { id: node_id, label, color, fontcolor, fillcolor }
+}
+
+///|
+fn merge_node_data(existing : NodeData, update : NodeData) -> NodeData {
+  {
+    id: update.id,
+    label: if update.label != update.id {
+      update.label
+    } else {
+      existing.label
+    },
+    color: match update.color {
+      Some(_) => update.color
+      None => existing.color
+    },
+    fontcolor: match update.fontcolor {
+      Some(_) => update.fontcolor
+      None => existing.fontcolor
+    },
+    fillcolor: match update.fillcolor {
+      Some(_) => update.fillcolor
+      None => existing.fillcolor
+    },
+  }
+}
+
+///|
+fn upsert_node(
+  nodes : Map[String, NodeData],
+  node_id : String,
+  attrs : @parser.AttributeList?,
+) -> Unit {
+  let node_data = build_node_data(node_id, attrs)
+  match nodes.get(node_id) {
+    Some(existing) => nodes.set(node_id, merge_node_data(existing, node_data))
+    None => nodes.set(node_id, node_data)
+  }
+}
+
+///|
+fn ensure_node(
+  nodes : Map[String, NodeData],
+  node_id : String,
+  attrs : @parser.AttributeList?,
+) -> Unit {
+  if not(nodes.contains(node_id)) {
+    nodes.set(node_id, build_node_data(node_id, attrs))
+  }
 }
 
 ///|
@@ -124,10 +132,10 @@ fn merge_attrs(
     (None, Some(_)) => overrides
     (Some(d), Some(o)) => {
       let merged : Array[@parser.Attribute] = []
-      for attr in d.attributes {
+      for attr in o.attributes {
         merged.push(attr)
       }
-      for attr in o.attributes {
+      for attr in d.attributes {
         merged.push(attr)
       }
       Some({ attributes: merged })
