@@ -60,7 +60,12 @@ fn collect_nodes_with_defaults(
       @parser.AttrStmt("node", attr_list) =>
         node_defaults = merge_attrs(node_defaults, Some(attr_list))
       @parser.NodeStmt(node_id, attrs) =>
-        upsert_node(nodes, node_id.id, merge_attrs(node_defaults, attrs))
+        upsert_node(
+          nodes,
+          node_id.id,
+          merge_attrs(node_defaults, attrs),
+          has_attr("label", attrs),
+        )
       @parser.EdgeStmt(start_node, edges, _attrs) => {
         ensure_node(nodes, start_node.id, node_defaults)
         for edge_pair in edges {
@@ -80,27 +85,28 @@ fn collect_nodes_with_defaults(
 fn build_node_data(
   node_id : String,
   attrs : @parser.AttributeList?,
+  label_explicit : Bool,
 ) -> NodeData {
   let label = extract_attr("label", attrs).unwrap_or(node_id)
   let color = extract_attr("color", attrs)
   let fontcolor = extract_attr("fontcolor", attrs)
   let fillcolor = extract_attr("fillcolor", attrs)
-  { id: node_id, label, color, fontcolor, fillcolor }
+  { id: node_id, label, label_explicit, color, fontcolor, fillcolor }
 }
 
 ///|
 fn merge_node_data(
   existing : NodeData,
   update : NodeData,
-  attrs : @parser.AttributeList?,
 ) -> NodeData {
   {
     id: update.id,
-    label: if has_attr("label", attrs) {
+    label: if update.label_explicit {
       update.label
     } else {
       existing.label
     },
+    label_explicit: existing.label_explicit || update.label_explicit,
     color: match update.color {
       Some(_) => update.color
       None => existing.color
@@ -121,11 +127,11 @@ fn upsert_node(
   nodes : Map[String, NodeData],
   node_id : String,
   attrs : @parser.AttributeList?,
+  label_explicit : Bool,
 ) -> Unit {
-  let node_data = build_node_data(node_id, attrs)
+  let node_data = build_node_data(node_id, attrs, label_explicit)
   match nodes.get(node_id) {
-    Some(existing) =>
-      nodes.set(node_id, merge_node_data(existing, node_data, attrs))
+    Some(existing) => nodes.set(node_id, merge_node_data(existing, node_data))
     None => nodes.set(node_id, node_data)
   }
 }
@@ -137,7 +143,7 @@ fn ensure_node(
   attrs : @parser.AttributeList?,
 ) -> Unit {
   if not(nodes.contains(node_id)) {
-    nodes.set(node_id, build_node_data(node_id, attrs))
+    nodes.set(node_id, build_node_data(node_id, attrs, false))
   }
 }
 

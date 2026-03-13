@@ -63,6 +63,18 @@ test "extract_graph_explicit_label_matching_id_overrides_default_label" {
 }
 
 ///|
+test "extract_graph_default_label_does_not_overwrite_existing_explicit_label" {
+  match @parser.parse_dot("digraph { a [label=custom]; node [label=default]; a }") {
+    Ok(graph) => {
+      let (nodes, _edges) = extract_graph(graph)
+      let node = nodes.get("a").unwrap()
+      inspect(node.label, content="custom")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
+
+///|
 test "cycle_removal_acyclic_unchanged" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let (result, reversed) = remove_cycles(edges)
@@ -85,6 +97,7 @@ test "layer_assignment_sources_at_zero" {
   nodes.set("a", {
     id: "a",
     label: "a",
+    label_explicit: false,
     color: None,
     fontcolor: None,
     fillcolor: None,
@@ -92,6 +105,7 @@ test "layer_assignment_sources_at_zero" {
   nodes.set("b", {
     id: "b",
     label: "b",
+    label_explicit: false,
     color: None,
     fontcolor: None,
     fillcolor: None,
@@ -99,6 +113,7 @@ test "layer_assignment_sources_at_zero" {
   nodes.set("c", {
     id: "c",
     label: "c",
+    label_explicit: false,
     color: None,
     fontcolor: None,
     fillcolor: None,
@@ -114,6 +129,7 @@ test "layer_assignment_edges_go_lower_to_higher" {
   nodes.set("a", {
     id: "a",
     label: "a",
+    label_explicit: false,
     color: None,
     fontcolor: None,
     fillcolor: None,
@@ -121,6 +137,7 @@ test "layer_assignment_edges_go_lower_to_higher" {
   nodes.set("b", {
     id: "b",
     label: "b",
+    label_explicit: false,
     color: None,
     fontcolor: None,
     fillcolor: None,
@@ -128,6 +145,7 @@ test "layer_assignment_edges_go_lower_to_higher" {
   nodes.set("c", {
     id: "c",
     label: "c",
+    label_explicit: false,
     color: None,
     fontcolor: None,
     fillcolor: None,
@@ -159,6 +177,7 @@ test "coordinate_assignment_no_overlap" {
   nodes.set("a", {
     id: "a",
     label: "a",
+    label_explicit: false,
     color: None,
     fontcolor: None,
     fillcolor: None,
@@ -166,6 +185,7 @@ test "coordinate_assignment_no_overlap" {
   nodes.set("b", {
     id: "b",
     label: "b",
+    label_explicit: false,
     color: None,
     fontcolor: None,
     fillcolor: None,

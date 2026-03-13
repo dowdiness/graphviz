@@ -40,6 +40,8 @@ fn escape_and_quote(s : String) -> String {
       '"' => buf.write_string("\\\"")
       '\\' => buf.write_string("\\\\")
       '\n' => buf.write_string("\\n")
+      '\t' => buf.write_string("\\t")
+      '\r' => buf.write_string("\\r")
       _ => buf.write_char(c)
     }
   }
@@ -96,7 +98,7 @@ fn format_node_id(node_id : NodeId) -> String {
             format_compass(compass)
         (Some(port_id), None) => result = result + ":" + format_id(port_id)
         (None, Some(compass)) => result = result + ":" + format_compass(compass)
-        (None, None) => result = result + ":"
+        (None, None) => ()
       }
     None => ()
   }

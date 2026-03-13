@@ -66,6 +66,7 @@ pub struct GraphLayout {
 struct NodeData {
   id : String
   label : String
+  label_explicit : Bool
   color : String?
   fontcolor : String?
   fillcolor : String?

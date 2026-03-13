@@ -75,6 +75,11 @@ test "format_id_quotes_keywords_and_digit_leading_mixed_ids" {
 }
 
 ///|
+test "format_id_escapes_tab_and_carriage_return" {
+  assert_eq(format_id("a\tb\rc"), "\"a\\tb\\rc\"")
+}
+
+///|
 test "format_graph_roundtrips_dotted_ids" {
   let graph : Graph = {
     strict: false,
@@ -164,6 +169,19 @@ test "format_edge_stmt_preserves_compass_only_ports" {
     }
     Err(_) => abort("Failed to parse graph with compass-only ports")
   }
+}
+
+///|
+test "format_node_id_omits_trailing_colon_for_empty_port" {
+  let graph : Graph = {
+    strict: false,
+    directed: true,
+    id: None,
+    statements: [NodeStmt({ id: "a", port: Some({ id: None, compass: None }) }, None)],
+  }
+  let formatted = format_graph(graph)
+  assert_true(not(formatted.contains("a:")))
+  assert_true(parse_dot(formatted) is Ok(_))
 }
 
 ///|
