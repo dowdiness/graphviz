@@ -421,18 +421,16 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
 fn Parser::parse_stmt_list(self : Parser) -> Array[Statement] {
   let statements = []
   while true {
-    match self.parse_statement() {
-      Some(stmt) => {
-        statements.push(stmt)
-        // Optional semicolon
-        loop self.current_token {
-          Semicolon => {
-            self.eat(Semicolon) |> ignore
-            continue self.current_token
-          }
-          _ => break
-        }
+    // Skip leading/repeated semicolons
+    loop self.current_token {
+      Semicolon => {
+        self.eat(Semicolon) |> ignore
+        continue self.current_token
       }
+      _ => break
+    }
+    match self.parse_statement() {
+      Some(stmt) => statements.push(stmt)
       None => break
     }
   }

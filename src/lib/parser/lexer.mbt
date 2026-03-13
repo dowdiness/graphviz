@@ -160,8 +160,14 @@ fn Lexer::read_quoted_string(self : Lexer) -> String {
       self.advance() // Skip escape character
       match self.current_char {
         Some(escaped_char) => {
+          let decoded = match escaped_char {
+            'n' => "\n"
+            't' => "\t"
+            'r' => "\r"
+            _ => escaped_char.to_string()
+          }
           self.advance()
-          continue (self.current_char, acc + escaped_char.to_string())
+          continue (self.current_char, acc + decoded)
         }
         None => break acc // Unexpected end of input
       }

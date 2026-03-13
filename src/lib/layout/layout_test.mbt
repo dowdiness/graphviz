@@ -21,7 +21,7 @@ test "full_layout_simple_chain" {
         println("All nodes have layout positions")
       }
     }
-    Err(_) => println("Parse error: full_layout_simple_chain")
+    Err(_) => abort("Parse error: full_layout_simple_chain")
   }
 }
 
@@ -41,7 +41,7 @@ test "full_layout_diamond" {
       inspect(layout.edges.length(), content="4")
       inspect(layout.layers.length(), content="3")
     }
-    Err(_) => println("Parse error: full_layout_diamond")
+    Err(_) => abort("Parse error: full_layout_diamond")
   }
 }
 
@@ -61,6 +61,6 @@ test "full_layout_automaton" {
       let layout = compute_layout(graph)
       inspect(layout.nodes.length(), content="6")
     }
-    Err(_) => println("Parse error: full_layout_automaton")
+    Err(_) => abort("Parse error: full_layout_automaton")
   }
 }

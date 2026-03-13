@@ -176,15 +176,18 @@ fn format_compass(compass : CompassPoint) -> String {
 
 ///|
 fn format_attr_list(attr_list : AttributeList) -> String {
-  let mut result = "["
+  let buf = StringBuilder::new()
+  buf.write_char('[')
   let mut first = true
   for attr in attr_list.attributes {
     if not(first) {
-      result = result + ", "
+      buf.write_string(", ")
     }
-    result = result + format_id(attr.key) + "=" + escape_and_quote(attr.value)
+    buf.write_string(format_id(attr.key))
+    buf.write_char('=')
+    buf.write_string(escape_and_quote(attr.value))
     first = false
   }
-  result = result + "]"
-  result
+  buf.write_char(']')
+  buf.to_string()
 }
