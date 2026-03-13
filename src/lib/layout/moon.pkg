@@ -1,5 +1,6 @@
 import {
   "antisatori/graphviz/lib/parser",
+  "moonbitlang/core/hashset",
 }
 
 options(

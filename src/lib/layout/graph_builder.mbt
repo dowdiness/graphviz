@@ -51,21 +51,33 @@ fn collect_nodes(
         let color = extract_attr("color", attrs)
         let fontcolor = extract_attr("fontcolor", attrs)
         let fillcolor = extract_attr("fillcolor", attrs)
-        nodes.set(node_id.id, { id: node_id.id, label, color, fontcolor, fillcolor })
+        nodes.set(node_id.id, {
+          id: node_id.id,
+          label,
+          color,
+          fontcolor,
+          fillcolor,
+        })
       }
       @parser.EdgeStmt(start_node, edges, _attrs) => {
         if not(nodes.contains(start_node.id)) {
           nodes.set(start_node.id, {
-            id: start_node.id, label: start_node.id,
-            color: None, fontcolor: None, fillcolor: None,
+            id: start_node.id,
+            label: start_node.id,
+            color: None,
+            fontcolor: None,
+            fillcolor: None,
           })
         }
         for edge_pair in edges {
           let (_edge_op, target_node) = edge_pair
           if not(nodes.contains(target_node.id)) {
             nodes.set(target_node.id, {
-              id: target_node.id, label: target_node.id,
-              color: None, fontcolor: None, fillcolor: None,
+              id: target_node.id,
+              label: target_node.id,
+              color: None,
+              fontcolor: None,
+              fillcolor: None,
             })
           }
         }

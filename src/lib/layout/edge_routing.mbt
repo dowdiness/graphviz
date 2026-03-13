@@ -22,7 +22,8 @@ fn route_edges(
         let is_reversed = reversed.contains(make_edge_key(edge.from, edge.to)) ||
           reversed.contains(make_edge_key(edge.to, edge.from))
         layout_edges.push({
-          from: edge.from, to: edge.to,
+          from: edge.from,
+          to: edge.to,
           waypoints: [source_point, target_point],
           reversed: is_reversed,
         })

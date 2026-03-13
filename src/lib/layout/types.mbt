@@ -60,39 +60,6 @@ pub struct GraphLayout {
   directed : Bool // Whether the graph is directed
 } derive(Show)
 
-// Internal graph representation (for algorithm use)
-
-///|
-pub(all) struct InternalGraph {
-  nodes : Map[String, NodeInfo]
-  edges : Array[Edge]
-  directed : Bool
-} derive(Show)
-
-///|
-pub(all) struct NodeInfo {
-  id : String
-  mut label : String // Display label from DOT attributes (mutable to update from NodeStmt)
-  mut incoming : Array[String] // Incoming edge sources
-  mut outgoing : Array[String] // Outgoing edge targets
-  mut color : String? // Per-node border color
-  mut fontcolor : String? // Per-node text color
-  mut fillcolor : String? // Per-node fill color
-} derive(Show)
-
-///|
-pub(all) struct Edge {
-  from : String
-  to : String
-  original_direction : EdgeDirection
-} derive(Eq, Show)
-
-///|
-pub(all) enum EdgeDirection {
-  Forward
-  Backward // Edge was reversed during cycle removal
-} derive(Eq, Show)
-
 // Immutable node data extracted from AST
 
 ///|

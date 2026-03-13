@@ -1,23 +1,6 @@
 // Layout Engine Tests
 
 ///|
-test "graph_extraction_simple" {
-  let dot = "digraph { a -> b }"
-  match @parser.parse_dot(dot) {
-    Ok(graph) => {
-      let internal = extract_graph(graph)
-      inspect(internal.nodes.length(), content="2")
-      inspect(internal.edges.length(), content="1")
-      inspect(internal.directed, content="true")
-    }
-    Err(_) => {
-      println("Parse failed: graph_extraction_simple")
-      inspect(true, content="false")
-    }
-  }
-}
-
-///|
 test "full_layout_simple_chain" {
   let dot =
     #|digraph {
