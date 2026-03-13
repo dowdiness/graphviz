@@ -165,3 +165,41 @@ test "format_edge_stmt_preserves_compass_only_ports" {
     Err(_) => abort("Failed to parse graph with compass-only ports")
   }
 }
+
+///|
+test "roundtrip_simple_digraph" {
+  let input = "digraph { a -> b }"
+  match parse_dot(input) {
+    Ok(graph) => {
+      let formatted = format_graph(graph)
+      match parse_dot(formatted) {
+        Ok(reparsed) => {
+          assert_eq(reparsed.directed, graph.directed)
+          assert_eq(reparsed.strict, graph.strict)
+          assert_eq(reparsed.statements.length(), graph.statements.length())
+        }
+        Err(e) => abort("roundtrip failed: " + e.message)
+      }
+    }
+    Err(e) => abort("initial parse failed: " + e.message)
+  }
+}
+
+///|
+test "roundtrip_graph_with_attributes" {
+  let input = "strict digraph G { node [shape=box]; a [color=red]; a -> b [label=edge1] }"
+  match parse_dot(input) {
+    Ok(graph) => {
+      let formatted = format_graph(graph)
+      match parse_dot(formatted) {
+        Ok(reparsed) => {
+          assert_eq(reparsed.strict, true)
+          assert_eq(reparsed.id, Some("G"))
+          assert_eq(reparsed.statements.length(), graph.statements.length())
+        }
+        Err(e) => abort("roundtrip failed: " + e.message)
+      }
+    }
+    Err(e) => abort("initial parse failed: " + e.message)
+  }
+}
