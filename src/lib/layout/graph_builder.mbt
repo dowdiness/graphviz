@@ -25,6 +25,21 @@ fn extract_attr(key : String, attrs : @parser.AttributeList?) -> String? {
 }
 
 ///|
+fn has_attr(key : String, attrs : @parser.AttributeList?) -> Bool {
+  match attrs {
+    Some(attr_list) => {
+      for attr in attr_list.attributes {
+        if attr.key == key {
+          return true
+        }
+      }
+      false
+    }
+    None => false
+  }
+}
+
+///|
 fn collect_nodes(
   statements : Array[@parser.Statement],
 ) -> Map[String, NodeData] {
@@ -74,10 +89,14 @@ fn build_node_data(
 }
 
 ///|
-fn merge_node_data(existing : NodeData, update : NodeData) -> NodeData {
+fn merge_node_data(
+  existing : NodeData,
+  update : NodeData,
+  attrs : @parser.AttributeList?,
+) -> NodeData {
   {
     id: update.id,
-    label: if update.label != update.id {
+    label: if has_attr("label", attrs) {
       update.label
     } else {
       existing.label
@@ -105,7 +124,8 @@ fn upsert_node(
 ) -> Unit {
   let node_data = build_node_data(node_id, attrs)
   match nodes.get(node_id) {
-    Some(existing) => nodes.set(node_id, merge_node_data(existing, node_data))
+    Some(existing) =>
+      nodes.set(node_id, merge_node_data(existing, node_data, attrs))
     None => nodes.set(node_id, node_data)
   }
 }

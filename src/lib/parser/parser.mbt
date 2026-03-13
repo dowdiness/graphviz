@@ -285,6 +285,28 @@ fn expand_edge_statements(
 }
 
 ///|
+fn statement_requires_subgraph_preservation(stmt : Statement) -> Bool {
+  match stmt {
+    NodeStmt(_, Some(_)) => true
+    EdgeStmt(_, _, _) => true
+    AttrStmt(_, _) => true
+    Assignment(_, _) => true
+    Subgraph(subgraph) => subgraph_requires_preservation(subgraph)
+    NodeStmt(_, None) => false
+  }
+}
+
+///|
+fn subgraph_requires_preservation(subgraph : Subgraph) -> Bool {
+  for stmt in subgraph.statements {
+    if statement_requires_subgraph_preservation(stmt) {
+      return true
+    }
+  }
+  false
+}
+
+///|
 fn Parser::emit_expanded_statements(
   self : Parser,
   statements : Array[Statement],
@@ -344,10 +366,17 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
             Parsed(edge_chain) => {
               let start_nodes = node_ids_in_subgraph(subgraph)
               let attr_list = self.parse_attr_list()
+              let statements = []
+              if subgraph_requires_preservation(subgraph) {
+                statements.push(Statement::Subgraph(subgraph))
+              }
               let expanded = expand_edge_statements(
                 start_nodes, edge_chain, attr_list,
               )
-              self.emit_expanded_statements(expanded)
+              for stmt in expanded {
+                statements.push(stmt)
+              }
+              self.emit_expanded_statements(statements)
             }
             NoEdgeOp => Some(Subgraph(subgraph))
             Malformed => None

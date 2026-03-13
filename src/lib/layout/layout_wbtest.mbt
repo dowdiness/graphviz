@@ -51,6 +51,18 @@ test "extract_graph_subgraph_inherits_parent_node_defaults" {
 }
 
 ///|
+test "extract_graph_explicit_label_matching_id_overrides_default_label" {
+  match @parser.parse_dot("digraph { node [label=default]; a [label=a] }") {
+    Ok(graph) => {
+      let (nodes, _edges) = extract_graph(graph)
+      let node = nodes.get("a").unwrap()
+      inspect(node.label, content="a")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
+
+///|
 test "cycle_removal_acyclic_unchanged" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let (result, reversed) = remove_cycles(edges)
