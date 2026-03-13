@@ -5,13 +5,22 @@ priv struct Lexer {
   input : String
   mut position : Int
   mut current_char : Char?
+  mut token_start : Int
 }
 
 ///|
 fn Lexer::new(input : String) -> Lexer {
-  let lexer = { input, position: 0, current_char: None }
+  let lexer = { input, position: 0, current_char: None, token_start: 0 }
   lexer.advance()
   lexer
+}
+
+///|
+fn Lexer::current_index(self : Lexer) -> Int {
+  match self.current_char {
+    Some(_) => self.position - 1
+    None => self.position
+  }
 }
 
 ///|
@@ -190,12 +199,21 @@ fn Lexer::next_token(self : Lexer) -> Token {
   while true {
     self.skip_whitespace()
     match self.current_char {
+      None => {
+        self.token_start = self.position
+        return EOF
+      }
+      Some('#') => {
+        self.skip_comment() |> ignore
+        continue
+      }
+      Some('/') => if self.skip_comment() { continue }
+      _ => ()
+    }
+    self.token_start = self.current_index()
+    match self.current_char {
       None => return EOF
-      Some('#') => self.skip_comment() |> ignore
       Some('/') => {
-        if self.skip_comment() {
-          continue
-        }
         self.advance()
         return ID("/")
       }

@@ -17,7 +17,7 @@ test "cycle_removal_acyclic_unchanged" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let (result, reversed) = remove_cycles(edges)
   inspect(result.length(), content="2")
-  inspect(reversed.length(), content="0")
+  inspect(reversed, content="[false, false]")
 }
 
 ///|
@@ -26,7 +26,7 @@ test "cycle_removal_single_cycle" {
   let (result, reversed) = remove_cycles(edges)
   inspect(result.length(), content="2")
   // Exactly one edge should be reversed
-  inspect(reversed.length(), content="1")
+  inspect(reversed[0] != reversed[1], content="true")
 }
 
 ///|
@@ -133,7 +133,7 @@ test "coordinate_assignment_no_overlap" {
 ///|
 test "edge_routing_has_waypoints" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }]
-  let reversed : @hashset.HashSet[String] = @hashset.HashSet::new()
+  let reversed : Array[Bool] = [false]
   let positions : Map[String, LayoutNode] = Map::new()
   positions.set("a", {
     id: "a",
@@ -161,4 +161,37 @@ test "edge_routing_has_waypoints" {
   let routed = route_edges(edges, reversed, positions, config)
   inspect(routed.length(), content="1")
   inspect(routed[0].waypoints.length() >= 2, content="true")
+}
+
+///|
+test "edge_routing_tracks_reversal_per_edge" {
+  let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "a" }]
+  let (acyclic_edges, reversed) = remove_cycles(edges)
+  let positions : Map[String, LayoutNode] = Map::new()
+  positions.set("a", {
+    id: "a",
+    label: "a",
+    position: { x: 0.0, y: 0.0 },
+    size: { width: 72.0, height: 36.0 },
+    layer: 0,
+    order: 0,
+    color: None,
+    fontcolor: None,
+    fillcolor: None,
+  })
+  positions.set("b", {
+    id: "b",
+    label: "b",
+    position: { x: 0.0, y: 116.0 },
+    size: { width: 72.0, height: 36.0 },
+    layer: 1,
+    order: 0,
+    color: None,
+    fontcolor: None,
+    fillcolor: None,
+  })
+  let config = LayoutConfig::default()
+  let routed = route_edges(acyclic_edges, reversed, positions, config)
+  inspect(routed.length(), content="2")
+  inspect(routed[0].reversed != routed[1].reversed, content="true")
 }

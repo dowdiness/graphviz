@@ -4,6 +4,7 @@
 priv struct Parser {
   lexer : Lexer
   mut current_token : Token
+  mut current_token_start : Int
   pending_statements : Array[Statement]
 }
 
@@ -11,18 +12,29 @@ priv struct Parser {
 fn Parser::new(input : String) -> Parser {
   let lexer = Lexer::new(input)
   let current_token = lexer.next_token()
-  { lexer, current_token, pending_statements: [] }
+  {
+    lexer,
+    current_token,
+    current_token_start: lexer.token_start,
+    pending_statements: [],
+  }
+}
+
+///|
+fn Parser::advance_token(self : Parser) -> Unit {
+  self.current_token = self.lexer.next_token()
+  self.current_token_start = self.lexer.token_start
 }
 
 ///|
 fn Parser::eat(self : Parser, expected : Token) -> Bool {
   match (self.current_token, expected) {
     (ID(_), ID(_)) => {
-      self.current_token = self.lexer.next_token()
+      self.advance_token()
       true
     }
     (actual, expected) if actual == expected => {
-      self.current_token = self.lexer.next_token()
+      self.advance_token()
       true
     }
     _ => false
@@ -516,11 +528,14 @@ pub fn parse_dot(input : String) -> Result[Graph, ParseError] {
         _ =>
           Err({
             message: "unexpected tokens after graph",
-            position: parser.lexer.position,
+            position: parser.current_token_start,
           })
       }
     None =>
-      Err({ message: "failed to parse graph", position: parser.lexer.position })
+      Err({
+        message: "failed to parse graph",
+        position: parser.current_token_start,
+      })
   }
 }
 

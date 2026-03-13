@@ -3,12 +3,13 @@
 ///|
 fn route_edges(
   edges : Array[EdgeData],
-  reversed : @hashset.HashSet[String],
+  reversed : Array[Bool],
   node_positions : Map[String, LayoutNode],
   _config : LayoutConfig,
 ) -> Array[LayoutEdge] {
   let layout_edges : Array[LayoutEdge] = []
-  for edge in edges {
+  for i = 0; i < edges.length(); i = i + 1 {
+    let edge = edges[i]
     match (node_positions.get(edge.from), node_positions.get(edge.to)) {
       (Some(from_node), Some(to_node)) => {
         let source_point : Point = {
@@ -19,9 +20,7 @@ fn route_edges(
           x: to_node.position.x + to_node.size.width / 2.0,
           y: to_node.position.y,
         }
-        // reversed set stores original-direction keys; edges are physically
-        // flipped after cycle removal, so check the (to, from) key
-        let is_reversed = reversed.contains(make_edge_key(edge.to, edge.from))
+        let is_reversed = reversed[i]
         layout_edges.push({
           from: edge.from,
           to: edge.to,

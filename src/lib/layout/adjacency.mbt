@@ -1,11 +1,6 @@
 // Adjacency utility — computes incoming/outgoing maps from edge list
 
 ///|
-fn make_edge_key(from : String, to : String) -> String {
-  from + "\u0000" + to
-}
-
-///|
 fn build_adjacency(
   edges : Array[EdgeData],
 ) -> (Map[String, Array[String]], Map[String, Array[String]]) {

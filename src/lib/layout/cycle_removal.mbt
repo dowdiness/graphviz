@@ -4,18 +4,20 @@
 priv struct DFSState {
   visited : Map[String, Bool]
   on_stack : Map[String, Bool]
-  reversed_edges : @hashset.HashSet[String]
+  reversed_edges : Array[Bool]
 }
 
 ///|
-fn remove_cycles(
-  edges : Array[EdgeData],
-) -> (Array[EdgeData], @hashset.HashSet[String]) {
-  let (_, outgoing) = build_adjacency(edges)
+fn remove_cycles(edges : Array[EdgeData]) -> (Array[EdgeData], Array[Bool]) {
+  let outgoing = build_indexed_outgoing_adjacency(edges)
+  let reversed_edges : Array[Bool] = []
+  for _ in edges {
+    reversed_edges.push(false)
+  }
   let state : DFSState = {
     visited: Map::new(),
     on_stack: Map::new(),
-    reversed_edges: @hashset.HashSet::new(),
+    reversed_edges,
   }
   // Initialize all nodes as unvisited
   let all_nodes : @hashset.HashSet[String] = @hashset.HashSet::new()
@@ -35,9 +37,9 @@ fn remove_cycles(
 
   // Build new edge list with reversed back edges
   let new_edges : Array[EdgeData] = []
-  for edge in edges {
-    let key = make_edge_key(edge.from, edge.to)
-    if state.reversed_edges.contains(key) {
+  for i = 0; i < edges.length(); i = i + 1 {
+    let edge = edges[i]
+    if state.reversed_edges[i] {
       new_edges.push({ from: edge.to, to: edge.from })
     } else {
       new_edges.push(edge)
@@ -47,22 +49,40 @@ fn remove_cycles(
 }
 
 ///|
+fn build_indexed_outgoing_adjacency(
+  edges : Array[EdgeData],
+) -> Map[String, Array[(String, Int)]] {
+  let outgoing : Map[String, Array[(String, Int)]] = Map::new()
+  for i = 0; i < edges.length(); i = i + 1 {
+    let edge = edges[i]
+    if not(outgoing.contains(edge.from)) {
+      outgoing.set(edge.from, [])
+    }
+    if not(outgoing.contains(edge.to)) {
+      outgoing.set(edge.to, [])
+    }
+    outgoing.get(edge.from).unwrap().push((edge.to, i))
+  }
+  outgoing
+}
+
+///|
 fn dfs_visit(
   node : String,
-  outgoing : Map[String, Array[String]],
+  outgoing : Map[String, Array[(String, Int)]],
   state : DFSState,
 ) -> Unit {
   state.visited.set(node, true)
   state.on_stack.set(node, true)
   match outgoing.get(node) {
     Some(neighbors) =>
-      for neighbor in neighbors {
+      for edge in neighbors {
+        let (neighbor, edge_index) = edge
         match state.visited.get(neighbor) {
           Some(false) => dfs_visit(neighbor, outgoing, state)
           Some(true) =>
             match state.on_stack.get(neighbor) {
-              Some(true) =>
-                state.reversed_edges.add(make_edge_key(node, neighbor))
+              Some(true) => state.reversed_edges[edge_index] = true
               _ => ()
             }
           None => ()
