@@ -89,11 +89,20 @@ fn build_node_data(
   attrs : @parser.AttributeList?,
   explicit_attrs : @hashset.HashSet[String],
 ) -> NodeData {
-  let label = extract_attr("label", attrs).unwrap_or(node_id)
+  let label_attr = extract_attr("label", attrs)
+  let label = label_attr.unwrap_or(node_id)
   let color = extract_attr("color", attrs)
   let fontcolor = extract_attr("fontcolor", attrs)
   let fillcolor = extract_attr("fillcolor", attrs)
-  { id: node_id, label, color, fontcolor, fillcolor, explicit_attrs }
+  {
+    id: node_id,
+    label_attr,
+    label,
+    color,
+    fontcolor,
+    fillcolor,
+    explicit_attrs,
+  }
 }
 
 ///|
@@ -118,13 +127,11 @@ fn merge_node_data(existing : NodeData, update : NodeData) -> NodeData {
       existing_val
     }
   }
+  let label_attr = pick("label", update.label_attr, existing.label_attr)
   {
     id: update.id,
-    label: if update.explicit_attrs.contains("label") {
-      update.label
-    } else {
-      existing.label
-    },
+    label_attr,
+    label: label_attr.unwrap_or(update.id),
     color: pick("color", update.color, existing.color),
     fontcolor: pick("fontcolor", update.fontcolor, existing.fontcolor),
     fillcolor: pick("fillcolor", update.fillcolor, existing.fillcolor),

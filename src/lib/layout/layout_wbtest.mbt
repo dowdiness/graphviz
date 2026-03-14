@@ -4,6 +4,7 @@
 fn test_node_data(id : String) -> NodeData {
   {
     id,
+    label_attr: None,
     label: id,
     color: None,
     fontcolor: None,
@@ -94,6 +95,19 @@ test "extract_graph_default_label_does_not_overwrite_existing_explicit_label" {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
       inspect(node.label, content="custom")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
+
+///|
+test "extract_graph_rementioned_nodes_adopt_newer_default_labels" {
+  match
+    @parser.parse_dot("digraph { node [label=old]; a; node [label=new]; a }") {
+    Ok(graph) => {
+      let (nodes, _edges) = extract_graph(graph)
+      let node = nodes.get("a").unwrap()
+      inspect(node.label, content="new")
     }
     Err(_) => abort("parse failed")
   }
