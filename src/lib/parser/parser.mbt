@@ -378,24 +378,24 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
 
   match self.current_token {
     // Attribute statement
-    Graph | Node | Edge => {
-      let attr_type = match self.current_token {
-        Graph => {
-          ignore(self.eat(Graph))
-          "graph"
-        }
-        Node => {
-          ignore(self.eat(Node))
-          "node"
-        }
-        Edge => {
-          ignore(self.eat(Edge))
-          "edge"
-        }
-        _ => ""
-      }
+    Graph => {
+      ignore(self.eat(Graph))
       match self.parse_attr_list() {
-        Some(attr_list) => Some(AttrStmt(attr_type, attr_list))
+        Some(attr_list) => Some(AttrStmt("graph", attr_list))
+        None => None
+      }
+    }
+    Node => {
+      ignore(self.eat(Node))
+      match self.parse_attr_list() {
+        Some(attr_list) => Some(AttrStmt("node", attr_list))
+        None => None
+      }
+    }
+    Edge => {
+      ignore(self.eat(Edge))
+      match self.parse_attr_list() {
+        Some(attr_list) => Some(AttrStmt("edge", attr_list))
         None => None
       }
     }

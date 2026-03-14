@@ -25,6 +25,18 @@ test "extract_graph_node_defaults_allow_explicit_override" {
 }
 
 ///|
+test "extract_graph_duplicate_attributes_use_last_value" {
+  match @parser.parse_dot("digraph { a [color=red, color=blue] }") {
+    Ok(graph) => {
+      let (nodes, _edges) = extract_graph(graph)
+      let node = nodes.get("a").unwrap()
+      inspect(node.color, content="Some(\"blue\")")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
+
+///|
 test "extract_graph_node_defaults_accumulate" {
   match
     @parser.parse_dot("digraph { node [color=red]; node [fontcolor=white]; a }") {

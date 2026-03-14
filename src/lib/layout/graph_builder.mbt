@@ -13,12 +13,13 @@ fn extract_graph(
 fn extract_attr(key : String, attrs : @parser.AttributeList?) -> String? {
   match attrs {
     Some(attr_list) => {
+      let mut value = None
       for attr in attr_list.attributes {
         if attr.key == key {
-          return Some(attr.value)
+          value = Some(attr.value)
         }
       }
-      None
+      value
     }
     None => None
   }
@@ -186,10 +187,10 @@ fn merge_attrs(
     (None, Some(_)) => overrides
     (Some(d), Some(o)) => {
       let merged : Array[@parser.Attribute] = []
-      for attr in o.attributes {
+      for attr in d.attributes {
         merged.push(attr)
       }
-      for attr in d.attributes {
+      for attr in o.attributes {
         merged.push(attr)
       }
       Some({ attributes: merged })
