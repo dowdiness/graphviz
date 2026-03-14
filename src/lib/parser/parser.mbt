@@ -445,7 +445,6 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
     | Semicolon
     | Comma
     | Equals
-    | CompassPt(_)
     | Arrow
     | Colon
     | Line

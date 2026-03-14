@@ -114,10 +114,7 @@ fn build_node_data(
 }
 
 ///|
-fn merge_node_data(
-  existing : NodeData,
-  update : NodeData,
-) -> NodeData {
+fn merge_node_data(existing : NodeData, update : NodeData) -> NodeData {
   {
     id: update.id,
     // Re-mentioning a node with new defaults should not erase a value that was
@@ -128,7 +125,11 @@ fn merge_node_data(
       existing.label
     },
     label_explicit: existing.label_explicit || update.label_explicit,
-    color: if update.color_explicit { update.color } else { existing.color },
+    color: if update.color_explicit {
+      update.color
+    } else {
+      existing.color
+    },
     color_explicit: existing.color_explicit || update.color_explicit,
     fontcolor: if update.fontcolor_explicit {
       update.fontcolor
@@ -156,12 +157,7 @@ fn upsert_node(
   fillcolor_explicit : Bool,
 ) -> Unit {
   let node_data = build_node_data(
-    node_id,
-    attrs,
-    label_explicit,
-    color_explicit,
-    fontcolor_explicit,
-    fillcolor_explicit,
+    node_id, attrs, label_explicit, color_explicit, fontcolor_explicit, fillcolor_explicit,
   )
   match nodes.get(node_id) {
     Some(existing) => nodes.set(node_id, merge_node_data(existing, node_data))
@@ -176,7 +172,10 @@ fn ensure_node(
   attrs : @parser.AttributeList?,
 ) -> Unit {
   if not(nodes.contains(node_id)) {
-    nodes.set(node_id, build_node_data(node_id, attrs, false, false, false, false))
+    nodes.set(
+      node_id,
+      build_node_data(node_id, attrs, false, false, false, false),
+    )
   }
 }
 

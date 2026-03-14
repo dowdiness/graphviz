@@ -48,9 +48,6 @@ priv enum Token {
   Equals // =
   Arrow // ->
   Line // --
-
-  // Compass points
-  CompassPt(String) // n, ne, e, se, s, sw, w, nw, c, _
   EOF // End of file
 } derive(Eq, Show)
 

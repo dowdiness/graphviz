@@ -177,7 +177,9 @@ test "format_node_id_omits_trailing_colon_for_empty_port" {
     strict: false,
     directed: true,
     id: None,
-    statements: [NodeStmt({ id: "a", port: Some({ id: None, compass: None }) }, None)],
+    statements: [
+      NodeStmt({ id: "a", port: Some({ id: None, compass: None }) }, None),
+    ],
   }
   let formatted = format_graph(graph)
   assert_true(not(formatted.contains("a:")))

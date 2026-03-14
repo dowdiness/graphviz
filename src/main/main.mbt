@@ -39,7 +39,7 @@ fn test_layout(name : String, dot : String) -> Unit {
       println(@svg.render_svg(layout))
       println("---\n")
     }
-    Err(_) => println("Parse error\n")
+    Err(e) => println("Parse error at position \{e.position}: \{e.message}\n")
   }
 }
 
@@ -49,20 +49,21 @@ fn test_layout(name : String, dot : String) -> Unit {
 pub fn parse_dot(dot_string : String) -> String {
   match @parser.parse_dot(dot_string) {
     Ok(graph) => @parser.format_graph(graph)
-    Err(_) => ""
+    Err(e) =>
+      "{\"error\": \"Parse error at position \{e.position}: \{e.message}\"}"
   }
 }
 
 ///|
 /// Render DOT string to SVG (for JavaScript FFI)
-/// Returns SVG string, or empty string on error
+/// Returns SVG string, or error message on parse failure
 pub fn render_dot_to_svg(dot_string : String) -> String {
   match @parser.parse_dot(dot_string) {
     Ok(graph) => {
       let layout = @layout.compute_layout(graph)
       @svg.render_svg(layout)
     }
-    Err(_) => ""
+    Err(e) => "<!-- Parse error at position \{e.position}: \{e.message} -->"
   }
 }
 

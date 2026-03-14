@@ -76,7 +76,8 @@ test "extract_graph_explicit_label_matching_id_overrides_default_label" {
 
 ///|
 test "extract_graph_default_label_does_not_overwrite_existing_explicit_label" {
-  match @parser.parse_dot("digraph { a [label=custom]; node [label=default]; a }") {
+  match
+    @parser.parse_dot("digraph { a [label=custom]; node [label=default]; a }") {
     Ok(graph) => {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
@@ -88,9 +89,10 @@ test "extract_graph_default_label_does_not_overwrite_existing_explicit_label" {
 
 ///|
 test "extract_graph_default_styles_do_not_overwrite_existing_explicit_styles" {
-  match @parser.parse_dot(
-    "digraph { a [color=blue, fontcolor=white, fillcolor=black]; node [color=red, fontcolor=yellow, fillcolor=green]; a }",
-  ) {
+  match
+    @parser.parse_dot(
+      "digraph { a [color=blue, fontcolor=white, fillcolor=black]; node [color=red, fontcolor=yellow, fillcolor=green]; a }",
+    ) {
     Ok(graph) => {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
@@ -121,7 +123,10 @@ test "cycle_removal_single_cycle" {
 
 ///|
 test "cycle_removal_uses_first_seen_root_order" {
-  let ab_edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "a" }]
+  let ab_edges : Array[EdgeData] = [
+    { from: "a", to: "b" },
+    { from: "b", to: "a" },
+  ]
   let (_, ab_reversed) = remove_cycles(ab_edges)
   inspect(ab_reversed, content="[false, true]")
 

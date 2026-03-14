@@ -12,6 +12,6 @@ pub fn render_dot_to_svg(dot_string : String) -> String {
       let dark_config = @svg.SvgConfig::dark_theme()
       @svg.render_svg_with_config(layout, dark_config)
     }
-    Err(_) => ""
+    Err(e) => "<!-- Parse error at position \{e.position}: \{e.message} -->"
   }
 }
