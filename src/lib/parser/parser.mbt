@@ -377,7 +377,8 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
   }
 
   match self.current_token {
-    // Attribute statement
+    // Keep these as separate arms rather than rematching current_token inside
+    // a grouped branch so the compiler can see the match is exhaustive.
     Graph => {
       ignore(self.eat(Graph))
       match self.parse_attr_list() {

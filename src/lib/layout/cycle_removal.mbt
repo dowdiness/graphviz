@@ -19,7 +19,9 @@ fn remove_cycles(edges : Array[EdgeData]) -> (Array[EdgeData], Array[Bool]) {
     on_stack: Map::new(),
     reversed_edges,
   }
-  // Preserve first-seen node order so DFS root selection is stable.
+  // DFS root choice decides which back edge gets flipped in a cycle.
+  // Preserving first-seen order keeps that decision tied to DOT input order
+  // instead of HashSet iteration order.
   let all_nodes : Array[String] = []
   let seen_nodes : @hashset.HashSet[String] = @hashset.HashSet::new()
   for edge in edges {
@@ -91,6 +93,8 @@ fn dfs_visit(
           Some(false) => dfs_visit(neighbor, outgoing, state)
           Some(true) =>
             match state.on_stack.get(neighbor) {
+              // A neighbor already on the DFS stack closes a cycle, so mark
+              // this edge for reversal and rebuild the edge list afterward.
               Some(true) => state.reversed_edges[edge_index] = true
               _ => ()
             }

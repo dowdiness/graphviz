@@ -14,6 +14,8 @@ fn extract_attr(key : String, attrs : @parser.AttributeList?) -> String? {
   match attrs {
     Some(attr_list) => {
       let mut value = None
+      // DOT treats later duplicate attributes as overriding earlier ones,
+      // so keep scanning and return the last matching value.
       for attr in attr_list.attributes {
         if attr.key == key {
           value = Some(attr.value)
@@ -118,6 +120,8 @@ fn merge_node_data(
 ) -> NodeData {
   {
     id: update.id,
+    // Re-mentioning a node with new defaults should not erase a value that was
+    // explicitly set earlier, so each style field carries its own explicitness.
     label: if update.label_explicit {
       update.label
     } else {
@@ -187,6 +191,8 @@ fn merge_attrs(
     (None, Some(_)) => overrides
     (Some(d), Some(o)) => {
       let merged : Array[@parser.Attribute] = []
+      // Defaults go first and explicit attrs go last so extract_attr's
+      // last-match behavior gives node-local attrs precedence.
       for attr in d.attributes {
         merged.push(attr)
       }
