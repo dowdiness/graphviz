@@ -117,6 +117,23 @@ test "extract_graph_default_styles_do_not_overwrite_existing_explicit_styles" {
 }
 
 ///|
+test "extract_graph_rementioned_nodes_adopt_newer_defaults" {
+  match
+    @parser.parse_dot(
+      "digraph { node [color=red, fontcolor=white, fillcolor=black]; a; node [color=blue, fontcolor=yellow, fillcolor=green]; a }",
+    ) {
+    Ok(graph) => {
+      let (nodes, _edges) = extract_graph(graph)
+      let node = nodes.get("a").unwrap()
+      inspect(node.color, content="Some(\"blue\")")
+      inspect(node.fontcolor, content="Some(\"yellow\")")
+      inspect(node.fillcolor, content="Some(\"green\")")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
+
+///|
 test "cycle_removal_acyclic_unchanged" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let (result, reversed) = remove_cycles(edges)

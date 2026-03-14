@@ -200,7 +200,8 @@ fn Lexer::read_quoted_string(self : Lexer) -> String {
 
 ///|
 fn keyword_or_id(word : String) -> Token {
-  match word {
+  let normalized = word.to_lower()
+  match normalized {
     "strict" => Strict
     "graph" => Graph
     "digraph" => Digraph

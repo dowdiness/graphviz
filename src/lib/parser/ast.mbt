@@ -136,7 +136,8 @@ pub(all) struct ParseError {
 
 ///|
 fn is_dot_keyword(s : String) -> Bool {
-  match s {
+  let normalized = s.to_lower()
+  match normalized {
     "strict" | "graph" | "digraph" | "node" | "edge" | "subgraph" => true
     _ => false
   }

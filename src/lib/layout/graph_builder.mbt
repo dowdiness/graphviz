@@ -110,6 +110,10 @@ fn merge_node_data(existing : NodeData, update : NodeData) -> NodeData {
   ) -> String? {
     if update.explicit_attrs.contains(key) {
       update_val
+    } else if existing.explicit_attrs.contains(key) {
+      existing_val
+    } else if update_val is Some(_) {
+      update_val
     } else {
       existing_val
     }
