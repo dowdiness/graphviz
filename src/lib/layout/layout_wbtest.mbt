@@ -120,6 +120,20 @@ test "cycle_removal_single_cycle" {
 }
 
 ///|
+test "cycle_removal_uses_first_seen_root_order" {
+  let ab_edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "a" }]
+  let (_, ab_reversed) = remove_cycles(ab_edges)
+  inspect(ab_reversed, content="[false, true]")
+
+  let aabb_edges : Array[EdgeData] = [
+    { from: "aa", to: "bb" },
+    { from: "bb", to: "aa" },
+  ]
+  let (_, aabb_reversed) = remove_cycles(aabb_edges)
+  inspect(aabb_reversed, content="[false, true]")
+}
+
+///|
 test "layer_assignment_sources_at_zero" {
   let nodes : Map[String, NodeData] = Map::new()
   nodes.set("a", {

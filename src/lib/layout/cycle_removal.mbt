@@ -19,21 +19,30 @@ fn remove_cycles(edges : Array[EdgeData]) -> (Array[EdgeData], Array[Bool]) {
     on_stack: Map::new(),
     reversed_edges,
   }
-  // Initialize all nodes as unvisited
-  let all_nodes : @hashset.HashSet[String] = @hashset.HashSet::new()
+  // Preserve first-seen node order so DFS root selection is stable.
+  let all_nodes : Array[String] = []
+  let seen_nodes : @hashset.HashSet[String] = @hashset.HashSet::new()
   for edge in edges {
-    all_nodes.add(edge.from)
-    all_nodes.add(edge.to)
+    if not(seen_nodes.contains(edge.from)) {
+      seen_nodes.add(edge.from)
+      all_nodes.push(edge.from)
+    }
+    if not(seen_nodes.contains(edge.to)) {
+      seen_nodes.add(edge.to)
+      all_nodes.push(edge.to)
+    }
   }
-  all_nodes.each(fn(id) { state.visited.set(id, false) })
+  for id in all_nodes {
+    state.visited.set(id, false)
+  }
 
   // Run DFS from each unvisited node
-  all_nodes.each(fn(id) {
+  for id in all_nodes {
     match state.visited.get(id) {
       Some(false) => dfs_visit(id, outgoing, state)
       _ => ()
     }
-  })
+  }
 
   // Build new edge list with reversed back edges
   let new_edges : Array[EdgeData] = []
