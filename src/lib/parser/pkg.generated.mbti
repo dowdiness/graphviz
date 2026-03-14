@@ -17,6 +17,14 @@ pub fn[T : ToDot] to_dot_string(T) -> String
 // Errors
 
 // Types and methods
+pub(all) enum AttrTarget {
+  GraphAttr
+  NodeAttr
+  EdgeAttr
+}
+pub impl Eq for AttrTarget
+pub impl Show for AttrTarget
+
 pub(all) struct Attribute {
   key : String
   value : String
@@ -84,7 +92,7 @@ pub impl Show for Port
 pub(all) enum Statement {
   NodeStmt(NodeId, AttributeList?)
   EdgeStmt(NodeId, Array[(EdgeOp, NodeId)], AttributeList?)
-  AttrStmt(String, AttributeList)
+  AttrStmt(AttrTarget, AttributeList)
   Assignment(String, String)
   Subgraph(Subgraph)
 }

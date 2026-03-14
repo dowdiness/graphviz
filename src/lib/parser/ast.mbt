@@ -97,10 +97,17 @@ pub(all) struct AttributeList {
 } derive(Eq, Show)
 
 ///|
+pub(all) enum AttrTarget {
+  GraphAttr
+  NodeAttr
+  EdgeAttr
+} derive(Eq, Show)
+
+///|
 pub(all) enum Statement {
   NodeStmt(NodeId, AttributeList?)
   EdgeStmt(NodeId, Array[(EdgeOp, NodeId)], AttributeList?)
-  AttrStmt(String, AttributeList) // "graph", "node", or "edge"
+  AttrStmt(AttrTarget, AttributeList)
   Assignment(String, String)
   Subgraph(Subgraph)
 } derive(Eq, Show)

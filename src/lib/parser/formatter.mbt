@@ -138,8 +138,14 @@ fn format_statement_with_indent(stmt : Statement, indent_level : Int) -> String 
       }
       result
     }
-    AttrStmt(attr_type, attr_list) =>
-      attr_type + " " + format_attr_list(attr_list)
+    AttrStmt(attr_target, attr_list) => {
+      let target_str = match attr_target {
+        GraphAttr => "graph"
+        NodeAttr => "node"
+        EdgeAttr => "edge"
+      }
+      target_str + " " + format_attr_list(attr_list)
+    }
     Assignment(key, value) => format_id(key) + " = " + format_id(value)
     Subgraph(subgraph) => {
       let mut result = "subgraph"

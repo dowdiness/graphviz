@@ -45,7 +45,7 @@ fn collect_nodes_with_defaults(
   let mut node_defaults = inherited_defaults
   for stmt in statements {
     match stmt {
-      @parser.AttrStmt("node", attr_list) =>
+      @parser.AttrStmt(@parser.NodeAttr, attr_list) =>
         node_defaults = merge_attrs(node_defaults, Some(attr_list))
       @parser.NodeStmt(node_id, attrs) =>
         upsert_node(
