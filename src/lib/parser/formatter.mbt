@@ -6,10 +6,7 @@ fn needs_quoting(s : String) -> Bool {
   if chars.length() == 0 {
     return true
   }
-  if (match s {
-      "strict" | "graph" | "digraph" | "node" | "edge" | "subgraph" => true
-      _ => false
-    }) {
+  if is_dot_keyword(s) {
     return true
   }
   let mut has_ascii_alpha = false

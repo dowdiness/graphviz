@@ -1,6 +1,18 @@
 // Layout Phase Whitebox Tests
 
 ///|
+fn test_node_data(id : String) -> NodeData {
+  {
+    id,
+    label: id,
+    color: None,
+    fontcolor: None,
+    fillcolor: None,
+    explicit_attrs: @hashset.HashSet::new(),
+  }
+}
+
+///|
 test "extract_graph_simple" {
   match @parser.parse_dot("digraph { a -> b }") {
     Ok(graph) => {
@@ -141,39 +153,9 @@ test "cycle_removal_uses_first_seen_root_order" {
 ///|
 test "layer_assignment_sources_at_zero" {
   let nodes : Map[String, NodeData] = Map::new()
-  nodes.set("a", {
-    id: "a",
-    label: "a",
-    label_explicit: false,
-    color: None,
-    color_explicit: false,
-    fontcolor: None,
-    fontcolor_explicit: false,
-    fillcolor: None,
-    fillcolor_explicit: false,
-  })
-  nodes.set("b", {
-    id: "b",
-    label: "b",
-    label_explicit: false,
-    color: None,
-    color_explicit: false,
-    fontcolor: None,
-    fontcolor_explicit: false,
-    fillcolor: None,
-    fillcolor_explicit: false,
-  })
-  nodes.set("c", {
-    id: "c",
-    label: "c",
-    label_explicit: false,
-    color: None,
-    color_explicit: false,
-    fontcolor: None,
-    fontcolor_explicit: false,
-    fillcolor: None,
-    fillcolor_explicit: false,
-  })
+  nodes.set("a", test_node_data("a"))
+  nodes.set("b", test_node_data("b"))
+  nodes.set("c", test_node_data("c"))
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let layers = assign_layers(nodes, edges)
   inspect(layers.get("a"), content="Some(0)")
@@ -182,39 +164,9 @@ test "layer_assignment_sources_at_zero" {
 ///|
 test "layer_assignment_edges_go_lower_to_higher" {
   let nodes : Map[String, NodeData] = Map::new()
-  nodes.set("a", {
-    id: "a",
-    label: "a",
-    label_explicit: false,
-    color: None,
-    color_explicit: false,
-    fontcolor: None,
-    fontcolor_explicit: false,
-    fillcolor: None,
-    fillcolor_explicit: false,
-  })
-  nodes.set("b", {
-    id: "b",
-    label: "b",
-    label_explicit: false,
-    color: None,
-    color_explicit: false,
-    fontcolor: None,
-    fontcolor_explicit: false,
-    fillcolor: None,
-    fillcolor_explicit: false,
-  })
-  nodes.set("c", {
-    id: "c",
-    label: "c",
-    label_explicit: false,
-    color: None,
-    color_explicit: false,
-    fontcolor: None,
-    fontcolor_explicit: false,
-    fillcolor: None,
-    fillcolor_explicit: false,
-  })
+  nodes.set("a", test_node_data("a"))
+  nodes.set("b", test_node_data("b"))
+  nodes.set("c", test_node_data("c"))
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let layers = assign_layers(nodes, edges)
   let a_layer = layers.get("a").unwrap()
@@ -239,28 +191,8 @@ test "crossing_minimization_preserves_nodes" {
 ///|
 test "coordinate_assignment_no_overlap" {
   let nodes : Map[String, NodeData] = Map::new()
-  nodes.set("a", {
-    id: "a",
-    label: "a",
-    label_explicit: false,
-    color: None,
-    color_explicit: false,
-    fontcolor: None,
-    fontcolor_explicit: false,
-    fillcolor: None,
-    fillcolor_explicit: false,
-  })
-  nodes.set("b", {
-    id: "b",
-    label: "b",
-    label_explicit: false,
-    color: None,
-    color_explicit: false,
-    fontcolor: None,
-    fontcolor_explicit: false,
-    fillcolor: None,
-    fillcolor_explicit: false,
-  })
+  nodes.set("a", test_node_data("a"))
+  nodes.set("b", test_node_data("b"))
   let layers : Array[Array[String]] = [["a", "b"]]
   let config = LayoutConfig::default()
   let positions = assign_coordinates(layers, nodes, config)
