@@ -2,7 +2,7 @@
 
 A [MoonBit](https://www.moonbitlang.com/) library for parsing, laying out, and rendering [Graphviz DOT](https://graphviz.org/doc/info/lang.html) graphs.
 
-```
+```text
 DOT string ──→ parse ──→ AST ──→ layout ──→ SVG/HTML
 ```
 
