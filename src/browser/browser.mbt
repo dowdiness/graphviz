@@ -4,7 +4,7 @@
 /// This version has no file I/O and no main function that auto-executes
 pub fn render_dot_to_svg(dot_string : String) -> String {
   match @parser.parse_dot(dot_string) {
-    Some(graph) => {
+    Ok(graph) => {
       // Use compact layout configuration for web display
       let compact_config = @layout.LayoutConfig::compact()
       let layout = @layout.compute_layout_with_config(graph, compact_config)
@@ -12,6 +12,6 @@ pub fn render_dot_to_svg(dot_string : String) -> String {
       let dark_config = @svg.SvgConfig::dark_theme()
       @svg.render_svg_with_config(layout, dark_config)
     }
-    None => ""
+    Err(e) => "<!-- Parse error at position \{e.position}: \{e.message} -->"
   }
 }

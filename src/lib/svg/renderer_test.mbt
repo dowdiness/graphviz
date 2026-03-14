@@ -4,7 +4,7 @@
 test "save_svg_creates_file" {
   let dot = "digraph { a -> b }"
   match @parser.parse_dot(dot) {
-    Some(graph) => {
+    Ok(graph) => {
       let layout = @layout.compute_layout(graph)
       let filename = "test_output.svg"
 
@@ -19,7 +19,7 @@ test "save_svg_creates_file" {
         }
       }
     }
-    None => {
+    Err(_) => {
       println("Parse failed")
       inspect(false, content="true")
     }
@@ -30,7 +30,7 @@ test "save_svg_creates_file" {
 test "render_svg_produces_valid_xml_header" {
   let dot = "digraph { x -> y }"
   match @parser.parse_dot(dot) {
-    Some(graph) => {
+    Ok(graph) => {
       let layout = @layout.compute_layout(graph)
       let svg = render_svg(layout)
 
@@ -46,7 +46,7 @@ test "render_svg_produces_valid_xml_header" {
       )
       inspect(has_svg_element, content="true")
     }
-    None => {
+    Err(_) => {
       println("Parse failed")
       inspect(false, content="true")
     }
@@ -57,7 +57,7 @@ test "render_svg_produces_valid_xml_header" {
 test "render_svg_includes_arrowhead_for_directed_graph" {
   let dot = "digraph { a -> b }"
   match @parser.parse_dot(dot) {
-    Some(graph) => {
+    Ok(graph) => {
       let layout = @layout.compute_layout(graph)
       let svg = render_svg(layout)
 
@@ -65,7 +65,7 @@ test "render_svg_includes_arrowhead_for_directed_graph" {
       let has_arrowhead = svg.contains("<marker id=\"arrowhead\"")
       inspect(has_arrowhead, content="true")
     }
-    None => {
+    Err(_) => {
       println("Parse failed")
       inspect(false, content="true")
     }
@@ -76,7 +76,7 @@ test "render_svg_includes_arrowhead_for_directed_graph" {
 test "render_svg_no_arrowhead_for_undirected_graph" {
   let dot = "graph { a -- b }"
   match @parser.parse_dot(dot) {
-    Some(graph) => {
+    Ok(graph) => {
       let layout = @layout.compute_layout(graph)
       let svg = render_svg(layout)
 
@@ -84,7 +84,7 @@ test "render_svg_no_arrowhead_for_undirected_graph" {
       let has_arrowhead = svg.contains("<marker id=\"arrowhead\"")
       inspect(has_arrowhead, content="false")
     }
-    None => {
+    Err(_) => {
       println("Parse failed")
       inspect(false, content="true")
     }
@@ -95,7 +95,7 @@ test "render_svg_no_arrowhead_for_undirected_graph" {
 test "render_html_produces_valid_html_structure" {
   let dot = "digraph { x -> y }"
   match @parser.parse_dot(dot) {
-    Some(graph) => {
+    Ok(graph) => {
       let layout = @layout.compute_layout(graph)
       let html = render_html(layout, "Test Graph")
 
@@ -111,7 +111,7 @@ test "render_html_produces_valid_html_structure" {
       let has_xml_declaration = html.contains("<?xml version")
       inspect(has_xml_declaration, content="false")
     }
-    None => {
+    Err(_) => {
       println("Parse failed")
       inspect(false, content="true")
     }
@@ -122,7 +122,7 @@ test "render_html_produces_valid_html_structure" {
 test "save_html_creates_file" {
   let dot = "digraph { a -> b }"
   match @parser.parse_dot(dot) {
-    Some(graph) => {
+    Ok(graph) => {
       let layout = @layout.compute_layout(graph)
       let filename = "test_output.html"
 
@@ -137,9 +137,41 @@ test "save_html_creates_file" {
         }
       }
     }
-    None => {
+    Err(_) => {
       println("Parse failed")
       inspect(false, content="true")
     }
+  }
+}
+
+///|
+test "render_svg_snapshot_simple_digraph" {
+  let dot = "digraph { a -> b -> c }"
+  match @parser.parse_dot(dot) {
+    Ok(graph) => {
+      let layout = @layout.compute_layout(graph)
+      let svg = render_svg(layout)
+      // Verify key structural elements
+      inspect(svg.contains("<rect"), content="true")
+      inspect(svg.contains("<text"), content="true")
+      inspect(svg.contains("<polyline"), content="true")
+      inspect(svg.contains("arrowhead"), content="true")
+    }
+    Err(_) => abort("parse failed")
+  }
+}
+
+///|
+test "render_svg_respects_node_colors" {
+  let dot = "digraph { a [color=red, fillcolor=blue, fontcolor=white]; a -> b }"
+  match @parser.parse_dot(dot) {
+    Ok(graph) => {
+      let layout = @layout.compute_layout(graph)
+      let svg = render_svg(layout)
+      inspect(svg.contains("blue"), content="true")
+      inspect(svg.contains("red"), content="true")
+      inspect(svg.contains("white"), content="true")
+    }
+    Err(_) => abort("parse failed")
   }
 }

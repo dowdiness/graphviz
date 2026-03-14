@@ -6,25 +6,9 @@ import {
 }
 
 // Values
-pub fn assign_coordinates(Array[Array[String]], Map[String, NodeInfo], LayoutConfig) -> Map[String, LayoutNode]
-
-pub fn assign_layers(InternalGraph) -> Map[String, Int]
-
-pub fn build_adjacency_lists(InternalGraph) -> InternalGraph
-
 pub fn compute_layout(@parser.Graph) -> GraphLayout
 
 pub fn compute_layout_with_config(@parser.Graph, LayoutConfig) -> GraphLayout
-
-pub fn extract_graph(@parser.Graph) -> InternalGraph
-
-pub fn group_by_layer(Map[String, Int]) -> Array[Array[String]]
-
-pub fn minimize_crossings(InternalGraph, Array[Array[String]], Int) -> Array[Array[String]]
-
-pub fn remove_cycles(InternalGraph) -> InternalGraph
-
-pub fn route_edges(InternalGraph, Map[String, LayoutNode], LayoutConfig) -> Array[LayoutEdge]
 
 // Errors
 
@@ -38,20 +22,9 @@ pub struct Bounds {
 pub impl Eq for Bounds
 pub impl Show for Bounds
 
-pub(all) struct Edge {
-  from : String
-  to : String
-  original_direction : EdgeDirection
-}
-pub impl Eq for Edge
-pub impl Show for Edge
-
-pub(all) enum EdgeDirection {
-  Forward
-  Backward
-}
-pub impl Eq for EdgeDirection
-pub impl Show for EdgeDirection
+type EdgeData
+pub impl Eq for EdgeData
+pub impl Show for EdgeData
 
 pub struct GraphLayout {
   nodes : Map[String, LayoutNode]
@@ -61,13 +34,6 @@ pub struct GraphLayout {
   directed : Bool
 }
 pub impl Show for GraphLayout
-
-pub(all) struct InternalGraph {
-  nodes : Map[String, NodeInfo]
-  edges : Array[Edge]
-  directed : Bool
-}
-pub impl Show for InternalGraph
 
 pub struct LayoutConfig {
   node_width : Double
@@ -103,16 +69,8 @@ pub struct LayoutNode {
 pub impl Eq for LayoutNode
 pub impl Show for LayoutNode
 
-pub(all) struct NodeInfo {
-  id : String
-  mut label : String
-  mut incoming : Array[String]
-  mut outgoing : Array[String]
-  mut color : String?
-  mut fontcolor : String?
-  mut fillcolor : String?
-}
-pub impl Show for NodeInfo
+type NodeData
+pub impl Show for NodeData
 
 pub struct Point {
   x : Double
