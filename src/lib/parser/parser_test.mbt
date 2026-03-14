@@ -320,8 +320,8 @@ test "parse_graph_attribute" {
     Ok(graph) => {
       assert_eq(graph.statements.length(), 1)
       match graph.statements[0] {
-        AttrStmt(attr_type, attr_list) => {
-          assert_eq(attr_type, "graph")
+        AttrStmt(attr_target, attr_list) => {
+          assert_eq(attr_target, GraphAttr)
           assert_eq(attr_list.attributes.length(), 1)
         }
         _ => abort("Expected AttrStmt")
@@ -337,8 +337,8 @@ test "parse_node_attribute" {
   match parse_dot(input) {
     Ok(graph) =>
       match graph.statements[0] {
-        AttrStmt(attr_type, attr_list) => {
-          assert_eq(attr_type, "node")
+        AttrStmt(attr_target, attr_list) => {
+          assert_eq(attr_target, NodeAttr)
           assert_eq(attr_list.attributes.length(), 2)
         }
         _ => abort("Expected AttrStmt")
@@ -353,8 +353,8 @@ test "parse_edge_attribute" {
   match parse_dot(input) {
     Ok(graph) =>
       match graph.statements[0] {
-        AttrStmt(attr_type, attr_list) => {
-          assert_eq(attr_type, "edge")
+        AttrStmt(attr_target, attr_list) => {
+          assert_eq(attr_target, EdgeAttr)
           assert_eq(attr_list.attributes.length(), 2)
         }
         _ => abort("Expected AttrStmt")

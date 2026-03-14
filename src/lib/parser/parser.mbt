@@ -382,21 +382,21 @@ fn Parser::parse_statement(self : Parser) -> Statement? {
     Graph => {
       ignore(self.eat(Graph))
       match self.parse_attr_list() {
-        Some(attr_list) => Some(AttrStmt("graph", attr_list))
+        Some(attr_list) => Some(AttrStmt(GraphAttr, attr_list))
         None => None
       }
     }
     Node => {
       ignore(self.eat(Node))
       match self.parse_attr_list() {
-        Some(attr_list) => Some(AttrStmt("node", attr_list))
+        Some(attr_list) => Some(AttrStmt(NodeAttr, attr_list))
         None => None
       }
     }
     Edge => {
       ignore(self.eat(Edge))
       match self.parse_attr_list() {
-        Some(attr_list) => Some(AttrStmt("edge", attr_list))
+        Some(attr_list) => Some(AttrStmt(EdgeAttr, attr_list))
         None => None
       }
     }
