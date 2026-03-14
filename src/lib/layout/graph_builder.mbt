@@ -28,21 +28,6 @@ fn extract_attr(key : String, attrs : @parser.AttributeList?) -> String? {
 }
 
 ///|
-fn has_attr(key : String, attrs : @parser.AttributeList?) -> Bool {
-  match attrs {
-    Some(attr_list) => {
-      for attr in attr_list.attributes {
-        if attr.key == key {
-          return true
-        }
-      }
-      false
-    }
-    None => false
-  }
-}
-
-///|
 fn collect_nodes(
   statements : Array[@parser.Statement],
 ) -> Map[String, NodeData] {
@@ -67,10 +52,10 @@ fn collect_nodes_with_defaults(
           nodes,
           node_id.id,
           merge_attrs(node_defaults, attrs),
-          has_attr("label", attrs),
-          has_attr("color", attrs),
-          has_attr("fontcolor", attrs),
-          has_attr("fillcolor", attrs),
+          extract_attr("label", attrs) is Some(_),
+          extract_attr("color", attrs) is Some(_),
+          extract_attr("fontcolor", attrs) is Some(_),
+          extract_attr("fillcolor", attrs) is Some(_),
         )
       @parser.EdgeStmt(start_node, edges, _attrs) => {
         ensure_node(nodes, start_node.id, node_defaults)

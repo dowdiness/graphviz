@@ -120,13 +120,16 @@ fn Lexer::skip_comment(self : Lexer) -> Bool {
 
 ///|
 fn Lexer::read_identifier(self : Lexer) -> String {
-  loop (self.current_char, "") {
-    (Some(c), acc) if c.is_numeric() || c.is_ascii_alphabetic() || c == '_' => {
+  let buf = StringBuilder::new()
+  loop self.current_char {
+    Some(c) if c.is_numeric() || c.is_ascii_alphabetic() || c == '_' => {
+      buf.write_char(c)
       self.advance()
-      continue (self.current_char, acc + c.to_string())
+      continue self.current_char
     }
-    (_, acc) => break acc
+    _ => break
   }
+  buf.to_string()
 }
 
 ///|
@@ -137,46 +140,54 @@ fn Lexer::read_dotted_identifier(self : Lexer) -> String {
 
 ///|
 fn Lexer::read_number(self : Lexer) -> String {
-  loop (self.current_char, "", false, false) {
-    (Some(c), acc, has_dot, _) if c.is_numeric() => {
+  let buf = StringBuilder::new()
+  let mut has_dot = false
+  loop self.current_char {
+    Some(c) if c.is_numeric() => {
+      buf.write_char(c)
       self.advance()
-      continue (self.current_char, acc + c.to_string(), has_dot, true)
+      continue self.current_char
     }
-    (Some('.'), acc, false, has_digit) => {
+    Some('.') if not(has_dot) => {
+      buf.write_char('.')
+      has_dot = true
       self.advance()
-      continue (self.current_char, acc + ".", true, has_digit)
+      continue self.current_char
     }
-    (_, acc, _, _) => break acc
+    _ => break
   }
+  buf.to_string()
 }
 
 ///|
 fn Lexer::read_quoted_string(self : Lexer) -> String {
   let quote_char = self.current_char.unwrap()
   self.advance() // Skip opening quote
-  let result = loop (self.current_char, "") {
-    (Some(c), acc) if c == quote_char => break acc // End of string
-    (Some('\\'), acc) => {
+  let buf = StringBuilder::new()
+  loop self.current_char {
+    Some(c) if c == quote_char => break // End of string
+    Some('\\') => {
       self.advance() // Skip escape character
       match self.current_char {
         Some(escaped_char) => {
-          let decoded = match escaped_char {
-            'n' => "\n"
-            't' => "\t"
-            'r' => "\r"
-            _ => escaped_char.to_string()
+          match escaped_char {
+            'n' => buf.write_char('\n')
+            't' => buf.write_char('\t')
+            'r' => buf.write_char('\r')
+            _ => buf.write_char(escaped_char)
           }
           self.advance()
-          continue (self.current_char, acc + decoded)
+          continue self.current_char
         }
-        None => break acc // Unexpected end of input
+        None => break // Unexpected end of input
       }
     }
-    (Some(c), acc) => {
+    Some(c) => {
+      buf.write_char(c)
       self.advance()
-      continue (self.current_char, acc + c.to_string())
+      continue self.current_char
     }
-    (None, acc) => break acc // End of input
+    None => break // End of input
   }
 
   // Skip closing quote
@@ -184,7 +195,7 @@ fn Lexer::read_quoted_string(self : Lexer) -> String {
     Some(c) if c == quote_char => self.advance()
     _ => ()
   }
-  result
+  buf.to_string()
 }
 
 ///|

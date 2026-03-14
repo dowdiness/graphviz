@@ -68,42 +68,42 @@ fn compute_layer_barycenters(
   adjacent_layer : Array[String],
   connections : Map[String, Array[String]],
 ) -> Map[String, Double] {
+  let pos_index : Map[String, Int] = Map::new()
+  for i = 0; i < adjacent_layer.length(); i = i + 1 {
+    pos_index.set(adjacent_layer[i], i)
+  }
   let barycenters : Map[String, Double] = Map::new()
+  let default_pos = adjacent_layer.length().to_double() / 2.0
   for node in current_layer {
-    let barycenter = compute_barycenter(node, adjacent_layer, connections)
-    barycenters.set(node, barycenter)
-  }
-  barycenters
-}
-
-///|
-fn compute_barycenter(
-  node : String,
-  adjacent_layer : Array[String],
-  connections : Map[String, Array[String]],
-) -> Double {
-  let connected = match connections.get(node) {
-    Some(c) => c
-    None => return adjacent_layer.length().to_double() / 2.0
-  }
-  if connected.is_empty() {
-    return adjacent_layer.length().to_double() / 2.0
-  }
-  let mut sum = 0.0
-  let mut count = 0
-  for connected_node in connected {
-    for i = 0; i < adjacent_layer.length(); i = i + 1 {
-      if adjacent_layer[i] == connected_node {
-        sum = sum + i.to_double()
-        count = count + 1
-        break
+    let connected = match connections.get(node) {
+      Some(c) => c
+      None => {
+        barycenters.set(node, default_pos)
+        continue
       }
     }
+    if connected.is_empty() {
+      barycenters.set(node, default_pos)
+      continue
+    }
+    let mut sum = 0.0
+    let mut count = 0
+    for connected_node in connected {
+      match pos_index.get(connected_node) {
+        Some(pos) => {
+          sum = sum + pos.to_double()
+          count = count + 1
+        }
+        None => ()
+      }
+    }
+    if count == 0 {
+      barycenters.set(node, default_pos)
+    } else {
+      barycenters.set(node, sum / count.to_double())
+    }
   }
-  if count == 0 {
-    return adjacent_layer.length().to_double() / 2.0
-  }
-  sum / count.to_double()
+  barycenters
 }
 
 ///|
