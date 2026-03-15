@@ -49,7 +49,7 @@ priv enum Token {
   Arrow // ->
   Line // --
   EOF // End of file
-} derive(Eq, Show)
+} derive(Eq)
 
 // AST node types
 
