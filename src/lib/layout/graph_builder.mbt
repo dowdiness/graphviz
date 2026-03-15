@@ -47,16 +47,27 @@ fn collect_nodes_with_defaults(
     match stmt {
       @parser.AttrStmt(@parser.NodeAttr, attr_list) =>
         node_defaults = merge_attrs(node_defaults, Some(attr_list))
-      @parser.NodeStmt(node_id, attrs) =>
+      @parser.NodeStmt(node_id, attrs) => {
+        let explicit = @hashset.HashSet::new()
+        if extract_attr("label", attrs) is Some(_) {
+          explicit.add("label")
+        }
+        if extract_attr("color", attrs) is Some(_) {
+          explicit.add("color")
+        }
+        if extract_attr("fontcolor", attrs) is Some(_) {
+          explicit.add("fontcolor")
+        }
+        if extract_attr("fillcolor", attrs) is Some(_) {
+          explicit.add("fillcolor")
+        }
         upsert_node(
           nodes,
           node_id.id,
           merge_attrs(node_defaults, attrs),
-          extract_attr("label", attrs) is Some(_),
-          extract_attr("color", attrs) is Some(_),
-          extract_attr("fontcolor", attrs) is Some(_),
-          extract_attr("fillcolor", attrs) is Some(_),
+          explicit,
         )
+      }
       @parser.EdgeStmt(start_node, edges, _attrs) => {
         ensure_node(nodes, start_node.id, node_defaults)
         for edge_pair in edges {
@@ -76,58 +87,55 @@ fn collect_nodes_with_defaults(
 fn build_node_data(
   node_id : String,
   attrs : @parser.AttributeList?,
-  label_explicit : Bool,
-  color_explicit : Bool,
-  fontcolor_explicit : Bool,
-  fillcolor_explicit : Bool,
+  explicit_attrs : @hashset.HashSet[String],
 ) -> NodeData {
-  let label = extract_attr("label", attrs).unwrap_or(node_id)
+  let label_attr = extract_attr("label", attrs)
+  let label = label_attr.unwrap_or(node_id)
   let color = extract_attr("color", attrs)
   let fontcolor = extract_attr("fontcolor", attrs)
   let fillcolor = extract_attr("fillcolor", attrs)
   {
     id: node_id,
+    label_attr,
     label,
-    label_explicit,
     color,
-    color_explicit,
     fontcolor,
-    fontcolor_explicit,
     fillcolor,
-    fillcolor_explicit,
+    explicit_attrs,
   }
 }
 
 ///|
 fn merge_node_data(existing : NodeData, update : NodeData) -> NodeData {
+  // Re-mentioning a node with new defaults should not erase a value that was
+  // explicitly set earlier, so we track which attrs were set on the node itself.
+  let merged_explicit = @hashset.HashSet::new()
+  existing.explicit_attrs.each(fn(k) { merged_explicit.add(k) })
+  update.explicit_attrs.each(fn(k) { merged_explicit.add(k) })
+  fn pick(
+    key : String,
+    update_val : String?,
+    existing_val : String?,
+  ) -> String? {
+    if update.explicit_attrs.contains(key) {
+      update_val
+    } else if existing.explicit_attrs.contains(key) {
+      existing_val
+    } else if update_val is Some(_) {
+      update_val
+    } else {
+      existing_val
+    }
+  }
+  let label_attr = pick("label", update.label_attr, existing.label_attr)
   {
     id: update.id,
-    // Re-mentioning a node with new defaults should not erase a value that was
-    // explicitly set earlier, so each style field carries its own explicitness.
-    label: if update.label_explicit {
-      update.label
-    } else {
-      existing.label
-    },
-    label_explicit: existing.label_explicit || update.label_explicit,
-    color: if update.color_explicit {
-      update.color
-    } else {
-      existing.color
-    },
-    color_explicit: existing.color_explicit || update.color_explicit,
-    fontcolor: if update.fontcolor_explicit {
-      update.fontcolor
-    } else {
-      existing.fontcolor
-    },
-    fontcolor_explicit: existing.fontcolor_explicit || update.fontcolor_explicit,
-    fillcolor: if update.fillcolor_explicit {
-      update.fillcolor
-    } else {
-      existing.fillcolor
-    },
-    fillcolor_explicit: existing.fillcolor_explicit || update.fillcolor_explicit,
+    label_attr,
+    label: label_attr.unwrap_or(update.id),
+    color: pick("color", update.color, existing.color),
+    fontcolor: pick("fontcolor", update.fontcolor, existing.fontcolor),
+    fillcolor: pick("fillcolor", update.fillcolor, existing.fillcolor),
+    explicit_attrs: merged_explicit,
   }
 }
 
@@ -136,14 +144,9 @@ fn upsert_node(
   nodes : Map[String, NodeData],
   node_id : String,
   attrs : @parser.AttributeList?,
-  label_explicit : Bool,
-  color_explicit : Bool,
-  fontcolor_explicit : Bool,
-  fillcolor_explicit : Bool,
+  explicit_attrs : @hashset.HashSet[String],
 ) -> Unit {
-  let node_data = build_node_data(
-    node_id, attrs, label_explicit, color_explicit, fontcolor_explicit, fillcolor_explicit,
-  )
+  let node_data = build_node_data(node_id, attrs, explicit_attrs)
   match nodes.get(node_id) {
     Some(existing) => nodes.set(node_id, merge_node_data(existing, node_data))
     None => nodes.set(node_id, node_data)
@@ -157,10 +160,7 @@ fn ensure_node(
   attrs : @parser.AttributeList?,
 ) -> Unit {
   if not(nodes.contains(node_id)) {
-    nodes.set(
-      node_id,
-      build_node_data(node_id, attrs, false, false, false, false),
-    )
+    nodes.set(node_id, build_node_data(node_id, attrs, @hashset.HashSet::new()))
   }
 }
 

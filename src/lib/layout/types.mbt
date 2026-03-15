@@ -65,14 +65,12 @@ pub struct GraphLayout {
 ///|
 struct NodeData {
   id : String
+  label_attr : String?
   label : String
-  label_explicit : Bool
   color : String?
-  color_explicit : Bool
   fontcolor : String?
-  fontcolor_explicit : Bool
   fillcolor : String?
-  fillcolor_explicit : Bool
+  explicit_attrs : @hashset.HashSet[String]
 } derive(Show)
 
 // Immutable edge data

@@ -68,6 +68,29 @@ test "parse_strict_digraph_with_id" {
   }
 }
 
+///|
+test "parse_mixed_case_keywords" {
+  let input = "STRICT Graph G { NODE [shape=box] }"
+  match parse_dot(input) {
+    Ok(graph) => {
+      assert_eq(graph.strict, true)
+      assert_eq(graph.directed, false)
+      assert_eq(graph.id, Some("G"))
+      assert_eq(graph.statements.length(), 1)
+      match graph.statements[0] {
+        AttrStmt(attr_target, attr_list) => {
+          assert_eq(attr_target, NodeAttr)
+          assert_eq(attr_list.attributes.length(), 1)
+          assert_eq(attr_list.attributes[0].key, "shape")
+          assert_eq(attr_list.attributes[0].value, "box")
+        }
+        _ => abort("Expected AttrStmt")
+      }
+    }
+    Err(_) => abort("Failed to parse mixed-case keywords")
+  }
+}
+
 // Node statement tests
 
 ///|

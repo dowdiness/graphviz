@@ -70,6 +70,8 @@ test "format_preserves_non_bmp_attribute_value" {
 test "format_id_quotes_keywords_and_digit_leading_mixed_ids" {
   assert_eq(format_id("graph"), "\"graph\"")
   assert_eq(format_id("strict"), "\"strict\"")
+  assert_eq(format_id("Graph"), "\"Graph\"")
+  assert_eq(format_id("NODE"), "\"NODE\"")
   assert_eq(format_id("1foo"), "\"1foo\"")
   assert_eq(format_id("123"), "123")
 }

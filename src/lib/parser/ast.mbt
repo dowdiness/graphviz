@@ -131,3 +131,14 @@ pub(all) struct ParseError {
   message : String
   position : Int // UTF-16 code unit index
 } derive(Show)
+
+// DOT language keywords — shared by lexer and formatter.
+
+///|
+fn is_dot_keyword(s : String) -> Bool {
+  let normalized = s.to_lower()
+  match normalized {
+    "strict" | "graph" | "digraph" | "node" | "edge" | "subgraph" => true
+    _ => false
+  }
+}
