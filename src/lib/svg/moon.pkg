@@ -1,6 +1,6 @@
 import {
   "antisatori/graphviz/lib/layout",
-  "antisatori/svg-dsl/lib" @svg,
+  "antisatori/svg-dsl/lib" @svgdsl,
   "moonbitlang/x/fs",
 }
 

@@ -58,7 +58,7 @@ pub fn render_svg_with_config(
   config : SvgConfig,
 ) -> String {
   let svg_element = build_svg_element(layout, config)
-  @svg.render(svg_element)
+  @svgdsl.render(svg_element)
 }
 
 ///|
@@ -66,7 +66,7 @@ pub fn render_svg_with_config(
 fn build_svg_element(
   layout : @layout.GraphLayout,
   config : SvgConfig,
-) -> @svg.SvgElement {
+) -> @svgdsl.SvgElement {
   // Calculate viewBox with padding
   let vb_x = layout.bounds.min_x - config.padding
   let vb_y = layout.bounds.min_y - config.padding
@@ -78,14 +78,14 @@ fn build_svg_element(
     2.0 * config.padding
 
   // Build children elements
-  let children : Array[@svg.SvgElement] = []
+  let children : Array[@svgdsl.SvgElement] = []
 
   // Add arrow marker for directed graphs
   if layout.directed {
-    let arrow_polygon = @svg.polygon([(0.0, 0.0), (10.0, 3.0), (0.0, 6.0)]).fill(
+    let arrow_polygon = @svgdsl.polygon([(0.0, 0.0), (10.0, 3.0), (0.0, 6.0)]).fill(
       config.edge_stroke,
     )
-    let arrow_marker = @svg.marker(
+    let arrow_marker = @svgdsl.marker(
       id="arrowhead",
       marker_width=10.0,
       marker_height=10.0,
@@ -94,7 +94,7 @@ fn build_svg_element(
       orient="auto",
       children=[arrow_polygon],
     )
-    children.push(@svg.defs(children=[arrow_marker]))
+    children.push(@svgdsl.defs(children=[arrow_marker]))
   }
 
   // Render edges first (so they appear behind nodes)
@@ -111,7 +111,7 @@ fn build_svg_element(
   })
 
   // Create SVG root with viewBox
-  @svg.svg_viewbox(vb_x, vb_y, vb_width, vb_height, children~)
+  @svgdsl.svg_viewbox(vb_x, vb_y, vb_width, vb_height, children~)
 }
 
 ///|
@@ -119,14 +119,14 @@ fn build_svg_element(
 fn build_node_element(
   node : @layout.LayoutNode,
   config : SvgConfig,
-) -> @svg.SvgElement {
+) -> @svgdsl.SvgElement {
   // Per-node colors with config fallback
   let fill = node.fillcolor.unwrap_or(config.node_fill)
   let stroke = node.color.unwrap_or(config.node_stroke)
   let text_fill = node.fontcolor.unwrap_or(config.text_color)
 
   // Rectangle
-  let node_rect = @svg.rect(
+  let node_rect = @svgdsl.rect(
       x=node.position.x,
       y=node.position.y,
       width=node.size.width,
@@ -140,14 +140,14 @@ fn build_node_element(
   // Text label (centered in node)
   let text_x = node.position.x + node.size.width / 2.0
   let text_y = node.position.y + node.size.height / 2.0 + config.font_size / 3.0
-  let node_text = @svg.text(node.label, x=text_x, y=text_y)
-    .with_attr(@svg.text_anchor("middle"))
+  let node_text = @svgdsl.text(node.label, x=text_x, y=text_y)
+    .with_attr(@svgdsl.text_anchor("middle"))
     .fill(text_fill)
-    .with_attr(@svg.font_size(config.font_size))
-    .with_attr(@svg.font_family(config.font_family))
+    .with_attr(@svgdsl.font_size(config.font_size))
+    .with_attr(@svgdsl.font_family(config.font_family))
 
   // Group containing rect and text
-  @svg.g(children=[node_rect, node_text])
+  @svgdsl.g(children=[node_rect, node_text])
 }
 
 ///|
@@ -156,7 +156,7 @@ fn build_edge_element(
   edge : @layout.LayoutEdge,
   directed : Bool,
   config : SvgConfig,
-) -> @svg.SvgElement? {
+) -> @svgdsl.SvgElement? {
   if edge.waypoints.length() < 2 {
     return None
   }
@@ -168,16 +168,16 @@ fn build_edge_element(
   }
 
   // Build polyline with attributes
-  let mut polyline_elem = @svg.polyline(pts)
+  let mut polyline_elem = @svgdsl.polyline(pts)
     .fill("none")
     .stroke(config.edge_stroke)
     .stroke_width(config.edge_stroke_width)
 
   // Add arrow marker for directed graphs
   if directed && not(edge.reversed) {
-    polyline_elem = polyline_elem.with_attr(@svg.marker_end("arrowhead"))
+    polyline_elem = polyline_elem.with_attr(@svgdsl.marker_end("arrowhead"))
   } else if directed && edge.reversed {
-    polyline_elem = polyline_elem.with_attr(@svg.marker_start("arrowhead"))
+    polyline_elem = polyline_elem.with_attr(@svgdsl.marker_start("arrowhead"))
   }
   Some(polyline_elem)
 }
@@ -220,7 +220,7 @@ fn render_svg_for_html(
   config : SvgConfig,
 ) -> String {
   let svg_element = build_svg_element(layout, config)
-  @svg.render_for_html(svg_element)
+  @svgdsl.render_for_html(svg_element)
 }
 
 ///|
@@ -232,7 +232,7 @@ pub fn render_html_with_config(
 ) -> String {
   let buf = StringBuilder::new()
   let svg_content = render_svg_for_html(layout, config)
-  let escaped_title = @svg.escape_xml(title)
+  let escaped_title = @svgdsl.escape_xml(title)
 
   // HTML header
   buf.write_string("<!DOCTYPE html>\n")
