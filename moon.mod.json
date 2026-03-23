@@ -5,6 +5,9 @@
     "moonbitlang/x": "0.4.38",
     "antisatori/svg-dsl": {
       "path": "../svg-dsl"
+    },
+    "dowdiness/alga": {
+      "path": "../alga"
     }
   },
   "readme": "README.md",
