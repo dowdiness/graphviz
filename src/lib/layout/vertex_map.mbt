@@ -24,6 +24,8 @@ fn VertexMap::from_nodes(nodes : Map[String, NodeData]) -> VertexMap {
 
 ///|
 /// Convert an edge list to an alga AdjacencyMap using the vertex mapping.
+/// Self-loops (u == v) are filtered out since they don't affect layering
+/// and would cause toposort to report a false cycle.
 fn VertexMap::to_adjacency_map(
   self : VertexMap,
   edges : Array[EdgeData],
@@ -31,7 +33,7 @@ fn VertexMap::to_adjacency_map(
   let int_edges : Array[(Int, Int)] = []
   for edge in edges {
     match (self.to_int.get(edge.from), self.to_int.get(edge.to)) {
-      (Some(u), Some(v)) => int_edges.push((u, v))
+      (Some(u), Some(v)) => if u != v { int_edges.push((u, v)) }
       _ => ()
     }
   }

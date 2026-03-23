@@ -15,14 +15,12 @@ fn assign_layers(
   let g = vmap.to_adjacency_map(edges)
   let topo_order = match @alga.toposort(g) {
     Some(order) => order
-    None => {
-      // Shouldn't happen after cycle_removal, but handle gracefully
-      let result : Map[String, Int] = Map::new()
-      for id, _ in nodes {
-        result[id] = 0
-      }
-      return result
-    }
+    None =>
+      // cycle_removal should have made the graph acyclic — if toposort
+      // still finds a cycle, something is wrong upstream. Abort so
+      // the bug surfaces during testing instead of producing a silent
+      // degenerate layout.
+      abort("assign_layers: toposort returned None (cycle detected) after cycle_removal — this is a bug")
   }
   // Forward propagation: each node's layer = max(predecessor layers) + 1
   let int_layer : Map[Int, Int] = Map::new()
