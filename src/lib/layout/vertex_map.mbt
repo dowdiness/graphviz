@@ -1,8 +1,12 @@
 ///|
-/// Mapping from String node IDs to Int vertex indices.
+/// Bidirectional mapping between String node IDs and Int vertex indices.
 /// Bridges graphviz's String-based graph to alga's Int-based DirectedGraph.
+///
+/// - `to_int[name]` → Int index (for building AdjacencyMap)
+/// - `to_string[idx]` → String name (for mapping results back)
 priv struct VertexMap {
   to_int : Map[String, Int]
+  to_string : Array[String]
 }
 
 ///|
@@ -10,17 +14,16 @@ priv struct VertexMap {
 /// Each node gets a stable Int index based on insertion order.
 fn VertexMap::from_nodes(nodes : Map[String, NodeData]) -> VertexMap {
   let to_int : Map[String, Int] = Map::new()
-  let mut idx = 0
+  let to_string : Array[String] = []
   for id, _ in nodes {
-    to_int[id] = idx
-    idx = idx + 1
+    to_int[id] = to_string.length()
+    to_string.push(id)
   }
-  { to_int, }
+  { to_int, to_string }
 }
 
 ///|
 /// Convert an edge list to an alga AdjacencyMap using the vertex mapping.
-/// Vertices not in the map are silently skipped.
 fn VertexMap::to_adjacency_map(
   self : VertexMap,
   edges : Array[EdgeData],

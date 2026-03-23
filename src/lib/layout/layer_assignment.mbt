@@ -5,20 +5,18 @@
 ///
 /// 1. Map String node IDs to Int indices (VertexMap)
 /// 2. Build AdjacencyMap and run alga's toposort (Kahn's algorithm)
-/// 3. Walk topological order, assigning each node to
-///    max(predecessor layers) + 1 (longest-path heuristic)
+/// 3. Walk topological order, propagating longest-path layers forward
+/// 4. Map Int results back to String keys via reverse lookup
 fn assign_layers(
   nodes : Map[String, NodeData],
   edges : Array[EdgeData],
 ) -> Map[String, Int] {
   let vmap = VertexMap::from_nodes(nodes)
   let g = vmap.to_adjacency_map(edges)
-  // Get topological order from alga
   let topo_order = match @alga.toposort(g) {
     Some(order) => order
     None => {
-      // Graph has a cycle (shouldn't happen after cycle_removal phase,
-      // but handle gracefully). Fall back to arbitrary order.
+      // Shouldn't happen after cycle_removal, but handle gracefully
       let result : Map[String, Int] = Map::new()
       for id, _ in nodes {
         result[id] = 0
@@ -26,10 +24,9 @@ fn assign_layers(
       return result
     }
   }
-  // Compute longest-path layers along topological order
+  // Forward propagation: each node's layer = max(predecessor layers) + 1
   let int_layer : Map[Int, Int] = Map::new()
   for v in topo_order {
-    // Forward propagation: each node's layer = max(predecessor layers) + 1
     let current_layer = match int_layer.get(v) {
       Some(l) => l
       None => 0
@@ -45,16 +42,15 @@ fn assign_layers(
       }
     })
   }
-  // Map Int layers back to String keys
+  // Map back to String keys via O(1) array index reverse lookup
   let layer_map : Map[String, Int] = Map::new()
+  for idx, layer in int_layer {
+    layer_map[vmap.to_string[idx]] = layer
+  }
+  // Ensure source nodes (layer 0, no predecessors) are included
   for id, _ in nodes {
-    match vmap.to_int.get(id) {
-      Some(idx) =>
-        match int_layer.get(idx) {
-          Some(layer) => layer_map[id] = layer
-          None => layer_map[id] = 0
-        }
-      None => layer_map[id] = 0
+    if not(layer_map.contains(id)) {
+      layer_map[id] = 0
     }
   }
   layer_map
