@@ -1,53 +1,60 @@
-// Phase 2: Layer Assignment using topological sort
+// Phase 2: Layer Assignment using alga's topological sort
 
 ///|
+/// Assign each node to a layer using longest-path layering.
+///
+/// 1. Map String node IDs to Int indices (VertexMap)
+/// 2. Build AdjacencyMap and run alga's toposort (Kahn's algorithm)
+/// 3. Walk topological order, assigning each node to
+///    max(predecessor layers) + 1 (longest-path heuristic)
 fn assign_layers(
   nodes : Map[String, NodeData],
   edges : Array[EdgeData],
 ) -> Map[String, Int] {
-  let (incoming, outgoing) = build_adjacency(edges)
+  let vmap = VertexMap::from_nodes(nodes)
+  let g = vmap.to_adjacency_map(edges)
+  // Get topological order from alga
+  let topo_order = match @alga.toposort(g) {
+    Some(order) => order
+    None => {
+      // Graph has a cycle (shouldn't happen after cycle_removal phase,
+      // but handle gracefully). Fall back to arbitrary order.
+      let result : Map[String, Int] = Map::new()
+      for id, _ in nodes {
+        result[id] = 0
+      }
+      return result
+    }
+  }
+  // Compute longest-path layers along topological order
+  let int_layer : Map[Int, Int] = Map::new()
+  for v in topo_order {
+    // Forward propagation: each node's layer = max(predecessor layers) + 1
+    let current_layer = match int_layer.get(v) {
+      Some(l) => l
+      None => 0
+    }
+    @alga.DirectedGraph::for_each_successor(g, v, fn(w) {
+      let new_layer = current_layer + 1
+      match int_layer.get(w) {
+        Some(existing) =>
+          if new_layer > existing {
+            int_layer[w] = new_layer
+          }
+        None => int_layer[w] = new_layer
+      }
+    })
+  }
+  // Map Int layers back to String keys
   let layer_map : Map[String, Int] = Map::new()
-  let in_degree : Map[String, Int] = Map::new()
-
-  // Initialize in-degree for all nodes
-  nodes.each(fn(id, _) {
-    match incoming.get(id) {
-      Some(inc) => in_degree.set(id, inc.length())
-      None => in_degree.set(id, 0)
-    }
-  })
-
-  // Initialize sources (in-degree 0) at layer 0
-  let queue : Array[String] = []
-  nodes.each(fn(id, _) {
-    if in_degree.get(id).unwrap() == 0 {
-      layer_map.set(id, 0)
-      queue.push(id)
-    }
-  })
-
-  // Process nodes in topological order
-  while not(queue.is_empty()) {
-    let current = queue.pop().unwrap()
-    let current_layer = layer_map.get(current).unwrap()
-    match outgoing.get(current) {
-      Some(neighbors) =>
-        for neighbor in neighbors {
-          let neighbor_degree = in_degree.get(neighbor).unwrap()
-          in_degree.set(neighbor, neighbor_degree - 1)
-          let new_layer = current_layer + 1
-          match layer_map.get(neighbor) {
-            Some(existing_layer) =>
-              if new_layer > existing_layer {
-                layer_map.set(neighbor, new_layer)
-              }
-            None => layer_map.set(neighbor, new_layer)
-          }
-          if in_degree.get(neighbor).unwrap() == 0 {
-            queue.push(neighbor)
-          }
+  for id, _ in nodes {
+    match vmap.to_int.get(id) {
+      Some(idx) =>
+        match int_layer.get(idx) {
+          Some(layer) => layer_map[id] = layer
+          None => layer_map[id] = 0
         }
-      None => ()
+      None => layer_map[id] = 0
     }
   }
   layer_map
@@ -56,11 +63,17 @@ fn assign_layers(
 ///|
 fn group_by_layer(layer_map : Map[String, Int]) -> Array[Array[String]] {
   let mut max_layer = 0
-  layer_map.each(fn(_id, layer) { if layer > max_layer { max_layer = layer } })
+  for _, layer in layer_map {
+    if layer > max_layer {
+      max_layer = layer
+    }
+  }
   let layers : Array[Array[String]] = []
-  for i = 0; i <= max_layer; i = i + 1 {
+  for _ in 0..<=max_layer {
     layers.push([])
   }
-  layer_map.each(fn(id, layer) { layers[layer].push(id) })
+  for id, layer in layer_map {
+    layers[layer].push(id)
+  }
   layers
 }
