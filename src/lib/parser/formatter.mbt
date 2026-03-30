@@ -17,7 +17,7 @@ fn needs_quoting(s : String) -> Bool {
     if c.is_ascii_alphabetic() || c == '_' || c.is_numeric() {
       continue
     }
-    if c == '.' && not(has_ascii_alpha) {
+    if c == '.' && !has_ascii_alpha {
       continue
     }
     return true
@@ -185,7 +185,7 @@ fn format_attr_list(attr_list : AttributeList) -> String {
   buf.write_char('[')
   let mut first = true
   for attr in attr_list.attributes {
-    if not(first) {
+    if !first {
       buf.write_string(", ")
     }
     buf.write_string(format_id(attr.key))

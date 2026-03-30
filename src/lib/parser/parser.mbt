@@ -79,7 +79,7 @@ fn parse_compass_point(compass_str : String) -> CompassPoint {
 
 ///|
 fn Parser::parse_port(self : Parser) -> Port? {
-  if not(self.eat(Colon)) {
+  if !self.eat(Colon) {
     return None
   }
   let port = { id: None, compass: None }
@@ -238,11 +238,11 @@ fn Parser::parse_a_list(self : Parser) -> Array[Attribute] {
 
 ///|
 fn Parser::parse_attr_list(self : Parser) -> AttributeList? {
-  if not(self.eat(LeftBracket)) {
+  if !self.eat(LeftBracket) {
     return None
   }
   let attributes = self.parse_a_list()
-  if not(self.eat(RightBracket)) {
+  if !self.eat(RightBracket) {
     return None
   }
   let attr_list = { attributes, }
@@ -584,7 +584,7 @@ fn Parser::parse_graph(self : Parser) -> Graph? {
   }
 
   // '{'
-  if not(self.eat(LeftBrace)) {
+  if !self.eat(LeftBrace) {
     return None
   }
 
@@ -592,7 +592,7 @@ fn Parser::parse_graph(self : Parser) -> Graph? {
   let statements = self.parse_stmt_list()
 
   // '}'
-  if not(self.eat(RightBrace)) {
+  if !self.eat(RightBrace) {
     return None
   }
   Some({ strict, directed, id, statements })

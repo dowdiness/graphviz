@@ -159,7 +159,7 @@ fn ensure_node(
   node_id : String,
   attrs : @parser.AttributeList?,
 ) -> Unit {
-  if not(nodes.contains(node_id)) {
+  if !nodes.contains(node_id) {
     nodes.set(node_id, build_node_data(node_id, attrs, @hashset.HashSet::new()))
   }
 }
@@ -201,7 +201,7 @@ fn collect_edges(
         for edge_pair in edge_list {
           let (edge_op, target_node) = edge_pair
           edges.push({ from: current, to: target_node.id })
-          if not(directed) || edge_op == @parser.Undirected {
+          if !directed || edge_op == @parser.Undirected {
             edges.push({ from: target_node.id, to: current })
           }
           current = target_node.id

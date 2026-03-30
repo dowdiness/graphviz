@@ -174,7 +174,7 @@ fn build_edge_element(
     .stroke_width(config.edge_stroke_width)
 
   // Add arrow marker for directed graphs
-  if directed && not(edge.reversed) {
+  if directed && !edge.reversed {
     polyline_elem = polyline_elem.with_attr(@svgdsl.marker_end("arrowhead"))
   } else if directed && edge.reversed {
     polyline_elem = polyline_elem.with_attr(@svgdsl.marker_start("arrowhead"))

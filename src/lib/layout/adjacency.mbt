@@ -8,16 +8,16 @@ fn build_adjacency(
   let outgoing : Map[String, Array[String]] = Map::new()
   for edge in edges {
     // Ensure both nodes exist in maps
-    if not(outgoing.contains(edge.from)) {
+    if !outgoing.contains(edge.from) {
       outgoing.set(edge.from, [])
     }
-    if not(incoming.contains(edge.to)) {
+    if !incoming.contains(edge.to) {
       incoming.set(edge.to, [])
     }
-    if not(incoming.contains(edge.from)) {
+    if !incoming.contains(edge.from) {
       incoming.set(edge.from, [])
     }
-    if not(outgoing.contains(edge.to)) {
+    if !outgoing.contains(edge.to) {
       outgoing.set(edge.to, [])
     }
     outgoing.get(edge.from).unwrap().push(edge.to)

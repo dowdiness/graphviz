@@ -20,7 +20,9 @@ fn assign_layers(
       // still finds a cycle, something is wrong upstream. Abort so
       // the bug surfaces during testing instead of producing a silent
       // degenerate layout.
-      abort("assign_layers: toposort returned None (cycle detected) after cycle_removal — this is a bug")
+      abort(
+        "assign_layers: toposort returned None (cycle detected) after cycle_removal — this is a bug",
+      )
   }
   // Forward propagation: each node's layer = max(predecessor layers) + 1
   let int_layer : Map[Int, Int] = Map::new()
@@ -32,10 +34,7 @@ fn assign_layers(
     @alga.DirectedGraph::for_each_successor(g, v, fn(w) {
       let new_layer = current_layer + 1
       match int_layer.get(w) {
-        Some(existing) =>
-          if new_layer > existing {
-            int_layer[w] = new_layer
-          }
+        Some(existing) => if new_layer > existing { int_layer[w] = new_layer }
         None => int_layer[w] = new_layer
       }
     })
@@ -47,7 +46,7 @@ fn assign_layers(
   }
   // Ensure source nodes (layer 0, no predecessors) are included
   for id, _ in nodes {
-    if not(layer_map.contains(id)) {
+    if !layer_map.contains(id) {
       layer_map[id] = 0
     }
   }

@@ -25,11 +25,11 @@ fn remove_cycles(edges : Array[EdgeData]) -> (Array[EdgeData], Array[Bool]) {
   let all_nodes : Array[String] = []
   let seen_nodes : @hashset.HashSet[String] = @hashset.HashSet::new()
   for edge in edges {
-    if not(seen_nodes.contains(edge.from)) {
+    if !seen_nodes.contains(edge.from) {
       seen_nodes.add(edge.from)
       all_nodes.push(edge.from)
     }
-    if not(seen_nodes.contains(edge.to)) {
+    if !seen_nodes.contains(edge.to) {
       seen_nodes.add(edge.to)
       all_nodes.push(edge.to)
     }
@@ -66,10 +66,10 @@ fn build_indexed_outgoing_adjacency(
   let outgoing : Map[String, Array[(String, Int)]] = Map::new()
   for i = 0; i < edges.length(); i = i + 1 {
     let edge = edges[i]
-    if not(outgoing.contains(edge.from)) {
+    if !outgoing.contains(edge.from) {
       outgoing.set(edge.from, [])
     }
-    if not(outgoing.contains(edge.to)) {
+    if !outgoing.contains(edge.to) {
       outgoing.set(edge.to, [])
     }
     outgoing.get(edge.from).unwrap().push((edge.to, i))

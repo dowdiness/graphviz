@@ -148,7 +148,7 @@ fn Lexer::read_number(self : Lexer) -> String {
       self.advance()
       continue self.current_char
     }
-    Some('.') if not(has_dot) => {
+    Some('.') if !has_dot => {
       buf.write_char('.')
       has_dot = true
       self.advance()

@@ -123,7 +123,7 @@ test "format_subgraph_renders_nested_statements" {
       assert_true(formatted.contains("subgraph cluster_0 {"))
       assert_true(formatted.contains("a;"))
       assert_true(formatted.contains("b -> c;"))
-      assert_true(not(formatted.contains("{ ... }")))
+      assert_true(!formatted.contains("{ ... }"))
     }
     Err(_) => abort("Failed to parse graph with subgraph")
   }
@@ -165,8 +165,8 @@ test "format_edge_stmt_preserves_compass_only_ports" {
     Ok(graph) => {
       let formatted = format_graph(graph)
       assert_true(formatted.contains("a:n -> b:s"))
-      assert_true(not(formatted.contains("a::n")))
-      assert_true(not(formatted.contains("b::s")))
+      assert_true(!formatted.contains("a::n"))
+      assert_true(!formatted.contains("b::s"))
       assert_true(parse_dot(formatted) is Ok(_))
     }
     Err(_) => abort("Failed to parse graph with compass-only ports")
@@ -184,7 +184,7 @@ test "format_node_id_omits_trailing_colon_for_empty_port" {
     ],
   }
   let formatted = format_graph(graph)
-  assert_true(not(formatted.contains("a:")))
+  assert_true(!formatted.contains("a:"))
   assert_true(parse_dot(formatted) is Ok(_))
 }
 
