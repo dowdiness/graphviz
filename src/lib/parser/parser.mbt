@@ -538,11 +538,11 @@ fn Parser::parse_subgraph(self : Parser) -> Subgraph? {
     }
     (_, id) => break id
   }
-  if (self.eat(LeftBrace) |> not) {
+  if !self.eat(LeftBrace) {
     return None
   }
   let statements = self.parse_stmt_list()
-  if (self.eat(RightBrace) |> not) {
+  if !self.eat(RightBrace) {
     return None
   }
   Some({ id, statements })
