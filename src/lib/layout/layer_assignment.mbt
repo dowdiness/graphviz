@@ -31,7 +31,7 @@ fn assign_layers(
       Some(l) => l
       None => 0
     }
-    @alga.DirectedGraph::for_each_successor(g, v, fn(w) {
+    @alga.DirectedGraph::each_successor(g, v, fn(w) {
       let new_layer = current_layer + 1
       match int_layer.get(w) {
         Some(existing) => if new_layer > existing { int_layer[w] = new_layer }
