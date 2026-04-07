@@ -2,6 +2,7 @@ import {
   "antisatori/graphviz/lib/parser",
   "dowdiness/alga",
   "moonbitlang/core/bench",
+  "moonbitlang/core/debug",
   "moonbitlang/core/hashset",
 }
 

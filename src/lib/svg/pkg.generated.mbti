@@ -3,6 +3,7 @@ package "antisatori/graphviz/lib/svg"
 
 import {
   "antisatori/graphviz/lib/layout",
+  "moonbitlang/core/debug",
 }
 
 // Values
@@ -35,10 +36,9 @@ pub struct SvgConfig {
   text_color : String
   font_size : Double
   font_family : String
-}
+} derive(@debug.Debug)
 pub fn SvgConfig::dark_theme() -> Self
 pub fn SvgConfig::default() -> Self
-pub impl Show for SvgConfig
 
 // Type aliases
 

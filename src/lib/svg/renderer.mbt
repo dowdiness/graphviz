@@ -12,7 +12,7 @@ pub struct SvgConfig {
   text_color : String // Text color: "#000"
   font_size : Double // Font size: 14.0
   font_family : String // Font family: "Arial, sans-serif"
-} derive(Show)
+} derive(Debug)
 
 ///|
 pub fn SvgConfig::default() -> SvgConfig {

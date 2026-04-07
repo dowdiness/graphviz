@@ -1,6 +1,10 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "antisatori/graphviz/lib/parser"
 
+import {
+  "moonbitlang/core/debug",
+}
+
 // Values
 pub fn format_graph(Graph) -> String
 
@@ -21,21 +25,17 @@ pub(all) enum AttrTarget {
   GraphAttr
   NodeAttr
   EdgeAttr
-}
-pub impl Eq for AttrTarget
+} derive(Eq, @debug.Debug)
 pub impl Show for AttrTarget
 
 pub(all) struct Attribute {
   key : String
   value : String
-}
-pub impl Eq for Attribute
-pub impl Show for Attribute
+} derive(Eq, @debug.Debug)
 
 pub(all) struct AttributeList {
   attributes : Array[Attribute]
-}
-pub impl Eq for AttributeList
+} derive(Eq, @debug.Debug)
 pub impl Show for AttributeList
 
 pub(all) enum CompassPoint {
@@ -49,44 +49,35 @@ pub(all) enum CompassPoint {
   NW
   C
   Underscore
-}
-pub impl Eq for CompassPoint
+} derive(Eq, @debug.Debug)
 pub impl Show for CompassPoint
 
 pub(all) enum EdgeOp {
   Directed
   Undirected
-}
-pub impl Eq for EdgeOp
-pub impl Show for EdgeOp
+} derive(Eq, @debug.Debug)
 
 pub(all) struct Graph {
   strict : Bool
   directed : Bool
   id : String?
   statements : Array[Statement]
-}
-pub impl Eq for Graph
-pub impl Show for Graph
+} derive(Eq, @debug.Debug)
 
 pub(all) struct NodeId {
   id : String
   port : Port?
-}
-pub impl Eq for NodeId
-pub impl Show for NodeId
+} derive(Eq, @debug.Debug)
 
 pub(all) struct ParseError {
   message : String
   position : Int
-}
-pub impl Show for ParseError
+} derive(@debug.Debug)
 
 pub(all) struct Port {
   mut id : String?
   mut compass : CompassPoint?
-}
-pub impl Eq for Port
+} derive(Eq, @debug.Debug)
 pub impl Show for Port
 
 pub(all) enum Statement {
@@ -95,16 +86,12 @@ pub(all) enum Statement {
   AttrStmt(AttrTarget, AttributeList)
   Assignment(String, String)
   Subgraph(Subgraph)
-}
-pub impl Eq for Statement
-pub impl Show for Statement
+} derive(Eq, @debug.Debug)
 
 pub(all) struct Subgraph {
   id : String?
   statements : Array[Statement]
-}
-pub impl Eq for Subgraph
-pub impl Show for Subgraph
+} derive(Eq, @debug.Debug)
 
 // Type aliases
 
