@@ -354,12 +354,14 @@ fn Parser::emit_expanded_statements(
   statements : Array[Statement],
 ) -> Statement? {
   if statements.is_empty() {
-    loop self.current_token {
-      Semicolon => {
-        self.eat(Semicolon) |> ignore
-        continue self.current_token
+    for tok = self.current_token {
+      match tok {
+        Semicolon => {
+          self.eat(Semicolon) |> ignore
+          continue self.current_token
+        }
+        _ => break
       }
-      _ => break
     }
     return self.parse_statement()
   }
@@ -506,12 +508,14 @@ fn Parser::parse_stmt_list(self : Parser) -> Array[Statement] {
   let statements = []
   while true {
     // Skip leading/repeated semicolons
-    loop self.current_token {
-      Semicolon => {
-        self.eat(Semicolon) |> ignore
-        continue self.current_token
+    for tok = self.current_token {
+      match tok {
+        Semicolon => {
+          self.eat(Semicolon) |> ignore
+          continue self.current_token
+        }
+        _ => break
       }
-      _ => break
     }
     match self.parse_statement() {
       Some(stmt) => statements.push(stmt)
@@ -524,19 +528,21 @@ fn Parser::parse_stmt_list(self : Parser) -> Array[Statement] {
 ///|
 fn Parser::parse_subgraph(self : Parser) -> Subgraph? {
   // Optional "subgraph" keyword
-  let id = loop (self.current_token, None) {
-    (Subgraph, id) => {
-      self.eat(Subgraph) |> ignore
-      // Optional ID after subgraph
-      match self.current_token {
-        ID(sub_id) => {
-          self.eat(ID("")) |> ignore
-          continue (self.current_token, Some(sub_id))
+  let id = for tok = self.current_token, id = (None : String?) {
+    match tok {
+      Subgraph => {
+        self.eat(Subgraph) |> ignore
+        // Optional ID after subgraph
+        match self.current_token {
+          ID(sub_id) => {
+            self.eat(ID("")) |> ignore
+            continue self.current_token, Some(sub_id)
+          }
+          _ => continue self.current_token, id
         }
-        _ => continue (self.current_token, id)
       }
+      _ => break id
     }
-    (_, id) => break id
   }
   if !self.eat(LeftBrace) {
     return None

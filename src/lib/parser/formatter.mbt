@@ -119,14 +119,16 @@ fn format_statement_with_indent(stmt : Statement, indent_level : Int) -> String 
       result
     }
     EdgeStmt(start_node, edges, attr_list) => {
-      let mut result = loop (edges[:], format_node_id(start_node)) {
-        ([], acc) => break acc
-        ([(edge_op, node_id), .. rest], acc) => {
-          let op_str = match edge_op {
-            Directed => " -> "
-            Undirected => " -- "
+      let mut result = for rest = edges[:], acc = format_node_id(start_node) {
+        match rest {
+          [] => break acc
+          [(edge_op, node_id), .. rest2] => {
+            let op_str = match edge_op {
+              Directed => " -> "
+              Undirected => " -- "
+            }
+            continue rest2, acc + op_str + format_node_id(node_id)
           }
-          continue (rest, acc + op_str + format_node_id(node_id))
         }
       }
       match attr_list {

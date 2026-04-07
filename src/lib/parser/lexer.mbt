@@ -61,11 +61,13 @@ fn Lexer::skip_comment(self : Lexer) -> Bool {
   match self.current_char {
     Some('#') => {
       // Hash comment: consume until newline or EOF
-      loop self.current_char {
-        Some('\n') | None => break
-        _ => {
-          self.advance()
-          continue self.current_char
+      for ch = self.current_char {
+        match ch {
+          Some('\n') | None => break
+          _ => {
+            self.advance()
+            continue self.current_char
+          }
         }
       }
       true
@@ -77,11 +79,13 @@ fn Lexer::skip_comment(self : Lexer) -> Bool {
           self.advance()
           self.advance()
           // Single line comment
-          loop self.current_char {
-            Some('\n') | None => break
-            _ => {
-              self.advance()
-              continue self.current_char
+          for ch = self.current_char {
+            match ch {
+              Some('\n') | None => break
+              _ => {
+                self.advance()
+                continue self.current_char
+              }
             }
           }
           true
@@ -92,22 +96,24 @@ fn Lexer::skip_comment(self : Lexer) -> Bool {
           self.advance()
           let mut closed = false
           // Multi-line comment
-          loop self.current_char {
-            None => break
-            Some('*') => {
-              self.advance()
-              match self.current_char {
-                Some('/') => {
-                  self.advance()
-                  closed = true
-                  break
+          for ch = self.current_char {
+            match ch {
+              None => break
+              Some('*') => {
+                self.advance()
+                match self.current_char {
+                  Some('/') => {
+                    self.advance()
+                    closed = true
+                    break
+                  }
+                  _ => continue self.current_char
                 }
-                _ => continue self.current_char
               }
-            }
-            _ => {
-              self.advance()
-              continue self.current_char
+              _ => {
+                self.advance()
+                continue self.current_char
+              }
             }
           }
           closed
@@ -121,13 +127,15 @@ fn Lexer::skip_comment(self : Lexer) -> Bool {
 ///|
 fn Lexer::read_identifier(self : Lexer) -> String {
   let buf = StringBuilder::new()
-  loop self.current_char {
-    Some(c) if c.is_numeric() || c.is_ascii_alphabetic() || c == '_' => {
-      buf.write_char(c)
-      self.advance()
-      continue self.current_char
+  for ch = self.current_char {
+    match ch {
+      Some(c) if c.is_numeric() || c.is_ascii_alphabetic() || c == '_' => {
+        buf.write_char(c)
+        self.advance()
+        continue self.current_char
+      }
+      _ => break
     }
-    _ => break
   }
   buf.to_string()
 }
@@ -142,19 +150,21 @@ fn Lexer::read_dotted_identifier(self : Lexer) -> String {
 fn Lexer::read_number(self : Lexer) -> String {
   let buf = StringBuilder::new()
   let mut has_dot = false
-  loop self.current_char {
-    Some(c) if c.is_numeric() => {
-      buf.write_char(c)
-      self.advance()
-      continue self.current_char
+  for ch = self.current_char {
+    match ch {
+      Some(c) if c.is_numeric() => {
+        buf.write_char(c)
+        self.advance()
+        continue self.current_char
+      }
+      Some('.') if !has_dot => {
+        buf.write_char('.')
+        has_dot = true
+        self.advance()
+        continue self.current_char
+      }
+      _ => break
     }
-    Some('.') if !has_dot => {
-      buf.write_char('.')
-      has_dot = true
-      self.advance()
-      continue self.current_char
-    }
-    _ => break
   }
   buf.to_string()
 }
@@ -164,30 +174,32 @@ fn Lexer::read_quoted_string(self : Lexer) -> String {
   let quote_char = self.current_char.unwrap()
   self.advance() // Skip opening quote
   let buf = StringBuilder::new()
-  loop self.current_char {
-    Some(c) if c == quote_char => break // End of string
-    Some('\\') => {
-      self.advance() // Skip escape character
-      match self.current_char {
-        Some(escaped_char) => {
-          match escaped_char {
-            'n' => buf.write_char('\n')
-            't' => buf.write_char('\t')
-            'r' => buf.write_char('\r')
-            _ => buf.write_char(escaped_char)
+  for ch = self.current_char {
+    match ch {
+      Some(c) if c == quote_char => break // End of string
+      Some('\\') => {
+        self.advance() // Skip escape character
+        match self.current_char {
+          Some(escaped_char) => {
+            match escaped_char {
+              'n' => buf.write_char('\n')
+              't' => buf.write_char('\t')
+              'r' => buf.write_char('\r')
+              _ => buf.write_char(escaped_char)
+            }
+            self.advance()
+            continue self.current_char
           }
-          self.advance()
-          continue self.current_char
+          None => break // Unexpected end of input
         }
-        None => break // Unexpected end of input
       }
+      Some(c) => {
+        buf.write_char(c)
+        self.advance()
+        continue self.current_char
+      }
+      None => break // End of input
     }
-    Some(c) => {
-      buf.write_char(c)
-      self.advance()
-      continue self.current_char
-    }
-    None => break // End of input
   }
 
   // Skip closing quote
