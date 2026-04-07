@@ -65,43 +65,63 @@ pub(all) enum CompassPoint {
   NW
   C
   Underscore
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for CompassPoint with output(self, logger) {
+  logger.write_string(@debug.to_string(self))
+}
 
 ///|
 pub(all) struct Port {
   mut id : String?
   mut compass : CompassPoint?
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for Port with output(self, logger) {
+  logger.write_string(@debug.to_string(self))
+}
 
 ///|
 pub(all) struct NodeId {
   id : String
   port : Port?
-} derive(Eq, Show)
+} derive(Eq, Debug)
 
 ///|
 pub(all) enum EdgeOp {
   Directed // ->
   Undirected // --
-} derive(Eq, Show)
+} derive(Eq, Debug)
 
 ///|
 pub(all) struct Attribute {
   key : String
   value : String
-} derive(Eq, Show)
+} derive(Eq, Debug)
 
 ///|
 pub(all) struct AttributeList {
   attributes : Array[Attribute]
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for AttributeList with output(self, logger) {
+  logger.write_string(@debug.to_string(self))
+}
 
 ///|
 pub(all) enum AttrTarget {
   GraphAttr
   NodeAttr
   EdgeAttr
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for AttrTarget with output(self, logger) {
+  logger.write_string(@debug.to_string(self))
+}
 
 ///|
 pub(all) enum Statement {
@@ -110,13 +130,13 @@ pub(all) enum Statement {
   AttrStmt(AttrTarget, AttributeList)
   Assignment(String, String)
   Subgraph(Subgraph)
-} derive(Eq, Show)
+} derive(Eq, Debug)
 
 ///|
 pub(all) struct Subgraph {
   id : String?
   statements : Array[Statement]
-} derive(Eq, Show)
+} derive(Eq, Debug)
 
 ///|
 pub(all) struct Graph {
@@ -124,13 +144,13 @@ pub(all) struct Graph {
   directed : Bool
   id : String?
   statements : Array[Statement]
-} derive(Eq, Show)
+} derive(Eq, Debug)
 
 ///|
 pub(all) struct ParseError {
   message : String
   position : Int // UTF-16 code unit index
-} derive(Show)
+} derive(Debug)
 
 // DOT language keywords — shared by lexer and formatter.
 

@@ -7,7 +7,7 @@ pub struct LayoutConfig {
   layer_spacing : Double // Vertical space between layers: 80.0
   node_spacing : Double // Horizontal space between nodes: 50.0
   edge_spacing : Double // Clearance for edge routing: 10.0
-} derive(Show)
+} derive(Debug)
 
 ///|
 pub fn LayoutConfig::default() -> LayoutConfig {

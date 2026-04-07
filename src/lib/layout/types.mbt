@@ -6,13 +6,13 @@
 pub struct Point {
   x : Double
   y : Double
-} derive(Eq, Show)
+} derive(Eq, Debug)
 
 ///|
 pub struct Size {
   width : Double
   height : Double
-} derive(Eq, Show)
+} derive(Eq, Debug)
 
 // Bounding box for the entire graph
 
@@ -22,7 +22,12 @@ pub struct Bounds {
   min_y : Double
   max_x : Double
   max_y : Double
-} derive(Eq, Show)
+} derive(Eq, Debug)
+
+///|
+pub impl Show for Bounds with output(self, logger) {
+  logger.write_string(@debug.to_string(self))
+}
 
 // Positioned node with layout information
 
@@ -37,7 +42,7 @@ pub struct LayoutNode {
   color : String? // Per-node border color override
   fontcolor : String? // Per-node text color override
   fillcolor : String? // Per-node fill color override
-} derive(Eq, Show)
+} derive(Eq, Debug)
 
 // Edge with routing waypoints
 
@@ -47,7 +52,7 @@ pub struct LayoutEdge {
   to : String // Target node ID
   waypoints : Array[Point] // Polyline path (including endpoints)
   reversed : Bool // True if edge was reversed for cycle removal
-} derive(Eq, Show)
+} derive(Eq, Debug)
 
 // Complete graph layout result
 
@@ -58,7 +63,7 @@ pub struct GraphLayout {
   bounds : Bounds // Overall graph dimensions
   layers : Array[Array[String]] // Layer structure: layer index -> node IDs
   directed : Bool // Whether the graph is directed
-} derive(Show)
+} derive(Debug)
 
 // Immutable node data extracted from AST
 
@@ -71,7 +76,7 @@ struct NodeData {
   fontcolor : String?
   fillcolor : String?
   explicit_attrs : @hashset.HashSet[String]
-} derive(Show)
+} derive(Debug)
 
 // Immutable edge data
 
@@ -79,4 +84,4 @@ struct NodeData {
 struct EdgeData {
   from : String
   to : String
-} derive(Eq, Show)
+} derive(Eq, Debug)

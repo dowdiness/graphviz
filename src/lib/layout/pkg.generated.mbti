@@ -3,6 +3,7 @@ package "antisatori/graphviz/lib/layout"
 
 import {
   "antisatori/graphviz/lib/parser",
+  "moonbitlang/core/debug",
 }
 
 // Values
@@ -18,13 +19,10 @@ pub struct Bounds {
   min_y : Double
   max_x : Double
   max_y : Double
-}
-pub impl Eq for Bounds
+} derive(Eq, @debug.Debug)
 pub impl Show for Bounds
 
-type EdgeData
-pub impl Eq for EdgeData
-pub impl Show for EdgeData
+type EdgeData derive(Eq, @debug.Debug)
 
 pub struct GraphLayout {
   nodes : Map[String, LayoutNode]
@@ -32,8 +30,7 @@ pub struct GraphLayout {
   bounds : Bounds
   layers : Array[Array[String]]
   directed : Bool
-}
-pub impl Show for GraphLayout
+} derive(@debug.Debug)
 
 pub struct LayoutConfig {
   node_width : Double
@@ -41,19 +38,16 @@ pub struct LayoutConfig {
   layer_spacing : Double
   node_spacing : Double
   edge_spacing : Double
-}
+} derive(@debug.Debug)
 pub fn LayoutConfig::compact() -> Self
 pub fn LayoutConfig::default() -> Self
-pub impl Show for LayoutConfig
 
 pub struct LayoutEdge {
   from : String
   to : String
   waypoints : Array[Point]
   reversed : Bool
-}
-pub impl Eq for LayoutEdge
-pub impl Show for LayoutEdge
+} derive(Eq, @debug.Debug)
 
 pub struct LayoutNode {
   id : String
@@ -65,26 +59,19 @@ pub struct LayoutNode {
   color : String?
   fontcolor : String?
   fillcolor : String?
-}
-pub impl Eq for LayoutNode
-pub impl Show for LayoutNode
+} derive(Eq, @debug.Debug)
 
-type NodeData
-pub impl Show for NodeData
+type NodeData derive(@debug.Debug)
 
 pub struct Point {
   x : Double
   y : Double
-}
-pub impl Eq for Point
-pub impl Show for Point
+} derive(Eq, @debug.Debug)
 
 pub struct Size {
   width : Double
   height : Double
-}
-pub impl Eq for Size
-pub impl Show for Size
+} derive(Eq, @debug.Debug)
 
 // Type aliases
 
