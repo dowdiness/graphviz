@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "antisatori/graphviz/main"
+package "dowdiness/graphviz/main"
 
 // Values
 pub fn parse_dot(String) -> String

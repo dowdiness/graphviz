@@ -1,7 +1,7 @@
 import {
-  "antisatori/graphviz/lib/parser",
-  "antisatori/graphviz/lib/layout",
-  "antisatori/graphviz/lib/svg",
+  "dowdiness/graphviz/lib/parser",
+  "dowdiness/graphviz/lib/layout",
+  "dowdiness/graphviz/lib/svg",
 }
 
 options(

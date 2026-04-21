@@ -1,5 +1,5 @@
 import {
-  "antisatori/graphviz/lib/parser",
+  "dowdiness/graphviz/lib/parser",
   "dowdiness/alga",
   "moonbitlang/core/bench",
   "moonbitlang/core/debug",

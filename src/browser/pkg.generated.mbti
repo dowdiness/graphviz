@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "antisatori/graphviz/browser"
+package "dowdiness/graphviz/browser"
 
 // Values
 pub fn render_dot_to_svg(String) -> String

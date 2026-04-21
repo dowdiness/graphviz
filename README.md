@@ -13,7 +13,7 @@ Add to your `moon.mod.json`:
 ```json
 {
   "deps": {
-    "antisatori/graphviz": "0.1.0"
+    "dowdiness/graphviz": "0.1.0"
   }
 }
 ```
@@ -45,9 +45,9 @@ The library is split into three packages that form a pipeline:
 
 | Package | Import path | Purpose |
 |---------|-------------|---------|
-| **parser** | `antisatori/graphviz/lib/parser` | Parse DOT → AST, format AST → DOT |
-| **layout** | `antisatori/graphviz/lib/layout` | Compute node positions and edge routes |
-| **svg** | `antisatori/graphviz/lib/svg` | Render layout to SVG or HTML |
+| **parser** | `dowdiness/graphviz/lib/parser` | Parse DOT → AST, format AST → DOT |
+| **layout** | `dowdiness/graphviz/lib/layout` | Compute node positions and edge routes |
+| **svg** | `dowdiness/graphviz/lib/svg` | Render layout to SVG or HTML |
 
 You can use any package independently. For example, use just the parser for DOT manipulation without rendering.
 

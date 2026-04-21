@@ -59,16 +59,16 @@ moon doc
 
 The library is split into three packages that form a pipeline (DOT → AST → layout → SVG), plus application-level packages:
 
-- **`src/lib/parser/`** (`antisatori/graphviz/lib/parser`)
+- **`src/lib/parser/`** (`dowdiness/graphviz/lib/parser`)
   - Lexer, recursive-descent parser, AST types, and DOT formatter
   - Public entry points: `parse_dot`, `parse_attributes`, `format_graph`, `ToDot`/`FromDot` traits
   - Files: `ast.mbt`, `lexer.mbt`, `parser.mbt`, `formatter.mbt`
 
-- **`src/lib/layout/`** (`antisatori/graphviz/lib/layout`)
+- **`src/lib/layout/`** (`dowdiness/graphviz/lib/layout`)
   - Sugiyama-style layered layout: cycle removal, layer assignment, crossing minimization, coordinate assignment, edge routing
   - Public entry points: `compute_layout`, `compute_layout_with_config`, `LayoutConfig`
 
-- **`src/lib/svg/`** (`antisatori/graphviz/lib/svg`)
+- **`src/lib/svg/`** (`dowdiness/graphviz/lib/svg`)
   - Renders a `GraphLayout` to SVG or HTML, using `antisatori/svg-dsl`
   - Public entry points: `render_svg`, `render_html`, `SvgConfig`
 

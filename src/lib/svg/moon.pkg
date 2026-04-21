@@ -1,11 +1,11 @@
 import {
-  "antisatori/graphviz/lib/layout",
+  "dowdiness/graphviz/lib/layout",
   "antisatori/svg-dsl/lib" @svgdsl,
   "moonbitlang/x/fs",
 }
 
 import {
-  "antisatori/graphviz/lib/parser",
+  "dowdiness/graphviz/lib/parser",
 } for "test"
 
 options(

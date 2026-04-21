@@ -1,8 +1,8 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "antisatori/graphviz/lib/svg"
+package "dowdiness/graphviz/lib/svg"
 
 import {
-  "antisatori/graphviz/lib/layout",
+  "dowdiness/graphviz/lib/layout",
   "moonbitlang/core/debug",
 }
 
