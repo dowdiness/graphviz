@@ -1,7 +1,7 @@
 // Layout configuration parameters
 
 ///|
-pub struct LayoutConfig {
+pub(all) struct LayoutConfig {
   node_width : Double // Default: 72.0 (1 inch at 72 DPI)
   node_height : Double // Default: 36.0
   layer_spacing : Double // Vertical space between layers: 80.0

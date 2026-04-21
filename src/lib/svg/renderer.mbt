@@ -2,7 +2,7 @@
 // Converts layout information into SVG markup using svg-dsl
 
 ///|
-pub struct SvgConfig {
+pub(all) struct SvgConfig {
   padding : Double // Padding around graph: 20.0
   node_stroke : String // Node border color: "#333"
   node_fill : String // Node fill color: "#fff"

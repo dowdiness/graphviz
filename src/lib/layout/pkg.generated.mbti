@@ -32,7 +32,7 @@ pub struct GraphLayout {
   directed : Bool
 } derive(@debug.Debug)
 
-pub struct LayoutConfig {
+pub(all) struct LayoutConfig {
   node_width : Double
   node_height : Double
   layer_spacing : Double

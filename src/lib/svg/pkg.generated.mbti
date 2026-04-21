@@ -26,7 +26,7 @@ pub fn save_svg_with_config(@layout.GraphLayout, String, SvgConfig) -> Result[Un
 // Errors
 
 // Types and methods
-pub struct SvgConfig {
+pub(all) struct SvgConfig {
   padding : Double
   node_stroke : String
   node_fill : String
