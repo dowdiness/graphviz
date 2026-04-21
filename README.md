@@ -203,13 +203,13 @@ let layout = @layout.compute_layout_with_config(
 ```moonbit
 // Default — comfortable spacing for readability
 LayoutConfig::default()
-// node_width: 80, node_height: 40
-// layer_spacing: 100, node_spacing: 60, edge_spacing: 20
+// node_width: 72.0, node_height: 36.0
+// layer_spacing: 80.0, node_spacing: 50.0, edge_spacing: 10.0
 
 // Compact — tighter spacing for dense graphs
 LayoutConfig::compact()
-// node_width: 60, node_height: 30
-// layer_spacing: 70, node_spacing: 40, edge_spacing: 15
+// node_width: 50.0, node_height: 28.0
+// layer_spacing: 50.0, node_spacing: 35.0, edge_spacing: 10.0
 ```
 
 Or create your own:
@@ -238,7 +238,7 @@ struct GraphLayout {
 struct LayoutNode {
   id : String
   label : String
-  position : Point     // center position
+  position : Point     // top-left corner (x, y)
   size : Size
   layer : Int
   order : Int          // order within layer
@@ -273,16 +273,17 @@ let svg = @svg.render_svg_with_config(layout, @svg.SvgConfig::dark_theme())
 ### SvgConfig presets
 
 ```moonbit
-// Default — light background, black strokes
+// Default — light background, dark strokes
 SvgConfig::default()
-// node_fill: "#ffffff", node_stroke: "#333333"
-// edge_stroke: "#666666", text_color: "#333333"
-// font_size: 14, font_family: "Arial, Helvetica, sans-serif"
+// padding: 20.0
+// node_fill: "#fff", node_stroke: "#333"
+// edge_stroke: "#666", text_color: "#000"
+// font_size: 14.0, font_family: "Arial, sans-serif"
 
 // Dark theme — dark background, light strokes
 SvgConfig::dark_theme()
-// node_fill: "#2d2d2d", node_stroke: "#cccccc"
-// edge_stroke: "#999999", text_color: "#e0e0e0"
+// node_fill: "#252526", node_stroke: "#3c3c3c"
+// edge_stroke: "#858585", text_color: "#d4d4d4"
 ```
 
 Or create your own:

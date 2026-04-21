@@ -25,14 +25,14 @@ moon check
 # Run all tests
 moon test
 
-# Run tests in a specific package
-moon test -p lib
+# Run tests in a specific package (parser / layout / svg)
+moon test -p lib/parser
 
 # Run a specific test file
-moon test -p lib -f dot_parser_text.mbt
+moon test -p lib/parser -f parser_test.mbt
 
 # Run a specific test by index
-moon test -p lib -f dot_parser_text.mbt -i 0
+moon test -p lib/parser -f parser_test.mbt -i 0
 
 # Update test snapshots
 moon test -u
@@ -57,43 +57,57 @@ moon doc
 
 ### Module Structure
 
-The project follows MoonBit's package system with two main packages:
+The library is split into three packages that form a pipeline (DOT → AST → layout → SVG), plus application-level packages:
 
-- **`src/lib/`**: Core parser library (`antisatori/graphviz/lib`)
-  - Contains the DOT language lexer, parser, and AST definitions
-  - Exports public API through `parse_dot()` function
+- **`src/lib/parser/`** (`antisatori/graphviz/lib/parser`)
+  - Lexer, recursive-descent parser, AST types, and DOT formatter
+  - Public entry points: `parse_dot`, `parse_attributes`, `format_graph`, `ToDot`/`FromDot` traits
+  - Files: `ast.mbt`, `lexer.mbt`, `parser.mbt`, `formatter.mbt`
 
-- **`src/main/`**: Main entry point
-  - Imports and uses the library package
-  - Demonstrates parser usage with example DOT graphs
+- **`src/lib/layout/`** (`antisatori/graphviz/lib/layout`)
+  - Sugiyama-style layered layout: cycle removal, layer assignment, crossing minimization, coordinate assignment, edge routing
+  - Public entry points: `compute_layout`, `compute_layout_with_config`, `LayoutConfig`
+
+- **`src/lib/svg/`** (`antisatori/graphviz/lib/svg`)
+  - Renders a `GraphLayout` to SVG or HTML, using `antisatori/svg-dsl`
+  - Public entry points: `render_svg`, `render_html`, `SvgConfig`
+
+- **`src/main/`** — CLI entry point that exercises the pipeline on example graphs
+- **`src/browser/`** — Browser entry point (JS target) for the web demo
 
 ### Parser Architecture
 
-The parser follows a classic lexer-parser architecture:
+The parser follows a classic lexer-parser architecture, split across four files in `src/lib/parser/`:
 
-1. **Lexer (`Lexer` struct)**: Tokenizes DOT language input
-   - Handles identifiers, keywords, operators, quoted strings
-   - Supports C-style comments (`//`, `/* */`) and hash comments (`#`)
+1. **Lexer (`lexer.mbt`)**: Tokenizes DOT language input
+   - Handles identifiers, keywords, operators, quoted strings, numerals (including dot-prefixed like `.5`)
+   - Supports C-style comments (`//`, `/* */`) and hash comments (`#`); rejects unterminated block comments
    - Returns a stream of `Token` enum values
 
-2. **Parser (`Parser` struct)**: Builds AST from tokens
+2. **Parser (`parser.mbt`)**: Builds AST from tokens
    - Recursive descent parser following DOT grammar rules
-   - Top-level entry: `parse_graph()` which parses the full graph structure
+   - Top-level entry: `parse_dot` returns `Result[Graph, ParseError]` with position-tagged errors
    - Parses statements recursively: nodes, edges, attributes, subgraphs
+   - Expands subgraph edge endpoints into concrete edges during parsing
 
-3. **AST Types**: Strongly-typed representation of DOT graphs
+3. **AST Types (`ast.mbt`)**: Strongly-typed representation of DOT graphs
    - `Graph`: Top-level structure (strict/non-strict, directed/undirected)
-   - `Statement`: Nodes, edges, attributes, assignments, subgraphs
-   - `NodeId`: Node identifiers with optional ports
+   - `Statement`: `NodeStmt`, `EdgeStmt`, `AttrStmt`, `Assignment`, `Subgraph`
+   - `AttrTarget`: `GraphAttr` / `NodeAttr` / `EdgeAttr` (typed target for attribute statements)
+   - `NodeId`, `Port`, `CompassPoint`: Node identifiers with optional ports
    - `EdgeOp`: Directed (`->`) vs undirected (`--`) edges
    - `AttributeList`: Key-value attribute pairs
 
+4. **Formatter (`formatter.mbt`)**: AST → DOT string
+   - Round-trips with `parse_dot`: preserves subgraph operands, label overrides, compass-only ports, non-BMP characters
+   - Quotes IDs and escapes strings conservatively
+
 ### Key Design Patterns
 
-- **Recursive descent parsing**: Each grammar rule maps to a parser method (e.g., `parse_statement()`, `parse_node_id()`, `parse_edge_rhs()`)
-- **Token consumption**: `eat()` method verifies and consumes expected tokens
+- **Recursive descent parsing**: Each grammar rule maps to a parser method (e.g., `parse_statement`, `parse_node_id`, `parse_edge_rhs`)
+- **Token consumption**: An `eat`/`expect`-style method verifies and consumes expected tokens, raising `ParseError` on mismatch
 - **Optional elements**: Parser methods return `Option` types for optional grammar elements
-- **Tail recursion**: Uses MoonBit's `loop` construct for iterative parsing (e.g., in `parse_stmt_list()`)
+- **Iteration**: Uses `while` and `for .. in` with accumulator state (MoonBit's `loop` keyword is deprecated)
 
 ### Grammar Implementation
 
@@ -107,11 +121,7 @@ edge_stmt : (node_id | subgraph) edgeRHS [ attr_list ]
 edgeRHS   : edgeop (node_id | subgraph) [ edgeRHS ]
 ```
 
-Key parsing entry points in `src/lib/dot_parser.mbt`:
-- `parse_graph()`: Parses the entire graph (line 672)
-- `parse_statement()`: Parses individual statements (line 532)
-- `parse_edge_rhs()`: Parses edge right-hand sides (line 505)
-- `parse_node_id()`: Parses node identifiers with ports (line 434)
+Key parsing entry points live in `src/lib/parser/parser.mbt`: `parse_dot`, `parse_graph`, `parse_statement`, `parse_edge_rhs`, `parse_node_id`, `parse_stmt_list`. Use `moon ide peek-def <symbol>` to jump to any of them rather than relying on line numbers.
 
 ## MoonBit Language Specifics
 
@@ -132,15 +142,16 @@ Use direct access instead of deprecated `Complex::T` syntax:
 Complex  // not Complex::T
 ```
 
-### Pattern Matching on Streams
-The codebase uses MoonBit's `loop` construct with pattern matching for stream processing and iterative operations.
+### Iteration
+
+The codebase uses `while` and `for .. in` with accumulator state for iterative operations. MoonBit's `loop` keyword is deprecated.
 
 ## Testing
 
-Tests are located in `src/lib/dot_parser_text.mbt`. The test file includes examples of:
-- Basic directed graphs (`digraph { a -> b }`)
-- Undirected graphs with attributes
-- Complex subgraphs with clusters
-- Automaton graphs with record-shaped nodes
+Each library package owns its own tests alongside its source:
 
-The test demonstrates both parsing and formatting of DOT graphs using `parse_dot()` and `format_graph()`.
+- `src/lib/parser/parser_test.mbt`, `formatter_test.mbt` — parser/formatter behavior, error reporting, round-trip property tests
+- `src/lib/layout/layout_test.mbt`, `layout_wbtest.mbt` — layout phase invariants (whitebox) and end-to-end behavior (blackbox)
+- `src/lib/svg/` — snapshot and color tests for the SVG renderer
+
+Tests exercise basic directed graphs, undirected graphs with attributes, clustered subgraphs, ports with compass points, and automaton-style record nodes. The tests demonstrate both parsing and formatting via `parse_dot` and `format_graph`.
