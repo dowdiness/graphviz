@@ -1,6 +1,6 @@
 import {
   "dowdiness/graphviz/lib/layout",
-  "antisatori/svg-dsl/lib" @svgdsl,
+  "dowdiness/svg-dsl/lib" @svgdsl,
   "moonbitlang/x/fs",
 }
 

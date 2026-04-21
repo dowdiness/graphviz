@@ -69,7 +69,7 @@ The library is split into three packages that form a pipeline (DOT → AST → l
   - Public entry points: `compute_layout`, `compute_layout_with_config`, `LayoutConfig`
 
 - **`src/lib/svg/`** (`dowdiness/graphviz/lib/svg`)
-  - Renders a `GraphLayout` to SVG or HTML, using `antisatori/svg-dsl`
+  - Renders a `GraphLayout` to SVG or HTML, using `dowdiness/svg-dsl`
   - Public entry points: `render_svg`, `render_html`, `SvgConfig`
 
 - **`src/main/`** — CLI entry point that exercises the pipeline on example graphs
