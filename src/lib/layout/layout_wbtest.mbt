@@ -31,7 +31,7 @@ test "extract_graph_node_defaults_allow_explicit_override" {
     Ok(graph) => {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
-      inspect(node.color, content="Some(\"blue\")")
+      @debug.debug_inspect(node.color, content="Some(\"blue\")")
     }
     Err(_) => abort("parse failed")
   }
@@ -43,7 +43,7 @@ test "extract_graph_duplicate_attributes_use_last_value" {
     Ok(graph) => {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
-      inspect(node.color, content="Some(\"blue\")")
+      @debug.debug_inspect(node.color, content="Some(\"blue\")")
     }
     Err(_) => abort("parse failed")
   }
@@ -56,8 +56,8 @@ test "extract_graph_node_defaults_accumulate" {
     Ok(graph) => {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
-      inspect(node.color, content="Some(\"red\")")
-      inspect(node.fontcolor, content="Some(\"white\")")
+      @debug.debug_inspect(node.color, content="Some(\"red\")")
+      @debug.debug_inspect(node.fontcolor, content="Some(\"white\")")
     }
     Err(_) => abort("parse failed")
   }
@@ -69,7 +69,7 @@ test "extract_graph_subgraph_inherits_parent_node_defaults" {
     Ok(graph) => {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
-      inspect(node.color, content="Some(\"red\")")
+      @debug.debug_inspect(node.color, content="Some(\"red\")")
     }
     Err(_) => abort("parse failed")
   }
@@ -122,9 +122,9 @@ test "extract_graph_default_styles_do_not_overwrite_existing_explicit_styles" {
     Ok(graph) => {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
-      inspect(node.color, content="Some(\"blue\")")
-      inspect(node.fontcolor, content="Some(\"white\")")
-      inspect(node.fillcolor, content="Some(\"black\")")
+      @debug.debug_inspect(node.color, content="Some(\"blue\")")
+      @debug.debug_inspect(node.fontcolor, content="Some(\"white\")")
+      @debug.debug_inspect(node.fillcolor, content="Some(\"black\")")
     }
     Err(_) => abort("parse failed")
   }
@@ -139,9 +139,9 @@ test "extract_graph_rementioned_nodes_adopt_newer_defaults" {
     Ok(graph) => {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
-      inspect(node.color, content="Some(\"blue\")")
-      inspect(node.fontcolor, content="Some(\"yellow\")")
-      inspect(node.fillcolor, content="Some(\"green\")")
+      @debug.debug_inspect(node.color, content="Some(\"blue\")")
+      @debug.debug_inspect(node.fontcolor, content="Some(\"yellow\")")
+      @debug.debug_inspect(node.fillcolor, content="Some(\"green\")")
     }
     Err(_) => abort("parse failed")
   }
@@ -189,7 +189,7 @@ test "layer_assignment_sources_at_zero" {
   nodes.set("c", test_node_data("c"))
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let layers = assign_layers(nodes, edges)
-  inspect(layers.get("a"), content="Some(0)")
+  @debug.debug_inspect(layers.get("a"), content="Some(0)")
 }
 
 ///|

@@ -68,17 +68,17 @@ test "format_preserves_non_bmp_attribute_value" {
 
 ///|
 test "format_id_quotes_keywords_and_digit_leading_mixed_ids" {
-  assert_eq(format_id("graph"), "\"graph\"")
-  assert_eq(format_id("strict"), "\"strict\"")
-  assert_eq(format_id("Graph"), "\"Graph\"")
-  assert_eq(format_id("NODE"), "\"NODE\"")
-  assert_eq(format_id("1foo"), "\"1foo\"")
-  assert_eq(format_id("123"), "123")
+  @debug.assert_eq(format_id("graph"), "\"graph\"")
+  @debug.assert_eq(format_id("strict"), "\"strict\"")
+  @debug.assert_eq(format_id("Graph"), "\"Graph\"")
+  @debug.assert_eq(format_id("NODE"), "\"NODE\"")
+  @debug.assert_eq(format_id("1foo"), "\"1foo\"")
+  @debug.assert_eq(format_id("123"), "123")
 }
 
 ///|
 test "format_id_escapes_tab_and_carriage_return" {
-  assert_eq(format_id("a\tb\rc"), "\"a\\tb\\rc\"")
+  @debug.assert_eq(format_id("a\tb\rc"), "\"a\\tb\\rc\"")
 }
 
 ///|
@@ -96,17 +96,17 @@ test "format_graph_roundtrips_dotted_ids" {
   let formatted = format_graph(graph)
   match parse_dot(formatted) {
     Ok(parsed) => {
-      assert_eq(parsed.statements.length(), 3)
+      @debug.assert_eq(parsed.statements.length(), 3)
       match parsed.statements[0] {
-        NodeStmt(node_id, _) => assert_eq(node_id.id, ".5")
+        NodeStmt(node_id, _) => @debug.assert_eq(node_id.id, ".5")
         _ => abort("Expected first roundtripped statement to be NodeStmt")
       }
       match parsed.statements[1] {
-        NodeStmt(node_id, _) => assert_eq(node_id.id, "1.")
+        NodeStmt(node_id, _) => @debug.assert_eq(node_id.id, "1.")
         _ => abort("Expected second roundtripped statement to be NodeStmt")
       }
       match parsed.statements[2] {
-        NodeStmt(node_id, _) => assert_eq(node_id.id, ".foo")
+        NodeStmt(node_id, _) => @debug.assert_eq(node_id.id, ".foo")
         _ => abort("Expected third roundtripped statement to be NodeStmt")
       }
     }
@@ -196,9 +196,9 @@ test "roundtrip_simple_digraph" {
       let formatted = format_graph(graph)
       match parse_dot(formatted) {
         Ok(reparsed) => {
-          assert_eq(reparsed.directed, graph.directed)
-          assert_eq(reparsed.strict, graph.strict)
-          assert_eq(reparsed.statements.length(), graph.statements.length())
+          @debug.assert_eq(reparsed.directed, graph.directed)
+          @debug.assert_eq(reparsed.strict, graph.strict)
+          @debug.assert_eq(reparsed.statements.length(), graph.statements.length())
         }
         Err(e) => abort("roundtrip failed: " + e.message)
       }
@@ -215,9 +215,9 @@ test "roundtrip_graph_with_attributes" {
       let formatted = format_graph(graph)
       match parse_dot(formatted) {
         Ok(reparsed) => {
-          assert_eq(reparsed.strict, true)
-          assert_eq(reparsed.id, Some("G"))
-          assert_eq(reparsed.statements.length(), graph.statements.length())
+          @debug.assert_eq(reparsed.strict, true)
+          @debug.assert_eq(reparsed.id, Some("G"))
+          @debug.assert_eq(reparsed.statements.length(), graph.statements.length())
         }
         Err(e) => abort("roundtrip failed: " + e.message)
       }
