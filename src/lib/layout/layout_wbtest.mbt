@@ -152,7 +152,7 @@ test "cycle_removal_acyclic_unchanged" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let (result, reversed) = remove_cycles(edges)
   @builtin.inspect(result.length(), content="2")
-  @builtin.inspect(reversed, content="[false, false]")
+  @debug.debug_inspect(reversed, content="[false, false]")
 }
 
 ///|
@@ -171,14 +171,14 @@ test "cycle_removal_uses_first_seen_root_order" {
     { from: "b", to: "a" },
   ]
   let (_, ab_reversed) = remove_cycles(ab_edges)
-  @builtin.inspect(ab_reversed, content="[false, true]")
+  @debug.debug_inspect(ab_reversed, content="[false, true]")
 
   let aabb_edges : Array[EdgeData] = [
     { from: "aa", to: "bb" },
     { from: "bb", to: "aa" },
   ]
   let (_, aabb_reversed) = remove_cycles(aabb_edges)
-  @builtin.inspect(aabb_reversed, content="[false, true]")
+  @debug.debug_inspect(aabb_reversed, content="[false, true]")
 }
 
 ///|
