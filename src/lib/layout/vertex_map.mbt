@@ -13,7 +13,7 @@ priv struct VertexMap {
 /// Build a VertexMap from the node map.
 /// Each node gets a stable Int index based on insertion order.
 fn VertexMap::from_nodes(nodes : Map[String, NodeData]) -> VertexMap {
-  let to_int : Map[String, Int] = Map::new()
+  let to_int : Map[String, Int] = Map::default()
   let to_string : Array[String] = []
   for id, _ in nodes {
     to_int[id] = to_string.length()

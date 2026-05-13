@@ -583,7 +583,7 @@ test "parse_record_shaped_node" {
 ///|
 test "parse_dot rejects malformed attribute_without_value" {
   let parsed = parse_dot("digraph { a [color] }")
-  inspect(parsed is Err(_), content="true")
+  @builtin.inspect(parsed is Err(_), content="true")
 }
 
 // Whitespace and comment tests
@@ -752,13 +752,13 @@ test "parse_attributes_requires_full_input_consumption" {
 ///|
 test "parse_dot rejects trailing tokens after closing brace" {
   let parsed = parse_dot("digraph { a -> b; } garbage")
-  inspect(parsed is Err(_), content="true")
+  @builtin.inspect(parsed is Err(_), content="true")
 }
 
 ///|
 test "parse_dot handles non-comment slash without hanging" {
   let parsed = parse_dot("/")
-  inspect(parsed is Err(_), content="true")
+  @builtin.inspect(parsed is Err(_), content="true")
 }
 
 ///|
@@ -766,8 +766,8 @@ test "parse_dot still accepts valid comments in graph body" {
   let parsed = parse_dot("digraph { a -> b; // trailing comment\n }")
   match parsed {
     Ok(graph) => {
-      inspect(graph.directed, content="true")
-      inspect(graph.statements.length(), content="1")
+      @builtin.inspect(graph.directed, content="true")
+      @builtin.inspect(graph.statements.length(), content="1")
     }
     Err(_) => abort("expected parser to accept valid comment")
   }
@@ -776,15 +776,15 @@ test "parse_dot still accepts valid comments in graph body" {
 ///|
 test "parse_dot rejects unterminated block comments" {
   let parsed = parse_dot("digraph { a -> b; /* unterminated")
-  inspect(parsed is Err(_), content="true")
+  @builtin.inspect(parsed is Err(_), content="true")
 }
 
 ///|
 test "parse_attributes accepts decimal numerals" {
   let attrs = parse_attributes("penwidth=1.5")
-  inspect(attrs.length(), content="1")
-  inspect(attrs[0].key, content="penwidth")
-  inspect(attrs[0].value, content="1.5")
+  @builtin.inspect(attrs.length(), content="1")
+  @builtin.inspect(attrs[0].key, content="penwidth")
+  @builtin.inspect(attrs[0].value, content="1.5")
 }
 
 ///|
@@ -792,12 +792,12 @@ test "parse_dot accepts edge statement with subgraph start operand" {
   let parsed = parse_dot("digraph { subgraph { a } -> b; }")
   match parsed {
     Ok(graph) => {
-      inspect(graph.statements.length(), content="1")
+      @builtin.inspect(graph.statements.length(), content="1")
       match graph.statements[0] {
         EdgeStmt(start, edges, _) => {
-          inspect(start.id, content="a")
-          inspect(edges.length(), content="1")
-          inspect(edges[0].1.id, content="b")
+          @builtin.inspect(start.id, content="a")
+          @builtin.inspect(edges.length(), content="1")
+          @builtin.inspect(edges[0].1.id, content="b")
         }
         _ => abort("expected edge statement")
       }
@@ -811,12 +811,12 @@ test "parse_dot accepts edge statement with subgraph target operand" {
   let parsed = parse_dot("digraph { a -> subgraph { b }; }")
   match parsed {
     Ok(graph) => {
-      inspect(graph.statements.length(), content="1")
+      @builtin.inspect(graph.statements.length(), content="1")
       match graph.statements[0] {
         EdgeStmt(start, edges, _) => {
-          inspect(start.id, content="a")
-          inspect(edges.length(), content="1")
-          inspect(edges[0].1.id, content="b")
+          @builtin.inspect(start.id, content="a")
+          @builtin.inspect(edges.length(), content="1")
+          @builtin.inspect(edges[0].1.id, content="b")
         }
         _ => abort("expected edge statement")
       }
@@ -830,20 +830,20 @@ test "parse_dot expands subgraph start operand with multiple nodes" {
   let parsed = parse_dot("digraph { { a; b; } -> c; }")
   match parsed {
     Ok(graph) => {
-      inspect(graph.statements.length(), content="2")
+      @builtin.inspect(graph.statements.length(), content="2")
       match graph.statements[0] {
         EdgeStmt(start, edges, _) => {
-          inspect(start.id, content="a")
-          inspect(edges.length(), content="1")
-          inspect(edges[0].1.id, content="c")
+          @builtin.inspect(start.id, content="a")
+          @builtin.inspect(edges.length(), content="1")
+          @builtin.inspect(edges[0].1.id, content="c")
         }
         _ => abort("expected expanded edge statement")
       }
       match graph.statements[1] {
         EdgeStmt(start, edges, _) => {
-          inspect(start.id, content="b")
-          inspect(edges.length(), content="1")
-          inspect(edges[0].1.id, content="c")
+          @builtin.inspect(start.id, content="b")
+          @builtin.inspect(edges.length(), content="1")
+          @builtin.inspect(edges[0].1.id, content="c")
         }
         _ => abort("expected expanded edge statement")
       }
@@ -857,18 +857,18 @@ test "parse_dot expands subgraph target operand with multiple nodes" {
   let parsed = parse_dot("digraph { a -> { b; c; }; }")
   match parsed {
     Ok(graph) => {
-      inspect(graph.statements.length(), content="2")
+      @builtin.inspect(graph.statements.length(), content="2")
       match graph.statements[0] {
         EdgeStmt(start, edges, _) => {
-          inspect(start.id, content="a")
-          inspect(edges[0].1.id, content="b")
+          @builtin.inspect(start.id, content="a")
+          @builtin.inspect(edges[0].1.id, content="b")
         }
         _ => abort("expected expanded edge statement")
       }
       match graph.statements[1] {
         EdgeStmt(start, edges, _) => {
-          inspect(start.id, content="a")
-          inspect(edges[0].1.id, content="c")
+          @builtin.inspect(start.id, content="a")
+          @builtin.inspect(edges[0].1.id, content="c")
         }
         _ => abort("expected expanded edge statement")
       }
@@ -881,7 +881,7 @@ test "parse_dot expands subgraph target operand with multiple nodes" {
 test "parse_dot accepts edge statement from empty subgraph endpoint as no-op" {
   let parsed = parse_dot("digraph { subgraph cluster_0 { } -> b; }")
   match parsed {
-    Ok(graph) => inspect(graph.statements.length(), content="0")
+    Ok(graph) => @builtin.inspect(graph.statements.length(), content="0")
     Err(_) => abort("expected parser to accept empty subgraph edge operand")
   }
 }
@@ -891,9 +891,9 @@ test "parse_dot continues after empty subgraph edge no-op" {
   let parsed = parse_dot("digraph { subgraph { } -> b; c; }")
   match parsed {
     Ok(graph) => {
-      inspect(graph.statements.length(), content="1")
+      @builtin.inspect(graph.statements.length(), content="1")
       match graph.statements[0] {
-        NodeStmt(node_id, _) => inspect(node_id.id, content="c")
+        NodeStmt(node_id, _) => @builtin.inspect(node_id.id, content="c")
         _ => abort("expected node statement after no-op edge")
       }
     }
@@ -906,22 +906,22 @@ test "parse_dot preserves_nontrivial_subgraph_start_operand_contents" {
   let parsed = parse_dot("digraph { subgraph { a [color=red]; b -> c } -> d; }")
   match parsed {
     Ok(graph) => {
-      inspect(graph.statements.length(), content="4")
+      @builtin.inspect(graph.statements.length(), content="4")
       match graph.statements[0] {
         Subgraph(subgraph) => {
-          inspect(subgraph.statements.length(), content="2")
+          @builtin.inspect(subgraph.statements.length(), content="2")
           match subgraph.statements[0] {
             NodeStmt(node_id, Some(attrs)) => {
-              inspect(node_id.id, content="a")
-              inspect(attrs.attributes[0].key, content="color")
-              inspect(attrs.attributes[0].value, content="red")
+              @builtin.inspect(node_id.id, content="a")
+              @builtin.inspect(attrs.attributes[0].key, content="color")
+              @builtin.inspect(attrs.attributes[0].value, content="red")
             }
             _ => abort("expected attributed node in preserved subgraph")
           }
           match subgraph.statements[1] {
             EdgeStmt(start, edges, _) => {
-              inspect(start.id, content="b")
-              inspect(edges[0].1.id, content="c")
+              @builtin.inspect(start.id, content="b")
+              @builtin.inspect(edges[0].1.id, content="c")
             }
             _ => abort("expected inner edge in preserved subgraph")
           }
@@ -930,8 +930,8 @@ test "parse_dot preserves_nontrivial_subgraph_start_operand_contents" {
       }
       match graph.statements[1] {
         EdgeStmt(start, edges, _) => {
-          inspect(start.id, content="a")
-          inspect(edges[0].1.id, content="d")
+          @builtin.inspect(start.id, content="a")
+          @builtin.inspect(edges[0].1.id, content="d")
         }
         _ => abort("expected expanded edge from preserved subgraph node")
       }
@@ -945,22 +945,22 @@ test "parse_dot preserves_nontrivial_subgraph_target_operand_contents" {
   let parsed = parse_dot("digraph { a -> subgraph { b [color=red]; c -> d }; }")
   match parsed {
     Ok(graph) => {
-      inspect(graph.statements.length(), content="4")
+      @builtin.inspect(graph.statements.length(), content="4")
       match graph.statements[0] {
         Subgraph(subgraph) => {
-          inspect(subgraph.statements.length(), content="2")
+          @builtin.inspect(subgraph.statements.length(), content="2")
           match subgraph.statements[0] {
             NodeStmt(node_id, Some(attrs)) => {
-              inspect(node_id.id, content="b")
-              inspect(attrs.attributes[0].key, content="color")
-              inspect(attrs.attributes[0].value, content="red")
+              @builtin.inspect(node_id.id, content="b")
+              @builtin.inspect(attrs.attributes[0].key, content="color")
+              @builtin.inspect(attrs.attributes[0].value, content="red")
             }
             _ => abort("expected attributed node in preserved subgraph")
           }
           match subgraph.statements[1] {
             EdgeStmt(start, edges, _) => {
-              inspect(start.id, content="c")
-              inspect(edges[0].1.id, content="d")
+              @builtin.inspect(start.id, content="c")
+              @builtin.inspect(edges[0].1.id, content="d")
             }
             _ => abort("expected inner edge in preserved subgraph")
           }
@@ -969,8 +969,8 @@ test "parse_dot preserves_nontrivial_subgraph_target_operand_contents" {
       }
       match graph.statements[1] {
         EdgeStmt(start, edges, _) => {
-          inspect(start.id, content="a")
-          inspect(edges[0].1.id, content="b")
+          @builtin.inspect(start.id, content="a")
+          @builtin.inspect(edges[0].1.id, content="b")
         }
         _ => abort("expected expanded edge into preserved subgraph node")
       }
@@ -984,9 +984,9 @@ test "parse_dot accepts empty subgraph target operand as no-op" {
   let parsed = parse_dot("digraph { a -> subgraph { }; b; }")
   match parsed {
     Ok(graph) => {
-      inspect(graph.statements.length(), content="1")
+      @builtin.inspect(graph.statements.length(), content="1")
       match graph.statements[0] {
-        NodeStmt(node_id, _) => inspect(node_id.id, content="b")
+        NodeStmt(node_id, _) => @builtin.inspect(node_id.id, content="b")
         _ => abort("expected node statement after no-op edge")
       }
     }
@@ -997,20 +997,20 @@ test "parse_dot accepts empty subgraph target operand as no-op" {
 ///|
 test "parse_dot rejects missing port id after colon" {
   let parsed = parse_dot("digraph { a: -> b; }")
-  inspect(parsed is Err(_), content="true")
+  @builtin.inspect(parsed is Err(_), content="true")
 }
 
 ///|
 test "parse_dot rejects trailing colon without compass point" {
   let parsed = parse_dot("digraph { a:port: -> b; }")
-  inspect(parsed is Err(_), content="true")
+  @builtin.inspect(parsed is Err(_), content="true")
 }
 
 ///|
 test "parse_dot accepts valid port with compass point" {
   let parsed = parse_dot("digraph { a:port:n -> b; }")
   match parsed {
-    Ok(graph) => inspect(graph.statements.length(), content="1")
+    Ok(graph) => @builtin.inspect(graph.statements.length(), content="1")
     Err(_) => abort("expected parser to accept valid port syntax")
   }
 }
@@ -1025,11 +1025,11 @@ test "parse_dot accepts compass-like port id with explicit compass suffix" {
           match start.port {
             Some(port) => {
               match port.id {
-                Some(id) => inspect(id, content="n")
+                Some(id) => @builtin.inspect(id, content="n")
                 None => abort("expected explicit port id")
               }
               match port.compass {
-                Some(SW) => inspect(true, content="true")
+                Some(SW) => @builtin.inspect(true, content="true")
                 _ => abort("expected sw compass point")
               }
             }
@@ -1044,7 +1044,7 @@ test "parse_dot accepts compass-like port id with explicit compass suffix" {
 ///|
 test "parse_dot rejects malformed edge rhs after consumed operator" {
   let parsed = parse_dot("digraph { a -> ; }")
-  inspect(parsed is Err(_), content="true")
+  @builtin.inspect(parsed is Err(_), content="true")
 }
 
 ///|
@@ -1052,8 +1052,8 @@ test "parse_dot_error_has_position_for_missing_brace" {
   match parse_dot("digraph") {
     Ok(_) => abort("should fail")
     Err(e) => {
-      inspect(e.position > 0, content="true")
-      inspect(e.message.length() > 0, content="true")
+      @builtin.inspect(e.position > 0, content="true")
+      @builtin.inspect(e.message.length() > 0, content="true")
     }
   }
 }
@@ -1063,8 +1063,8 @@ test "parse_dot_error_has_position_for_trailing_tokens" {
   match parse_dot("digraph { a } extra") {
     Ok(_) => abort("should fail")
     Err(e) => {
-      inspect(e.message.contains("unexpected"), content="true")
-      inspect(e.position, content="14")
+      @builtin.inspect(e.message.contains("unexpected"), content="true")
+      @builtin.inspect(e.position, content="14")
     }
   }
 }
