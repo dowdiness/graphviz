@@ -2,6 +2,7 @@ import {
   "dowdiness/graphviz/lib/parser",
   "dowdiness/alga",
   "moonbitlang/core/bench",
+  "moonbitlang/core/builtin",
   "moonbitlang/core/debug",
   "moonbitlang/core/hashset",
 }

@@ -12,16 +12,16 @@ test "save_svg_creates_file" {
       match save_svg(layout, filename) {
         Ok(_) =>
           // File should be created successfully
-          inspect(true, content="true")
+          @builtin.inspect(true, content="true")
         Err(e) => {
           println("Error saving file: \{e}")
-          inspect(false, content="true")
+          @builtin.inspect(false, content="true")
         }
       }
     }
     Err(_) => {
       println("Parse failed")
-      inspect(false, content="true")
+      @builtin.inspect(false, content="true")
     }
   }
 }
@@ -38,17 +38,17 @@ test "render_svg_produces_valid_xml_header" {
       let has_xml_header = svg.contains(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
       )
-      inspect(has_xml_header, content="true")
+      @builtin.inspect(has_xml_header, content="true")
 
       // Check for SVG root element
       let has_svg_element = svg.contains(
         "<svg xmlns=\"http://www.w3.org/2000/svg\"",
       )
-      inspect(has_svg_element, content="true")
+      @builtin.inspect(has_svg_element, content="true")
     }
     Err(_) => {
       println("Parse failed")
-      inspect(false, content="true")
+      @builtin.inspect(false, content="true")
     }
   }
 }
@@ -63,11 +63,11 @@ test "render_svg_includes_arrowhead_for_directed_graph" {
 
       // Should have arrow marker definition
       let has_arrowhead = svg.contains("<marker id=\"arrowhead\"")
-      inspect(has_arrowhead, content="true")
+      @builtin.inspect(has_arrowhead, content="true")
     }
     Err(_) => {
       println("Parse failed")
-      inspect(false, content="true")
+      @builtin.inspect(false, content="true")
     }
   }
 }
@@ -82,11 +82,11 @@ test "render_svg_no_arrowhead_for_undirected_graph" {
 
       // Should NOT have arrow marker definition
       let has_arrowhead = svg.contains("<marker id=\"arrowhead\"")
-      inspect(has_arrowhead, content="false")
+      @builtin.inspect(has_arrowhead, content="false")
     }
     Err(_) => {
       println("Parse failed")
-      inspect(false, content="true")
+      @builtin.inspect(false, content="true")
     }
   }
 }
@@ -101,19 +101,19 @@ test "render_html_produces_valid_html_structure" {
 
       // Check for HTML structure
       let has_doctype = html.contains("<!DOCTYPE html>")
-      inspect(has_doctype, content="true")
+      @builtin.inspect(has_doctype, content="true")
       let has_title = html.contains("<title>Test Graph</title>")
-      inspect(has_title, content="true")
+      @builtin.inspect(has_title, content="true")
       let has_svg = html.contains("<svg xmlns=\"http://www.w3.org/2000/svg\"")
-      inspect(has_svg, content="true")
+      @builtin.inspect(has_svg, content="true")
 
       // Should NOT have XML declaration in HTML
       let has_xml_declaration = html.contains("<?xml version")
-      inspect(has_xml_declaration, content="false")
+      @builtin.inspect(has_xml_declaration, content="false")
     }
     Err(_) => {
       println("Parse failed")
-      inspect(false, content="true")
+      @builtin.inspect(false, content="true")
     }
   }
 }
@@ -130,16 +130,16 @@ test "save_html_creates_file" {
       match save_html(layout, filename, "Test") {
         Ok(_) =>
           // File should be created successfully
-          inspect(true, content="true")
+          @builtin.inspect(true, content="true")
         Err(e) => {
           println("Error saving file: \{e}")
-          inspect(false, content="true")
+          @builtin.inspect(false, content="true")
         }
       }
     }
     Err(_) => {
       println("Parse failed")
-      inspect(false, content="true")
+      @builtin.inspect(false, content="true")
     }
   }
 }
@@ -152,10 +152,10 @@ test "render_svg_snapshot_simple_digraph" {
       let layout = @layout.compute_layout(graph)
       let svg = render_svg(layout)
       // Verify key structural elements
-      inspect(svg.contains("<rect"), content="true")
-      inspect(svg.contains("<text"), content="true")
-      inspect(svg.contains("<polyline"), content="true")
-      inspect(svg.contains("arrowhead"), content="true")
+      @builtin.inspect(svg.contains("<rect"), content="true")
+      @builtin.inspect(svg.contains("<text"), content="true")
+      @builtin.inspect(svg.contains("<polyline"), content="true")
+      @builtin.inspect(svg.contains("arrowhead"), content="true")
     }
     Err(_) => abort("parse failed")
   }
@@ -168,9 +168,9 @@ test "render_svg_respects_node_colors" {
     Ok(graph) => {
       let layout = @layout.compute_layout(graph)
       let svg = render_svg(layout)
-      inspect(svg.contains("blue"), content="true")
-      inspect(svg.contains("red"), content="true")
-      inspect(svg.contains("white"), content="true")
+      @builtin.inspect(svg.contains("blue"), content="true")
+      @builtin.inspect(svg.contains("red"), content="true")
+      @builtin.inspect(svg.contains("white"), content="true")
     }
     Err(_) => abort("parse failed")
   }

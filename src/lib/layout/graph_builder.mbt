@@ -31,7 +31,7 @@ fn extract_attr(key : String, attrs : @parser.AttributeList?) -> String? {
 fn collect_nodes(
   statements : Array[@parser.Statement],
 ) -> Map[String, NodeData] {
-  let nodes : Map[String, NodeData] = Map::new()
+  let nodes : Map[String, NodeData] = Map::default()
   collect_nodes_with_defaults(statements, None, nodes)
   nodes
 }
@@ -48,7 +48,7 @@ fn collect_nodes_with_defaults(
       @parser.AttrStmt(@parser.NodeAttr, attr_list) =>
         node_defaults = merge_attrs(node_defaults, Some(attr_list))
       @parser.NodeStmt(node_id, attrs) => {
-        let explicit = @hashset.HashSet::new()
+        let explicit = @hashset.HashSet::default()
         if extract_attr("label", attrs) is Some(_) {
           explicit.add("label")
         }
@@ -109,7 +109,7 @@ fn build_node_data(
 fn merge_node_data(existing : NodeData, update : NodeData) -> NodeData {
   // Re-mentioning a node with new defaults should not erase a value that was
   // explicitly set earlier, so we track which attrs were set on the node itself.
-  let merged_explicit = @hashset.HashSet::new()
+  let merged_explicit = @hashset.HashSet::default()
   existing.explicit_attrs.each(fn(k) { merged_explicit.add(k) })
   update.explicit_attrs.each(fn(k) { merged_explicit.add(k) })
   fn pick(
@@ -160,7 +160,7 @@ fn ensure_node(
   attrs : @parser.AttributeList?,
 ) -> Unit {
   if !nodes.contains(node_id) {
-    nodes.set(node_id, build_node_data(node_id, attrs, @hashset.HashSet::new()))
+    nodes.set(node_id, build_node_data(node_id, attrs, @hashset.HashSet::default()))
   }
 }
 

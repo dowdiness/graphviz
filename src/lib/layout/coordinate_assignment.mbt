@@ -6,7 +6,7 @@ fn assign_coordinates(
   nodes : Map[String, NodeData],
   config : LayoutConfig,
 ) -> Map[String, LayoutNode] {
-  let positions : Map[String, LayoutNode] = Map::new()
+  let positions : Map[String, LayoutNode] = Map::default()
   for layer_index = 0
       layer_index < layers.length()
       layer_index = layer_index + 1 {

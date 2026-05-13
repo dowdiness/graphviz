@@ -68,11 +68,11 @@ fn compute_layer_barycenters(
   adjacent_layer : Array[String],
   connections : Map[String, Array[String]],
 ) -> Map[String, Double] {
-  let pos_index : Map[String, Int] = Map::new()
+  let pos_index : Map[String, Int] = Map::default()
   for i = 0; i < adjacent_layer.length(); i = i + 1 {
     pos_index.set(adjacent_layer[i], i)
   }
-  let barycenters : Map[String, Double] = Map::new()
+  let barycenters : Map[String, Double] = Map::default()
   let default_pos = adjacent_layer.length().to_double() / 2.0
   for node in current_layer {
     let connected = match connections.get(node) {

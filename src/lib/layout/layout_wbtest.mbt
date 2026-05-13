@@ -9,7 +9,7 @@ fn test_node_data(id : String) -> NodeData {
     color: None,
     fontcolor: None,
     fillcolor: None,
-    explicit_attrs: @hashset.HashSet::new(),
+    explicit_attrs: @hashset.HashSet::default(),
   }
 }
 
@@ -18,8 +18,8 @@ test "extract_graph_simple" {
   match @parser.parse_dot("digraph { a -> b }") {
     Ok(graph) => {
       let (nodes, edges) = extract_graph(graph)
-      inspect(nodes.length(), content="2")
-      inspect(edges.length(), content="1")
+      @builtin.inspect(nodes.length(), content="2")
+      @builtin.inspect(edges.length(), content="1")
     }
     Err(_) => abort("parse failed")
   }
@@ -81,7 +81,7 @@ test "extract_graph_explicit_label_matching_id_overrides_default_label" {
     Ok(graph) => {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
-      inspect(node.label, content="a")
+      @builtin.inspect(node.label, content="a")
     }
     Err(_) => abort("parse failed")
   }
@@ -94,7 +94,7 @@ test "extract_graph_default_label_does_not_overwrite_existing_explicit_label" {
     Ok(graph) => {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
-      inspect(node.label, content="custom")
+      @builtin.inspect(node.label, content="custom")
     }
     Err(_) => abort("parse failed")
   }
@@ -107,7 +107,7 @@ test "extract_graph_rementioned_nodes_adopt_newer_default_labels" {
     Ok(graph) => {
       let (nodes, _edges) = extract_graph(graph)
       let node = nodes.get("a").unwrap()
-      inspect(node.label, content="new")
+      @builtin.inspect(node.label, content="new")
     }
     Err(_) => abort("parse failed")
   }
@@ -151,17 +151,17 @@ test "extract_graph_rementioned_nodes_adopt_newer_defaults" {
 test "cycle_removal_acyclic_unchanged" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
   let (result, reversed) = remove_cycles(edges)
-  inspect(result.length(), content="2")
-  inspect(reversed, content="[false, false]")
+  @builtin.inspect(result.length(), content="2")
+  @builtin.inspect(reversed, content="[false, false]")
 }
 
 ///|
 test "cycle_removal_single_cycle" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "a" }]
   let (result, reversed) = remove_cycles(edges)
-  inspect(result.length(), content="2")
+  @builtin.inspect(result.length(), content="2")
   // Exactly one edge should be reversed
-  inspect(reversed[0] != reversed[1], content="true")
+  @builtin.inspect(reversed[0] != reversed[1], content="true")
 }
 
 ///|
@@ -171,19 +171,19 @@ test "cycle_removal_uses_first_seen_root_order" {
     { from: "b", to: "a" },
   ]
   let (_, ab_reversed) = remove_cycles(ab_edges)
-  inspect(ab_reversed, content="[false, true]")
+  @builtin.inspect(ab_reversed, content="[false, true]")
 
   let aabb_edges : Array[EdgeData] = [
     { from: "aa", to: "bb" },
     { from: "bb", to: "aa" },
   ]
   let (_, aabb_reversed) = remove_cycles(aabb_edges)
-  inspect(aabb_reversed, content="[false, true]")
+  @builtin.inspect(aabb_reversed, content="[false, true]")
 }
 
 ///|
 test "layer_assignment_sources_at_zero" {
-  let nodes : Map[String, NodeData] = Map::new()
+  let nodes : Map[String, NodeData] = Map::default()
   nodes.set("a", test_node_data("a"))
   nodes.set("b", test_node_data("b"))
   nodes.set("c", test_node_data("c"))
@@ -194,7 +194,7 @@ test "layer_assignment_sources_at_zero" {
 
 ///|
 test "layer_assignment_edges_go_lower_to_higher" {
-  let nodes : Map[String, NodeData] = Map::new()
+  let nodes : Map[String, NodeData] = Map::default()
   nodes.set("a", test_node_data("a"))
   nodes.set("b", test_node_data("b"))
   nodes.set("c", test_node_data("c"))
@@ -203,8 +203,8 @@ test "layer_assignment_edges_go_lower_to_higher" {
   let a_layer = layers.get("a").unwrap()
   let b_layer = layers.get("b").unwrap()
   let c_layer = layers.get("c").unwrap()
-  inspect(a_layer < b_layer, content="true")
-  inspect(b_layer < c_layer, content="true")
+  @builtin.inspect(a_layer < b_layer, content="true")
+  @builtin.inspect(b_layer < c_layer, content="true")
 }
 
 ///|
@@ -213,15 +213,15 @@ test "crossing_minimization_preserves_nodes" {
   let layers : Array[Array[String]] = [["a", "b"], ["c", "d"]]
   let result = minimize_crossings(edges, layers, 4)
   // Same number of layers
-  inspect(result.length(), content="2")
+  @builtin.inspect(result.length(), content="2")
   // Same number of nodes per layer
-  inspect(result[0].length(), content="2")
-  inspect(result[1].length(), content="2")
+  @builtin.inspect(result[0].length(), content="2")
+  @builtin.inspect(result[1].length(), content="2")
 }
 
 ///|
 test "coordinate_assignment_no_overlap" {
-  let nodes : Map[String, NodeData] = Map::new()
+  let nodes : Map[String, NodeData] = Map::default()
   nodes.set("a", test_node_data("a"))
   nodes.set("b", test_node_data("b"))
   let layers : Array[Array[String]] = [["a", "b"]]
@@ -231,14 +231,14 @@ test "coordinate_assignment_no_overlap" {
   let b_pos = positions.get("b").unwrap()
   // Nodes in same layer should not overlap in X
   let a_right = a_pos.position.x + a_pos.size.width
-  inspect(a_right <= b_pos.position.x, content="true")
+  @builtin.inspect(a_right <= b_pos.position.x, content="true")
 }
 
 ///|
 test "edge_routing_has_waypoints" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }]
   let reversed : Array[Bool] = [false]
-  let positions : Map[String, LayoutNode] = Map::new()
+  let positions : Map[String, LayoutNode] = Map::default()
   positions.set("a", {
     id: "a",
     label: "a",
@@ -263,15 +263,15 @@ test "edge_routing_has_waypoints" {
   })
   let config = LayoutConfig::default()
   let routed = route_edges(edges, reversed, positions, config)
-  inspect(routed.length(), content="1")
-  inspect(routed[0].waypoints.length() >= 2, content="true")
+  @builtin.inspect(routed.length(), content="1")
+  @builtin.inspect(routed[0].waypoints.length() >= 2, content="true")
 }
 
 ///|
 test "edge_routing_tracks_reversal_per_edge" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "a" }]
   let (acyclic_edges, reversed) = remove_cycles(edges)
-  let positions : Map[String, LayoutNode] = Map::new()
+  let positions : Map[String, LayoutNode] = Map::default()
   positions.set("a", {
     id: "a",
     label: "a",
@@ -296,6 +296,6 @@ test "edge_routing_tracks_reversal_per_edge" {
   })
   let config = LayoutConfig::default()
   let routed = route_edges(acyclic_edges, reversed, positions, config)
-  inspect(routed.length(), content="2")
-  inspect(routed[0].reversed != routed[1].reversed, content="true")
+  @builtin.inspect(routed.length(), content="2")
+  @builtin.inspect(routed[0].reversed != routed[1].reversed, content="true")
 }

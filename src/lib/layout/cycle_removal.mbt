@@ -15,15 +15,15 @@ fn remove_cycles(edges : Array[EdgeData]) -> (Array[EdgeData], Array[Bool]) {
     reversed_edges.push(false)
   }
   let state : DFSState = {
-    visited: Map::new(),
-    on_stack: Map::new(),
+    visited: Map::default(),
+    on_stack: Map::default(),
     reversed_edges,
   }
   // DFS root choice decides which back edge gets flipped in a cycle.
   // Preserving first-seen order keeps that decision tied to DOT input order
   // instead of HashSet iteration order.
   let all_nodes : Array[String] = []
-  let seen_nodes : @hashset.HashSet[String] = @hashset.HashSet::new()
+  let seen_nodes : @hashset.HashSet[String] = @hashset.HashSet::default()
   for edge in edges {
     if !seen_nodes.contains(edge.from) {
       seen_nodes.add(edge.from)
@@ -63,7 +63,7 @@ fn remove_cycles(edges : Array[EdgeData]) -> (Array[EdgeData], Array[Bool]) {
 fn build_indexed_outgoing_adjacency(
   edges : Array[EdgeData],
 ) -> Map[String, Array[(String, Int)]] {
-  let outgoing : Map[String, Array[(String, Int)]] = Map::new()
+  let outgoing : Map[String, Array[(String, Int)]] = Map::default()
   for i = 0; i < edges.length(); i = i + 1 {
     let edge = edges[i]
     if !outgoing.contains(edge.from) {

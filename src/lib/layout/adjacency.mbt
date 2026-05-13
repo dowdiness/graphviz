@@ -4,8 +4,8 @@
 fn build_adjacency(
   edges : Array[EdgeData],
 ) -> (Map[String, Array[String]], Map[String, Array[String]]) {
-  let incoming : Map[String, Array[String]] = Map::new()
-  let outgoing : Map[String, Array[String]] = Map::new()
+  let incoming : Map[String, Array[String]] = Map::default()
+  let outgoing : Map[String, Array[String]] = Map::default()
   for edge in edges {
     // Ensure both nodes exist in maps
     if !outgoing.contains(edge.from) {

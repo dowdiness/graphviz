@@ -6,6 +6,7 @@ import {
 
 import {
   "dowdiness/graphviz/lib/parser",
+  "moonbitlang/core/builtin",
 } for "test"
 
 options(
