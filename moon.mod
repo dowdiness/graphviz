@@ -5,7 +5,7 @@ version = "0.1.0"
 import {
   "moonbitlang/x@0.4.38",
   "dowdiness/svg-dsl@0.1.0",
-  "dowdiness/alga@0.2.0",
+  "dowdiness/alga@0.4.0",
 }
 
 readme = "README.md"
