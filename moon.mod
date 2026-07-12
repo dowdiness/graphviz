@@ -14,12 +14,6 @@ repository = "https://github.com/dowdiness/graphviz"
 
 license = "Apache-2.0"
 
-keywords = [
-  "graphviz",
-  "dot",
-  "parser",
-  "layout",
-  "svg",
-]
+keywords = [ "graphviz", "dot", "parser", "layout", "svg" ]
 
 description = "Parser, layout engine, and SVG renderer for Graphviz DOT graphs"

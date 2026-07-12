@@ -68,7 +68,7 @@ pub(all) enum CompassPoint {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for CompassPoint with output(self, logger) {
+pub impl Show for CompassPoint with fn output(self, logger) {
   logger.write_string(@debug.to_string(self))
 }
 
@@ -79,7 +79,7 @@ pub(all) struct Port {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for Port with output(self, logger) {
+pub impl Show for Port with fn output(self, logger) {
   logger.write_string(@debug.to_string(self))
 }
 
@@ -107,7 +107,7 @@ pub(all) struct AttributeList {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for AttributeList with output(self, logger) {
+pub impl Show for AttributeList with fn output(self, logger) {
   logger.write_string(@debug.to_string(self))
 }
 
@@ -119,7 +119,7 @@ pub(all) enum AttrTarget {
 } derive(Eq, Debug)
 
 ///|
-pub impl Show for AttrTarget with output(self, logger) {
+pub impl Show for AttrTarget with fn output(self, logger) {
   logger.write_string(@debug.to_string(self))
 }
 

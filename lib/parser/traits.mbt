@@ -2,12 +2,12 @@
 
 ///|
 pub(open) trait ToDot {
-  to_graph(Self) -> Graph
+  fn to_graph(Self) -> Graph
 }
 
 ///|
 pub(open) trait FromDot {
-  from_graph(Graph) -> Self?
+  fn from_graph(Graph) -> Self?
 }
 
 ///|

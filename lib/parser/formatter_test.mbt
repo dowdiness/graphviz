@@ -198,7 +198,10 @@ test "roundtrip_simple_digraph" {
         Ok(reparsed) => {
           @debug.assert_eq(reparsed.directed, graph.directed)
           @debug.assert_eq(reparsed.strict, graph.strict)
-          @debug.assert_eq(reparsed.statements.length(), graph.statements.length())
+          @debug.assert_eq(
+            reparsed.statements.length(),
+            graph.statements.length(),
+          )
         }
         Err(e) => abort("roundtrip failed: " + e.message)
       }
@@ -217,7 +220,10 @@ test "roundtrip_graph_with_attributes" {
         Ok(reparsed) => {
           @debug.assert_eq(reparsed.strict, true)
           @debug.assert_eq(reparsed.id, Some("G"))
-          @debug.assert_eq(reparsed.statements.length(), graph.statements.length())
+          @debug.assert_eq(
+            reparsed.statements.length(),
+            graph.statements.length(),
+          )
         }
         Err(e) => abort("roundtrip failed: " + e.message)
       }

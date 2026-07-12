@@ -160,7 +160,10 @@ fn ensure_node(
   attrs : @parser.AttributeList?,
 ) -> Unit {
   if !nodes.contains(node_id) {
-    nodes.set(node_id, build_node_data(node_id, attrs, @hashset.HashSet::default()))
+    nodes.set(
+      node_id,
+      build_node_data(node_id, attrs, @hashset.HashSet::default()),
+    )
   }
 }
 

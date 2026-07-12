@@ -97,10 +97,10 @@ pub(all) struct Subgraph {
 
 // Traits
 pub(open) trait FromDot {
-  from_graph(Graph) -> Self?
+  fn from_graph(Graph) -> Self?
 }
 
 pub(open) trait ToDot {
-  to_graph(Self) -> Graph
+  fn to_graph(Self) -> Graph
 }
 
