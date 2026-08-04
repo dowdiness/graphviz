@@ -4,7 +4,8 @@ import {
   "dowdiness/graphviz/lib/svg",
 }
 
+pkgtype(kind: "executable")
+
 options(
-  "is-main": true,
   link: { "js": { "exports": [ "parse_dot", "render_dot_to_svg" ] } },
 )
