@@ -203,7 +203,7 @@ pub fn save_svg_with_config(
     @fs.write_string_to_file(filename, svg_content)
     Ok(())
   } catch {
-    e => Err(e.to_string())
+    @fs.IOError(message) => Err(message)
   }
 }
 
@@ -313,6 +313,6 @@ pub fn save_html_with_config(
     @fs.write_string_to_file(filename, html_content)
     Ok(())
   } catch {
-    e => Err(e.to_string())
+    @fs.IOError(message) => Err(message)
   }
 }
