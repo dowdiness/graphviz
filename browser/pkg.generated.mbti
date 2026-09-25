@@ -11,4 +11,3 @@ pub fn render_dot_to_svg(String) -> String
 // Type aliases
 
 // Traits
-
