@@ -43,4 +43,3 @@ pub fn SvgConfig::default() -> Self
 // Type aliases
 
 // Traits
-

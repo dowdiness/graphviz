@@ -103,4 +103,3 @@ pub(open) trait FromDot {
 pub(open) trait ToDot {
   fn to_graph(Self) -> Graph
 }
-
