@@ -39,6 +39,7 @@ pub(all) struct SvgConfig {
 } derive(@debug.Debug)
 pub fn SvgConfig::dark_theme() -> Self
 pub fn SvgConfig::default() -> Self
+pub fn SvgConfig::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

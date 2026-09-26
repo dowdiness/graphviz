@@ -20,9 +20,17 @@ pub struct Bounds {
   max_x : Double
   max_y : Double
 } derive(Eq, @debug.Debug)
+pub fn Bounds::equal(Self, Self) -> Bool
+pub fn Bounds::not_equal(Self, Self) -> Bool
+pub fn Bounds::output(Self, &Logger) -> Unit
+pub fn Bounds::to_repr(Self) -> @debug.Repr
+pub fn Bounds::to_string(Self) -> String
 pub impl Show for Bounds
 
 type EdgeData derive(Eq, @debug.Debug)
+pub fn EdgeData::equal(Self, Self) -> Bool
+pub fn EdgeData::not_equal(Self, Self) -> Bool
+pub fn EdgeData::to_repr(Self) -> @debug.Repr
 
 pub struct GraphLayout {
   nodes : Map[String, LayoutNode]
@@ -31,6 +39,7 @@ pub struct GraphLayout {
   layers : Array[Array[String]]
   directed : Bool
 } derive(@debug.Debug)
+pub fn GraphLayout::to_repr(Self) -> @debug.Repr
 
 pub(all) struct LayoutConfig {
   node_width : Double
@@ -41,6 +50,7 @@ pub(all) struct LayoutConfig {
 } derive(@debug.Debug)
 pub fn LayoutConfig::compact() -> Self
 pub fn LayoutConfig::default() -> Self
+pub fn LayoutConfig::to_repr(Self) -> @debug.Repr
 
 pub struct LayoutEdge {
   from : String
@@ -48,6 +58,9 @@ pub struct LayoutEdge {
   waypoints : Array[Point]
   reversed : Bool
 } derive(Eq, @debug.Debug)
+pub fn LayoutEdge::equal(Self, Self) -> Bool
+pub fn LayoutEdge::not_equal(Self, Self) -> Bool
+pub fn LayoutEdge::to_repr(Self) -> @debug.Repr
 
 pub struct LayoutNode {
   id : String
@@ -60,18 +73,28 @@ pub struct LayoutNode {
   fontcolor : String?
   fillcolor : String?
 } derive(Eq, @debug.Debug)
+pub fn LayoutNode::equal(Self, Self) -> Bool
+pub fn LayoutNode::not_equal(Self, Self) -> Bool
+pub fn LayoutNode::to_repr(Self) -> @debug.Repr
 
 type NodeData derive(@debug.Debug)
+pub fn NodeData::to_repr(Self) -> @debug.Repr
 
 pub struct Point {
   x : Double
   y : Double
 } derive(Eq, @debug.Debug)
+pub fn Point::equal(Self, Self) -> Bool
+pub fn Point::not_equal(Self, Self) -> Bool
+pub fn Point::to_repr(Self) -> @debug.Repr
 
 pub struct Size {
   width : Double
   height : Double
 } derive(Eq, @debug.Debug)
+pub fn Size::equal(Self, Self) -> Bool
+pub fn Size::not_equal(Self, Self) -> Bool
+pub fn Size::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 
