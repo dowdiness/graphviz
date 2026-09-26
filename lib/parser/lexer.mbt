@@ -126,7 +126,7 @@ fn Lexer::skip_comment(self : Lexer) -> Bool {
 
 ///|
 fn Lexer::read_identifier(self : Lexer) -> String {
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   for ch = self.current_char {
     match ch {
       Some(c) if c.is_numeric() || c.is_ascii_alphabetic() || c == '_' => {
@@ -148,7 +148,7 @@ fn Lexer::read_dotted_identifier(self : Lexer) -> String {
 
 ///|
 fn Lexer::read_number(self : Lexer) -> String {
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   let mut has_dot = false
   for ch = self.current_char {
     match ch {
@@ -173,7 +173,7 @@ fn Lexer::read_number(self : Lexer) -> String {
 fn Lexer::read_quoted_string(self : Lexer) -> String {
   let quote_char = self.current_char.unwrap()
   self.advance() // Skip opening quote
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   for ch = self.current_char {
     match ch {
       Some(c) if c == quote_char => break // End of string

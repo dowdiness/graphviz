@@ -25,7 +25,7 @@ fn assign_layers(
       )
   }
   // Forward propagation: each node's layer = max(predecessor layers) + 1
-  let int_layer : Map[Int, Int] = Map::default()
+  let int_layer : Map[Int, Int] = Default::default()
   for v in topo_order {
     let current_layer = match int_layer.get(v) {
       Some(l) => l
@@ -40,7 +40,7 @@ fn assign_layers(
     })
   }
   // Map back to String keys via O(1) array index reverse lookup
-  let layer_map : Map[String, Int] = Map::default()
+  let layer_map : Map[String, Int] = Default::default()
   for idx, layer in int_layer {
     layer_map[vmap.to_string[idx]] = layer
   }

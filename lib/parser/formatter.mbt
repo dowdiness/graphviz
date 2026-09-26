@@ -30,7 +30,7 @@ fn needs_quoting(s : String) -> Bool {
 
 ///|
 fn escape_and_quote(s : String) -> String {
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   buf.write_char('"')
   for c in s.to_array() {
     match c {
@@ -59,7 +59,7 @@ pub fn format_id(s : String) -> String {
 
 ///|
 pub fn format_graph(graph : Graph) -> String {
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   if graph.strict {
     buf.write_string("strict ")
   }
@@ -183,7 +183,7 @@ fn format_compass(compass : CompassPoint) -> String {
 
 ///|
 fn format_attr_list(attr_list : AttributeList) -> String {
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   buf.write_char('[')
   let mut first = true
   for attr in attr_list.attributes {

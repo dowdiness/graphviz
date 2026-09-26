@@ -9,7 +9,7 @@ test "full_layout_simple_chain" {
     #|}
   match @parser.parse_dot(dot) {
     Ok(graph) => {
-      let layout = compute_layout(graph)
+      let layout = @layout.compute_layout(graph)
       @builtin.inspect(layout.nodes.length(), content="3")
       @builtin.inspect(layout.edges.length(), content="2")
       @builtin.inspect(layout.layers.length(), content="3")
@@ -36,7 +36,7 @@ test "full_layout_diamond" {
     #|}
   match @parser.parse_dot(dot) {
     Ok(graph) => {
-      let layout = compute_layout(graph)
+      let layout = @layout.compute_layout(graph)
       @builtin.inspect(layout.nodes.length(), content="4")
       @builtin.inspect(layout.edges.length(), content="4")
       @builtin.inspect(layout.layers.length(), content="3")
@@ -58,7 +58,7 @@ test "full_layout_automaton" {
     #|}
   match @parser.parse_dot(dot_automaton) {
     Ok(graph) => {
-      let layout = compute_layout(graph)
+      let layout = @layout.compute_layout(graph)
       @builtin.inspect(layout.nodes.length(), content="6")
     }
     Err(_) => abort("Parse error: full_layout_automaton")

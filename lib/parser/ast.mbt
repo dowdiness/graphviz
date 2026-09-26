@@ -162,3 +162,78 @@ fn is_dot_keyword(s : String) -> Bool {
     _ => false
   }
 }
+
+///|
+pub extend AttrTarget with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend AttrTarget with Eq::{equal, not_equal}
+
+///|
+pub extend AttrTarget with Show::{output, to_string}
+
+///|
+pub extend Attribute with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Attribute with Eq::{equal, not_equal}
+
+///|
+pub extend AttributeList with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend AttributeList with Eq::{equal, not_equal}
+
+///|
+pub extend AttributeList with Show::{output, to_string}
+
+///|
+pub extend CompassPoint with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend CompassPoint with Eq::{equal, not_equal}
+
+///|
+pub extend CompassPoint with Show::{output, to_string}
+
+///|
+pub extend EdgeOp with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend EdgeOp with Eq::{equal, not_equal}
+
+///|
+pub extend Graph with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Graph with Eq::{equal, not_equal}
+
+///|
+pub extend NodeId with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend NodeId with Eq::{equal, not_equal}
+
+///|
+pub extend ParseError with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Port with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Port with Eq::{equal, not_equal}
+
+///|
+pub extend Port with Show::{output, to_string}
+
+///|
+pub extend Statement with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Statement with Eq::{equal, not_equal}
+
+///|
+pub extend Subgraph with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Subgraph with Eq::{equal, not_equal}

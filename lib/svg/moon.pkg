@@ -2,6 +2,7 @@ import {
   "dowdiness/graphviz/lib/layout",
   "dowdiness/svg-dsl/lib" @svgdsl,
   "moonbitlang/x/fs",
+  "moonbitlang/core/debug",
 }
 
 import {

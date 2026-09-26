@@ -85,3 +85,48 @@ struct EdgeData {
   from : String
   to : String
 } derive(Eq, Debug)
+
+///|
+pub extend Bounds with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Bounds with Eq::{equal, not_equal}
+
+///|
+pub extend Bounds with Show::{output, to_string}
+
+///|
+pub extend EdgeData with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend EdgeData with Eq::{equal, not_equal}
+
+///|
+pub extend GraphLayout with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend LayoutEdge with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend LayoutEdge with Eq::{equal, not_equal}
+
+///|
+pub extend LayoutNode with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend LayoutNode with Eq::{equal, not_equal}
+
+///|
+pub extend NodeData with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Point with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Point with Eq::{equal, not_equal}
+
+///|
+pub extend Size with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend Size with Eq::{equal, not_equal}
