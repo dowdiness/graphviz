@@ -19,7 +19,7 @@ fn VertexMap::from_nodes(nodes : Map[String, NodeData]) -> VertexMap {
     to_int[id] = to_string.length()
     to_string.push(id)
   }
-  { to_int, to_string }
+  { to_int, to_string, }
 }
 
 ///|

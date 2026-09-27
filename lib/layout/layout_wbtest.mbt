@@ -149,7 +149,10 @@ test "extract_graph_rementioned_nodes_adopt_newer_defaults" {
 
 ///|
 test "cycle_removal_acyclic_unchanged" {
-  let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
+  let edges : Array[EdgeData] = [
+    { from: "a", to: "b", },
+    { from: "b", to: "c", },
+  ]
   let (result, reversed) = remove_cycles(edges)
   @builtin.inspect(result.length(), content="2")
   @debug.debug_inspect(reversed, content="[false, false]")
@@ -157,7 +160,10 @@ test "cycle_removal_acyclic_unchanged" {
 
 ///|
 test "cycle_removal_single_cycle" {
-  let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "a" }]
+  let edges : Array[EdgeData] = [
+    { from: "a", to: "b", },
+    { from: "b", to: "a", },
+  ]
   let (result, reversed) = remove_cycles(edges)
   @builtin.inspect(result.length(), content="2")
   // Exactly one edge should be reversed
@@ -167,15 +173,15 @@ test "cycle_removal_single_cycle" {
 ///|
 test "cycle_removal_uses_first_seen_root_order" {
   let ab_edges : Array[EdgeData] = [
-    { from: "a", to: "b" },
-    { from: "b", to: "a" },
+    { from: "a", to: "b", },
+    { from: "b", to: "a", },
   ]
   let (_, ab_reversed) = remove_cycles(ab_edges)
   @debug.debug_inspect(ab_reversed, content="[false, true]")
 
   let aabb_edges : Array[EdgeData] = [
-    { from: "aa", to: "bb" },
-    { from: "bb", to: "aa" },
+    { from: "aa", to: "bb", },
+    { from: "bb", to: "aa", },
   ]
   let (_, aabb_reversed) = remove_cycles(aabb_edges)
   @debug.debug_inspect(aabb_reversed, content="[false, true]")
@@ -187,7 +193,10 @@ test "layer_assignment_sources_at_zero" {
   nodes.set("a", test_node_data("a"))
   nodes.set("b", test_node_data("b"))
   nodes.set("c", test_node_data("c"))
-  let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
+  let edges : Array[EdgeData] = [
+    { from: "a", to: "b", },
+    { from: "b", to: "c", },
+  ]
   let layers = assign_layers(nodes, edges)
   @debug.debug_inspect(layers.get("a"), content="Some(0)")
 }
@@ -198,7 +207,10 @@ test "layer_assignment_edges_go_lower_to_higher" {
   nodes.set("a", test_node_data("a"))
   nodes.set("b", test_node_data("b"))
   nodes.set("c", test_node_data("c"))
-  let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "c" }]
+  let edges : Array[EdgeData] = [
+    { from: "a", to: "b", },
+    { from: "b", to: "c", },
+  ]
   let layers = assign_layers(nodes, edges)
   let a_layer = layers.get("a").unwrap()
   let b_layer = layers.get("b").unwrap()
@@ -209,7 +221,10 @@ test "layer_assignment_edges_go_lower_to_higher" {
 
 ///|
 test "crossing_minimization_preserves_nodes" {
-  let edges : Array[EdgeData] = [{ from: "a", to: "c" }, { from: "b", to: "d" }]
+  let edges : Array[EdgeData] = [
+    { from: "a", to: "c", },
+    { from: "b", to: "d", },
+  ]
   let layers : Array[Array[String]] = [["a", "b"], ["c", "d"]]
   let result = minimize_crossings(edges, layers, 4)
   // Same number of layers
@@ -236,14 +251,14 @@ test "coordinate_assignment_no_overlap" {
 
 ///|
 test "edge_routing_has_waypoints" {
-  let edges : Array[EdgeData] = [{ from: "a", to: "b" }]
+  let edges : Array[EdgeData] = [{ from: "a", to: "b", }]
   let reversed : Array[Bool] = [false]
   let positions : Map[String, LayoutNode] = Default::default()
   positions.set("a", {
     id: "a",
     label: "a",
-    position: { x: 0.0, y: 0.0 },
-    size: { width: 72.0, height: 36.0 },
+    position: { x: 0.0, y: 0.0, },
+    size: { width: 72.0, height: 36.0, },
     layer: 0,
     order: 0,
     color: None,
@@ -253,8 +268,8 @@ test "edge_routing_has_waypoints" {
   positions.set("b", {
     id: "b",
     label: "b",
-    position: { x: 0.0, y: 116.0 },
-    size: { width: 72.0, height: 36.0 },
+    position: { x: 0.0, y: 116.0, },
+    size: { width: 72.0, height: 36.0, },
     layer: 1,
     order: 0,
     color: None,
@@ -269,14 +284,17 @@ test "edge_routing_has_waypoints" {
 
 ///|
 test "edge_routing_tracks_reversal_per_edge" {
-  let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "a" }]
+  let edges : Array[EdgeData] = [
+    { from: "a", to: "b", },
+    { from: "b", to: "a", },
+  ]
   let (acyclic_edges, reversed) = remove_cycles(edges)
   let positions : Map[String, LayoutNode] = Default::default()
   positions.set("a", {
     id: "a",
     label: "a",
-    position: { x: 0.0, y: 0.0 },
-    size: { width: 72.0, height: 36.0 },
+    position: { x: 0.0, y: 0.0, },
+    size: { width: 72.0, height: 36.0, },
     layer: 0,
     order: 0,
     color: None,
@@ -286,8 +304,8 @@ test "edge_routing_tracks_reversal_per_edge" {
   positions.set("b", {
     id: "b",
     label: "b",
-    position: { x: 0.0, y: 116.0 },
-    size: { width: 72.0, height: 36.0 },
+    position: { x: 0.0, y: 116.0, },
+    size: { width: 72.0, height: 36.0, },
     layer: 1,
     order: 0,
     color: None,

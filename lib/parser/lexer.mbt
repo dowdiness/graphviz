@@ -10,7 +10,7 @@ priv struct Lexer {
 
 ///|
 fn Lexer::new(input : String) -> Lexer {
-  let lexer = { input, position: 0, current_char: None, token_start: 0 }
+  let lexer = { input, position: 0, current_char: None, token_start: 0, }
   lexer.advance()
   lexer
 }

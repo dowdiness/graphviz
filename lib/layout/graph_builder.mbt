@@ -160,10 +160,7 @@ fn ensure_node(
   attrs : @parser.AttributeList?,
 ) -> Unit {
   if !nodes.contains(node_id) {
-    nodes.set(
-      node_id,
-      build_node_data(node_id, attrs, Default::default()),
-    )
+    nodes.set(node_id, build_node_data(node_id, attrs, Default::default()))
   }
 }
 
@@ -186,7 +183,7 @@ fn merge_attrs(
       for attr in o.attributes {
         merged.push(attr)
       }
-      Some({ attributes: merged })
+      Some({ attributes: merged, })
     }
   }
 }
@@ -203,9 +200,9 @@ fn collect_edges(
         let mut current = start_node.id
         for edge_pair in edge_list {
           let (edge_op, target_node) = edge_pair
-          edges.push({ from: current, to: target_node.id })
+          edges.push({ from: current, to: target_node.id, })
           if !directed || edge_op == @parser.Undirected {
-            edges.push({ from: target_node.id, to: current })
+            edges.push({ from: target_node.id, to: current, })
           }
           current = target_node.id
         }

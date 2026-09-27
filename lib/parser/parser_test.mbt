@@ -903,7 +903,9 @@ test "parse_dot continues after empty subgraph edge no-op" {
 
 ///|
 test "parse_dot preserves_nontrivial_subgraph_start_operand_contents" {
-  let parsed = @parser.parse_dot("digraph { subgraph { a [color=red]; b -> c } -> d; }")
+  let parsed = @parser.parse_dot(
+    "digraph { subgraph { a [color=red]; b -> c } -> d; }",
+  )
   match parsed {
     Ok(graph) => {
       @builtin.inspect(graph.statements.length(), content="4")
@@ -942,7 +944,9 @@ test "parse_dot preserves_nontrivial_subgraph_start_operand_contents" {
 
 ///|
 test "parse_dot preserves_nontrivial_subgraph_target_operand_contents" {
-  let parsed = @parser.parse_dot("digraph { a -> subgraph { b [color=red]; c -> d }; }")
+  let parsed = @parser.parse_dot(
+    "digraph { a -> subgraph { b [color=red]; c -> d }; }",
+  )
   match parsed {
     Ok(graph) => {
       @builtin.inspect(graph.statements.length(), content="4")
