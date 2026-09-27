@@ -230,7 +230,7 @@ pub fn render_html_with_config(
   title : String,
   config : SvgConfig,
 ) -> String {
-  let buf = StringBuilder::new()
+  let buf = StringBuilder()
   let svg_content = render_svg_for_html(layout, config)
   let escaped_title = @svgdsl.escape_xml(title)
 
@@ -316,3 +316,6 @@ pub fn save_html_with_config(
     @fs.IOError(message) => Err(message)
   }
 }
+
+///|
+pub extend SvgConfig with @moonbitlang/core/debug.Debug::{to_repr}

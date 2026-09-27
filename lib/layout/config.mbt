@@ -32,3 +32,6 @@ pub fn LayoutConfig::compact() -> LayoutConfig {
     edge_spacing: 10.0,
   }
 }
+
+///|
+pub extend LayoutConfig with @moonbitlang/core/debug.Debug::{to_repr}

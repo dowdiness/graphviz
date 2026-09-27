@@ -3,9 +3,9 @@
 ///|
 test "format_simple_graph" {
   let input = "graph { a }"
-  match parse_dot(input) {
+  match @parser.parse_dot(input) {
     Ok(graph) => {
-      let formatted = format_graph(graph)
+      let formatted = @parser.format_graph(graph)
       assert_true(formatted.contains("graph"))
       assert_true(formatted.contains("a"))
     }
@@ -16,9 +16,9 @@ test "format_simple_graph" {
 ///|
 test "format_digraph" {
   let input = "digraph { a -> b }"
-  match parse_dot(input) {
+  match @parser.parse_dot(input) {
     Ok(graph) => {
-      let formatted = format_graph(graph)
+      let formatted = @parser.format_graph(graph)
       assert_true(formatted.contains("digraph"))
     }
     Err(_) => abort("Failed to parse digraph")
@@ -28,9 +28,9 @@ test "format_digraph" {
 ///|
 test "format_strict_graph" {
   let input = "strict graph { a }"
-  match parse_dot(input) {
+  match @parser.parse_dot(input) {
     Ok(graph) => {
-      let formatted = format_graph(graph)
+      let formatted = @parser.format_graph(graph)
       assert_true(formatted.contains("strict"))
     }
     Err(_) => abort("Failed to parse strict graph")
@@ -39,19 +39,19 @@ test "format_strict_graph" {
 
 ///|
 test "format_preserves_non_bmp_identifier" {
-  let graph : Graph = {
+  let graph : @parser.Graph = {
     strict: false,
     directed: true,
     id: Some("🚀"),
     statements: [],
   }
-  let formatted = format_graph(graph)
+  let formatted = @parser.format_graph(graph)
   assert_true(formatted.contains("🚀"))
 }
 
 ///|
 test "format_preserves_non_bmp_attribute_value" {
-  let graph : Graph = {
+  let graph : @parser.Graph = {
     strict: false,
     directed: true,
     id: None,
@@ -62,28 +62,28 @@ test "format_preserves_non_bmp_attribute_value" {
       ),
     ],
   }
-  let formatted = format_graph(graph)
+  let formatted = @parser.format_graph(graph)
   assert_true(formatted.contains("go 🚀"))
 }
 
 ///|
 test "format_id_quotes_keywords_and_digit_leading_mixed_ids" {
-  @debug.assert_eq(format_id("graph"), "\"graph\"")
-  @debug.assert_eq(format_id("strict"), "\"strict\"")
-  @debug.assert_eq(format_id("Graph"), "\"Graph\"")
-  @debug.assert_eq(format_id("NODE"), "\"NODE\"")
-  @debug.assert_eq(format_id("1foo"), "\"1foo\"")
-  @debug.assert_eq(format_id("123"), "123")
+  @debug.assert_eq(@parser.format_id("graph"), "\"graph\"")
+  @debug.assert_eq(@parser.format_id("strict"), "\"strict\"")
+  @debug.assert_eq(@parser.format_id("Graph"), "\"Graph\"")
+  @debug.assert_eq(@parser.format_id("NODE"), "\"NODE\"")
+  @debug.assert_eq(@parser.format_id("1foo"), "\"1foo\"")
+  @debug.assert_eq(@parser.format_id("123"), "123")
 }
 
 ///|
 test "format_id_escapes_tab_and_carriage_return" {
-  @debug.assert_eq(format_id("a\tb\rc"), "\"a\\tb\\rc\"")
+  @debug.assert_eq(@parser.format_id("a\tb\rc"), "\"a\\tb\\rc\"")
 }
 
 ///|
 test "format_graph_roundtrips_dotted_ids" {
-  let graph : Graph = {
+  let graph : @parser.Graph = {
     strict: false,
     directed: true,
     id: None,
@@ -93,8 +93,8 @@ test "format_graph_roundtrips_dotted_ids" {
       NodeStmt({ id: ".foo", port: None }, None),
     ],
   }
-  let formatted = format_graph(graph)
-  match parse_dot(formatted) {
+  let formatted = @parser.format_graph(graph)
+  match @parser.parse_dot(formatted) {
     Ok(parsed) => {
       @debug.assert_eq(parsed.statements.length(), 3)
       match parsed.statements[0] {
@@ -117,9 +117,9 @@ test "format_graph_roundtrips_dotted_ids" {
 ///|
 test "format_subgraph_renders_nested_statements" {
   let input = "digraph { subgraph cluster_0 { a; b -> c } }"
-  match parse_dot(input) {
+  match @parser.parse_dot(input) {
     Ok(graph) => {
-      let formatted = format_graph(graph)
+      let formatted = @parser.format_graph(graph)
       assert_true(formatted.contains("subgraph cluster_0 {"))
       assert_true(formatted.contains("a;"))
       assert_true(formatted.contains("b -> c;"))
@@ -131,7 +131,7 @@ test "format_subgraph_renders_nested_statements" {
 
 ///|
 test "format_attr_list_quotes_keyword_attribute_keys" {
-  let graph : Graph = {
+  let graph : @parser.Graph = {
     strict: false,
     directed: true,
     id: None,
@@ -142,16 +142,16 @@ test "format_attr_list_quotes_keyword_attribute_keys" {
       ),
     ],
   }
-  let formatted = format_graph(graph)
+  let formatted = @parser.format_graph(graph)
   assert_true(formatted.contains("\"graph\"=\"x\""))
 }
 
 ///|
 test "format_edge_stmt_preserves_ports_and_compass" {
   let input = "digraph { a:out:ne -> b:in:sw }"
-  match parse_dot(input) {
+  match @parser.parse_dot(input) {
     Ok(graph) => {
-      let formatted = format_graph(graph)
+      let formatted = @parser.format_graph(graph)
       assert_true(formatted.contains("a:out:ne -> b:in:sw"))
     }
     Err(_) => abort("Failed to parse graph with ported edge")
@@ -161,13 +161,13 @@ test "format_edge_stmt_preserves_ports_and_compass" {
 ///|
 test "format_edge_stmt_preserves_compass_only_ports" {
   let input = "digraph { a:n -> b:s }"
-  match parse_dot(input) {
+  match @parser.parse_dot(input) {
     Ok(graph) => {
-      let formatted = format_graph(graph)
+      let formatted = @parser.format_graph(graph)
       assert_true(formatted.contains("a:n -> b:s"))
       assert_true(!formatted.contains("a::n"))
       assert_true(!formatted.contains("b::s"))
-      assert_true(parse_dot(formatted) is Ok(_))
+      assert_true(@parser.parse_dot(formatted) is Ok(_))
     }
     Err(_) => abort("Failed to parse graph with compass-only ports")
   }
@@ -175,7 +175,7 @@ test "format_edge_stmt_preserves_compass_only_ports" {
 
 ///|
 test "format_node_id_omits_trailing_colon_for_empty_port" {
-  let graph : Graph = {
+  let graph : @parser.Graph = {
     strict: false,
     directed: true,
     id: None,
@@ -183,18 +183,18 @@ test "format_node_id_omits_trailing_colon_for_empty_port" {
       NodeStmt({ id: "a", port: Some({ id: None, compass: None }) }, None),
     ],
   }
-  let formatted = format_graph(graph)
+  let formatted = @parser.format_graph(graph)
   assert_true(!formatted.contains("a:"))
-  assert_true(parse_dot(formatted) is Ok(_))
+  assert_true(@parser.parse_dot(formatted) is Ok(_))
 }
 
 ///|
 test "roundtrip_simple_digraph" {
   let input = "digraph { a -> b }"
-  match parse_dot(input) {
+  match @parser.parse_dot(input) {
     Ok(graph) => {
-      let formatted = format_graph(graph)
-      match parse_dot(formatted) {
+      let formatted = @parser.format_graph(graph)
+      match @parser.parse_dot(formatted) {
         Ok(reparsed) => {
           @debug.assert_eq(reparsed.directed, graph.directed)
           @debug.assert_eq(reparsed.strict, graph.strict)
@@ -213,10 +213,10 @@ test "roundtrip_simple_digraph" {
 ///|
 test "roundtrip_graph_with_attributes" {
   let input = "strict digraph G { node [shape=box]; a [color=red]; a -> b [label=edge1] }"
-  match parse_dot(input) {
+  match @parser.parse_dot(input) {
     Ok(graph) => {
-      let formatted = format_graph(graph)
-      match parse_dot(formatted) {
+      let formatted = @parser.format_graph(graph)
+      match @parser.parse_dot(formatted) {
         Ok(reparsed) => {
           @debug.assert_eq(reparsed.strict, true)
           @debug.assert_eq(reparsed.id, Some("G"))

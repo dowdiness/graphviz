@@ -9,7 +9,7 @@ test "save_svg_creates_file" {
       let filename = "test_output.svg"
 
       // Save to file
-      match save_svg(layout, filename) {
+      match @svg.save_svg(layout, filename) {
         Ok(_) =>
           // File should be created successfully
           @builtin.inspect(true, content="true")
@@ -32,7 +32,7 @@ test "render_svg_produces_valid_xml_header" {
   match @parser.parse_dot(dot) {
     Ok(graph) => {
       let layout = @layout.compute_layout(graph)
-      let svg = render_svg(layout)
+      let svg = @svg.render_svg(layout)
 
       // Check for XML declaration
       let has_xml_header = svg.contains(
@@ -59,7 +59,7 @@ test "render_svg_includes_arrowhead_for_directed_graph" {
   match @parser.parse_dot(dot) {
     Ok(graph) => {
       let layout = @layout.compute_layout(graph)
-      let svg = render_svg(layout)
+      let svg = @svg.render_svg(layout)
 
       // Should have arrow marker definition
       let has_arrowhead = svg.contains("<marker id=\"arrowhead\"")
@@ -78,7 +78,7 @@ test "render_svg_no_arrowhead_for_undirected_graph" {
   match @parser.parse_dot(dot) {
     Ok(graph) => {
       let layout = @layout.compute_layout(graph)
-      let svg = render_svg(layout)
+      let svg = @svg.render_svg(layout)
 
       // Should NOT have arrow marker definition
       let has_arrowhead = svg.contains("<marker id=\"arrowhead\"")
@@ -97,7 +97,7 @@ test "render_html_produces_valid_html_structure" {
   match @parser.parse_dot(dot) {
     Ok(graph) => {
       let layout = @layout.compute_layout(graph)
-      let html = render_html(layout, "Test Graph")
+      let html = @svg.render_html(layout, "Test Graph")
 
       // Check for HTML structure
       let has_doctype = html.contains("<!DOCTYPE html>")
@@ -127,7 +127,7 @@ test "save_html_creates_file" {
       let filename = "test_output.html"
 
       // Save to file
-      match save_html(layout, filename, "Test") {
+      match @svg.save_html(layout, filename, "Test") {
         Ok(_) =>
           // File should be created successfully
           @builtin.inspect(true, content="true")
@@ -150,7 +150,7 @@ test "render_svg_snapshot_simple_digraph" {
   match @parser.parse_dot(dot) {
     Ok(graph) => {
       let layout = @layout.compute_layout(graph)
-      let svg = render_svg(layout)
+      let svg = @svg.render_svg(layout)
       // Verify key structural elements
       @builtin.inspect(svg.contains("<rect"), content="true")
       @builtin.inspect(svg.contains("<text"), content="true")
@@ -167,7 +167,7 @@ test "render_svg_respects_node_colors" {
   match @parser.parse_dot(dot) {
     Ok(graph) => {
       let layout = @layout.compute_layout(graph)
-      let svg = render_svg(layout)
+      let svg = @svg.render_svg(layout)
       @builtin.inspect(svg.contains("blue"), content="true")
       @builtin.inspect(svg.contains("red"), content="true")
       @builtin.inspect(svg.contains("white"), content="true")

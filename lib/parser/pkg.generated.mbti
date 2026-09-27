@@ -26,16 +26,29 @@ pub(all) enum AttrTarget {
   NodeAttr
   EdgeAttr
 } derive(Eq, @debug.Debug)
+pub fn AttrTarget::equal(Self, Self) -> Bool
+pub fn AttrTarget::not_equal(Self, Self) -> Bool
+pub fn AttrTarget::output(Self, &Logger) -> Unit
+pub fn AttrTarget::to_repr(Self) -> @debug.Repr
+pub fn AttrTarget::to_string(Self) -> String
 pub impl Show for AttrTarget
 
 pub(all) struct Attribute {
   key : String
   value : String
 } derive(Eq, @debug.Debug)
+pub fn Attribute::equal(Self, Self) -> Bool
+pub fn Attribute::not_equal(Self, Self) -> Bool
+pub fn Attribute::to_repr(Self) -> @debug.Repr
 
 pub(all) struct AttributeList {
   attributes : Array[Attribute]
 } derive(Eq, @debug.Debug)
+pub fn AttributeList::equal(Self, Self) -> Bool
+pub fn AttributeList::not_equal(Self, Self) -> Bool
+pub fn AttributeList::output(Self, &Logger) -> Unit
+pub fn AttributeList::to_repr(Self) -> @debug.Repr
+pub fn AttributeList::to_string(Self) -> String
 pub impl Show for AttributeList
 
 pub(all) enum CompassPoint {
@@ -50,12 +63,20 @@ pub(all) enum CompassPoint {
   C
   Underscore
 } derive(Eq, @debug.Debug)
+pub fn CompassPoint::equal(Self, Self) -> Bool
+pub fn CompassPoint::not_equal(Self, Self) -> Bool
+pub fn CompassPoint::output(Self, &Logger) -> Unit
+pub fn CompassPoint::to_repr(Self) -> @debug.Repr
+pub fn CompassPoint::to_string(Self) -> String
 pub impl Show for CompassPoint
 
 pub(all) enum EdgeOp {
   Directed
   Undirected
 } derive(Eq, @debug.Debug)
+pub fn EdgeOp::equal(Self, Self) -> Bool
+pub fn EdgeOp::not_equal(Self, Self) -> Bool
+pub fn EdgeOp::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Graph {
   strict : Bool
@@ -63,21 +84,33 @@ pub(all) struct Graph {
   id : String?
   statements : Array[Statement]
 } derive(Eq, @debug.Debug)
+pub fn Graph::equal(Self, Self) -> Bool
+pub fn Graph::not_equal(Self, Self) -> Bool
+pub fn Graph::to_repr(Self) -> @debug.Repr
 
 pub(all) struct NodeId {
   id : String
   port : Port?
 } derive(Eq, @debug.Debug)
+pub fn NodeId::equal(Self, Self) -> Bool
+pub fn NodeId::not_equal(Self, Self) -> Bool
+pub fn NodeId::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ParseError {
   message : String
   position : Int
 } derive(@debug.Debug)
+pub fn ParseError::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Port {
   mut id : String?
   mut compass : CompassPoint?
 } derive(Eq, @debug.Debug)
+pub fn Port::equal(Self, Self) -> Bool
+pub fn Port::not_equal(Self, Self) -> Bool
+pub fn Port::output(Self, &Logger) -> Unit
+pub fn Port::to_repr(Self) -> @debug.Repr
+pub fn Port::to_string(Self) -> String
 pub impl Show for Port
 
 pub(all) enum Statement {
@@ -87,11 +120,17 @@ pub(all) enum Statement {
   Assignment(String, String)
   Subgraph(Subgraph)
 } derive(Eq, @debug.Debug)
+pub fn Statement::equal(Self, Self) -> Bool
+pub fn Statement::not_equal(Self, Self) -> Bool
+pub fn Statement::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Subgraph {
   id : String?
   statements : Array[Statement]
 } derive(Eq, @debug.Debug)
+pub fn Subgraph::equal(Self, Self) -> Bool
+pub fn Subgraph::not_equal(Self, Self) -> Bool
+pub fn Subgraph::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

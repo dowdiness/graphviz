@@ -9,7 +9,7 @@ fn test_node_data(id : String) -> NodeData {
     color: None,
     fontcolor: None,
     fillcolor: None,
-    explicit_attrs: @hashset.HashSet::default(),
+    explicit_attrs: Default::default(),
   }
 }
 
@@ -183,7 +183,7 @@ test "cycle_removal_uses_first_seen_root_order" {
 
 ///|
 test "layer_assignment_sources_at_zero" {
-  let nodes : Map[String, NodeData] = Map::default()
+  let nodes : Map[String, NodeData] = Default::default()
   nodes.set("a", test_node_data("a"))
   nodes.set("b", test_node_data("b"))
   nodes.set("c", test_node_data("c"))
@@ -194,7 +194,7 @@ test "layer_assignment_sources_at_zero" {
 
 ///|
 test "layer_assignment_edges_go_lower_to_higher" {
-  let nodes : Map[String, NodeData] = Map::default()
+  let nodes : Map[String, NodeData] = Default::default()
   nodes.set("a", test_node_data("a"))
   nodes.set("b", test_node_data("b"))
   nodes.set("c", test_node_data("c"))
@@ -221,7 +221,7 @@ test "crossing_minimization_preserves_nodes" {
 
 ///|
 test "coordinate_assignment_no_overlap" {
-  let nodes : Map[String, NodeData] = Map::default()
+  let nodes : Map[String, NodeData] = Default::default()
   nodes.set("a", test_node_data("a"))
   nodes.set("b", test_node_data("b"))
   let layers : Array[Array[String]] = [["a", "b"]]
@@ -238,7 +238,7 @@ test "coordinate_assignment_no_overlap" {
 test "edge_routing_has_waypoints" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }]
   let reversed : Array[Bool] = [false]
-  let positions : Map[String, LayoutNode] = Map::default()
+  let positions : Map[String, LayoutNode] = Default::default()
   positions.set("a", {
     id: "a",
     label: "a",
@@ -271,7 +271,7 @@ test "edge_routing_has_waypoints" {
 test "edge_routing_tracks_reversal_per_edge" {
   let edges : Array[EdgeData] = [{ from: "a", to: "b" }, { from: "b", to: "a" }]
   let (acyclic_edges, reversed) = remove_cycles(edges)
-  let positions : Map[String, LayoutNode] = Map::default()
+  let positions : Map[String, LayoutNode] = Default::default()
   positions.set("a", {
     id: "a",
     label: "a",
