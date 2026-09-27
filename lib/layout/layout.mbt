@@ -74,5 +74,5 @@ fn calculate_bounds(nodes : Map[String, LayoutNode]) -> Bounds {
       }
     }
   })
-  { min_x, min_y, max_x, max_y }
+  { min_x, min_y, max_x, max_y, }
 }

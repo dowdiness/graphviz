@@ -57,8 +57,8 @@ test "format_preserves_non_bmp_attribute_value" {
     id: None,
     statements: [
       NodeStmt(
-        { id: "a", port: None },
-        Some({ attributes: [{ key: "label", value: "go 🚀" }] }),
+        { id: "a", port: None, },
+        Some({ attributes: [{ key: "label", value: "go 🚀", }], }),
       ),
     ],
   }
@@ -88,9 +88,9 @@ test "format_graph_roundtrips_dotted_ids" {
     directed: true,
     id: None,
     statements: [
-      NodeStmt({ id: ".5", port: None }, None),
-      NodeStmt({ id: "1.", port: None }, None),
-      NodeStmt({ id: ".foo", port: None }, None),
+      NodeStmt({ id: ".5", port: None, }, None),
+      NodeStmt({ id: "1.", port: None, }, None),
+      NodeStmt({ id: ".foo", port: None, }, None),
     ],
   }
   let formatted = @parser.format_graph(graph)
@@ -137,8 +137,8 @@ test "format_attr_list_quotes_keyword_attribute_keys" {
     id: None,
     statements: [
       NodeStmt(
-        { id: "a", port: None },
-        Some({ attributes: [{ key: "graph", value: "x" }] }),
+        { id: "a", port: None, },
+        Some({ attributes: [{ key: "graph", value: "x", }], }),
       ),
     ],
   }
@@ -180,7 +180,7 @@ test "format_node_id_omits_trailing_colon_for_empty_port" {
     directed: true,
     id: None,
     statements: [
-      NodeStmt({ id: "a", port: Some({ id: None, compass: None }) }, None),
+      NodeStmt({ id: "a", port: Some({ id: None, compass: None, }), }, None),
     ],
   }
   let formatted = @parser.format_graph(graph)

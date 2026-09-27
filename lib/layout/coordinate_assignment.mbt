@@ -31,8 +31,8 @@ fn assign_coordinates(
       positions.set(node_id, {
         id: node_id,
         label,
-        position: { x, y },
-        size: { width: config.node_width, height: config.node_height },
+        position: { x, y, },
+        size: { width: config.node_width, height: config.node_height, },
         layer: layer_index,
         order: i,
         color,

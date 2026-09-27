@@ -82,7 +82,7 @@ fn Parser::parse_port(self : Parser) -> Port? {
   if !self.eat(Colon) {
     return None
   }
-  let port = { id: None, compass: None }
+  let port = { id: None, compass: None, }
   let first = match self.current_token {
     ID(id) => id
     _ => return None
@@ -118,7 +118,7 @@ fn Parser::parse_node_id(self : Parser) -> NodeId? {
           }
         _ => None
       }
-      Some({ id, port })
+      Some({ id, port, })
     }
     _ => None
   }
@@ -191,7 +191,7 @@ fn make_subgraph_endpoint(subgraph : Subgraph) -> EdgeEndpoint {
 ///|
 fn Parser::parse_edge_endpoint(self : Parser) -> EdgeEndpoint? {
   match self.parse_node_id() {
-    Some(node_id) => Some({ node_ids: [node_id], preserved_subgraph: None })
+    Some(node_id) => Some({ node_ids: [node_id], preserved_subgraph: None, })
     None =>
       match self.parse_subgraph() {
         Some(subgraph) => Some(make_subgraph_endpoint(subgraph))
@@ -209,7 +209,7 @@ fn Parser::parse_attribute(self : Parser) -> Attribute? {
       match self.current_token {
         ID(value) => {
           ignore(self.eat(ID("")))
-          Some({ key, value })
+          Some({ key, value, })
         }
         _ => None
       }
@@ -551,7 +551,7 @@ fn Parser::parse_subgraph(self : Parser) -> Subgraph? {
   if !self.eat(RightBrace) {
     return None
   }
-  Some({ id, statements })
+  Some({ id, statements, })
 }
 
 // graph : [ strict ] (graph | digraph) [ ID ] '{' stmt_list '}'
@@ -601,7 +601,7 @@ fn Parser::parse_graph(self : Parser) -> Graph? {
   if !self.eat(RightBrace) {
     return None
   }
-  Some({ strict, directed, id, statements })
+  Some({ strict, directed, id, statements, })
 }
 
 // Public API

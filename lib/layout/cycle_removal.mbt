@@ -51,7 +51,7 @@ fn remove_cycles(edges : Array[EdgeData]) -> (Array[EdgeData], Array[Bool]) {
   for i = 0; i < edges.length(); i = i + 1 {
     let edge = edges[i]
     if state.reversed_edges[i] {
-      new_edges.push({ from: edge.to, to: edge.from })
+      new_edges.push({ from: edge.to, to: edge.from, })
     } else {
       new_edges.push(edge)
     }
