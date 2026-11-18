@@ -26,6 +26,7 @@ pub fn save_svg_with_config(@layout.GraphLayout, String, SvgConfig) -> Result[Un
 // Errors
 
 // Types and methods
+#derive(@debug.Debug)
 pub(all) struct SvgConfig {
   padding : Double
   node_stroke : String
@@ -36,7 +37,7 @@ pub(all) struct SvgConfig {
   text_color : String
   font_size : Double
   font_family : String
-} derive(@debug.Debug)
+}
 pub fn SvgConfig::dark_theme() -> Self
 pub fn SvgConfig::default() -> Self
 pub fn SvgConfig::to_repr(Self) -> @debug.Repr

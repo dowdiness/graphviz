@@ -1,11 +1,11 @@
 name = "dowdiness/graphviz"
 
-version = "0.1.0"
+version = "0.2.0"
 
 import {
-  "moonbitlang/x@0.4.40",
-  "dowdiness/svg-dsl@0.1.0",
-  "dowdiness/alga@0.4.0",
+  "moonbitlang/x@0.5.7",
+  "dowdiness/svg-dsl@0.2.0",
+  "dowdiness/alga@0.5.0",
 }
 
 readme = "README.md"

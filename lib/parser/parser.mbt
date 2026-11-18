@@ -4,7 +4,7 @@
 priv struct Parser {
   lexer : Lexer
   mut current_token : Token
-  mut current_token_start : Int
+  mut current_token_start : Int32
   pending_statements : Array[Statement]
 }
 

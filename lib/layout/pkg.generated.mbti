@@ -14,12 +14,13 @@ pub fn compute_layout_with_config(@parser.Graph, LayoutConfig) -> GraphLayout
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub struct Bounds {
   min_x : Double
   min_y : Double
   max_x : Double
   max_y : Double
-} derive(Eq, @debug.Debug)
+}
 pub fn Bounds::equal(Self, Self) -> Bool
 pub fn Bounds::not_equal(Self, Self) -> Bool
 pub fn Bounds::output(Self, &Logger) -> Unit
@@ -27,71 +28,79 @@ pub fn Bounds::to_repr(Self) -> @debug.Repr
 pub fn Bounds::to_string(Self) -> String
 pub impl Show for Bounds
 
-type EdgeData derive(Eq, @debug.Debug)
+#derive(Eq, @debug.Debug)
+type EdgeData
 pub fn EdgeData::equal(Self, Self) -> Bool
 pub fn EdgeData::not_equal(Self, Self) -> Bool
 pub fn EdgeData::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub struct GraphLayout {
   nodes : Map[String, LayoutNode]
   edges : Array[LayoutEdge]
   bounds : Bounds
   layers : Array[Array[String]]
   directed : Bool
-} derive(@debug.Debug)
+}
 pub fn GraphLayout::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) struct LayoutConfig {
   node_width : Double
   node_height : Double
   layer_spacing : Double
   node_spacing : Double
   edge_spacing : Double
-} derive(@debug.Debug)
+}
 pub fn LayoutConfig::compact() -> Self
 pub fn LayoutConfig::default() -> Self
 pub fn LayoutConfig::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct LayoutEdge {
   from : String
   to : String
   waypoints : Array[Point]
   reversed : Bool
-} derive(Eq, @debug.Debug)
+}
 pub fn LayoutEdge::equal(Self, Self) -> Bool
 pub fn LayoutEdge::not_equal(Self, Self) -> Bool
 pub fn LayoutEdge::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct LayoutNode {
   id : String
   label : String
   position : Point
   size : Size
-  layer : Int
-  order : Int
+  layer : Int32
+  order : Int32
   color : String?
   fontcolor : String?
   fillcolor : String?
-} derive(Eq, @debug.Debug)
+}
 pub fn LayoutNode::equal(Self, Self) -> Bool
 pub fn LayoutNode::not_equal(Self, Self) -> Bool
 pub fn LayoutNode::to_repr(Self) -> @debug.Repr
 
-type NodeData derive(@debug.Debug)
+#derive(@debug.Debug)
+type NodeData
 pub fn NodeData::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct Point {
   x : Double
   y : Double
-} derive(Eq, @debug.Debug)
+}
 pub fn Point::equal(Self, Self) -> Bool
 pub fn Point::not_equal(Self, Self) -> Bool
 pub fn Point::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub struct Size {
   width : Double
   height : Double
-} derive(Eq, @debug.Debug)
+}
 pub fn Size::equal(Self, Self) -> Bool
 pub fn Size::not_equal(Self, Self) -> Bool
 pub fn Size::to_repr(Self) -> @debug.Repr

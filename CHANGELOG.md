@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-18
+
+### Breaking
+
+- Requires MoonBit 0.10.21. The previously published 0.1.0 package still used
+  the removed `moon.mod.json` manifest and cannot be resolved by current
+  toolchains.
+
+### Changed
+
+- Update dependencies to `moonbitlang/x@0.5.7`, `dowdiness/svg-dsl@0.2.0` and
+  `dowdiness/alga@0.5.0`.
+- Apply the MoonBit 0.10.21 formatter (`#derive` attributes) and refresh the
+  generated interfaces. No behavior change.
+
 ## [0.1.0] — 2026-04-21
 
 First public release. Three packages forming a DOT → AST → layout → SVG pipeline. Any of them can be used independently.

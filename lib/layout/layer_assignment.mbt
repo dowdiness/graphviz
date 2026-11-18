@@ -10,7 +10,7 @@
 fn assign_layers(
   nodes : Map[String, NodeData],
   edges : Array[EdgeData],
-) -> Map[String, Int] {
+) -> Map[String, Int32] {
   let vmap = VertexMap::from_nodes(nodes)
   let g = vmap.to_adjacency_map(edges)
   let topo_order = match @alga.toposort(g) {
@@ -25,7 +25,7 @@ fn assign_layers(
       )
   }
   // Forward propagation: each node's layer = max(predecessor layers) + 1
-  let int_layer : Map[Int, Int] = Default::default()
+  let int_layer : Map[Int32, Int32] = Default::default()
   for v in topo_order {
     let current_layer = match int_layer.get(v) {
       Some(l) => l
@@ -40,7 +40,7 @@ fn assign_layers(
     })
   }
   // Map back to String keys via O(1) array index reverse lookup
-  let layer_map : Map[String, Int] = Default::default()
+  let layer_map : Map[String, Int32] = Default::default()
   for idx, layer in int_layer {
     layer_map[vmap.to_string[idx]] = layer
   }
@@ -54,7 +54,7 @@ fn assign_layers(
 }
 
 ///|
-fn group_by_layer(layer_map : Map[String, Int]) -> Array[Array[String]] {
+fn group_by_layer(layer_map : Map[String, Int32]) -> Array[Array[String]] {
   let mut max_layer = 0
   for _, layer in layer_map {
     if layer > max_layer {
