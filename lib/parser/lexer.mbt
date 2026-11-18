@@ -3,9 +3,9 @@
 ///|
 priv struct Lexer {
   input : String
-  mut position : Int
+  mut position : Int32
   mut current_char : Char?
-  mut token_start : Int
+  mut token_start : Int32
 }
 
 ///|
@@ -16,7 +16,7 @@ fn Lexer::new(input : String) -> Lexer {
 }
 
 ///|
-fn Lexer::current_index(self : Lexer) -> Int {
+fn Lexer::current_index(self : Lexer) -> Int32 {
   match self.current_char {
     Some(_) => self.position - 1
     None => self.position

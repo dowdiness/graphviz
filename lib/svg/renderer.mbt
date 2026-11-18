@@ -2,6 +2,7 @@
 // Converts layout information into SVG markup using svg-dsl
 
 ///|
+#derive(Debug)
 pub(all) struct SvgConfig {
   padding : Double // Padding around graph: 20.0
   node_stroke : String // Node border color: "#333"
@@ -12,7 +13,7 @@ pub(all) struct SvgConfig {
   text_color : String // Text color: "#000"
   font_size : Double // Font size: 14.0
   font_family : String // Font family: "Arial, sans-serif"
-} derive(Debug)
+}
 
 ///|
 pub fn SvgConfig::default() -> SvgConfig {

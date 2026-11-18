@@ -2,7 +2,7 @@
 // Record baseline BEFORE alga integration, then compare AFTER.
 
 ///|
-fn bench_dot_chain(n : Int) -> String {
+fn bench_dot_chain(n : Int32) -> String {
   let mut s = "digraph { "
   for i in 0..<(n - 1) {
     s = s + "n" + i.to_string() + " -> n" + (i + 1).to_string() + "; "
@@ -11,7 +11,7 @@ fn bench_dot_chain(n : Int) -> String {
 }
 
 ///|
-fn bench_dot_diamond(layers : Int, width : Int) -> String {
+fn bench_dot_diamond(layers : Int32, width : Int32) -> String {
   let mut s = "digraph { "
   for layer in 0..<(layers - 1) {
     for i in 0..<width {
@@ -28,7 +28,7 @@ fn bench_dot_diamond(layers : Int, width : Int) -> String {
 }
 
 ///|
-fn bench_dot_cyclic(n : Int) -> String {
+fn bench_dot_cyclic(n : Int32) -> String {
   let mut s = "digraph { "
   for i in 0..<n {
     let next = (i + 1) % n

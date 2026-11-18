@@ -5,7 +5,7 @@
 /// - `to_int[name]` → Int index (for building AdjacencyMap)
 /// - `to_string[idx]` → String name (for mapping results back)
 priv struct VertexMap {
-  to_int : Map[String, Int]
+  to_int : Map[String, Int32]
   to_string : Array[String]
 }
 
@@ -13,7 +13,7 @@ priv struct VertexMap {
 /// Build a VertexMap from the node map.
 /// Each node gets a stable Int index based on insertion order.
 fn VertexMap::from_nodes(nodes : Map[String, NodeData]) -> VertexMap {
-  let to_int : Map[String, Int] = Default::default()
+  let to_int : Map[String, Int32] = Default::default()
   let to_string : Array[String] = []
   for id, _ in nodes {
     to_int[id] = to_string.length()
@@ -30,7 +30,7 @@ fn VertexMap::to_adjacency_map(
   self : VertexMap,
   edges : Array[EdgeData],
 ) -> @alga.AdjacencyMap {
-  let int_edges : Array[(Int, Int)] = []
+  let int_edges : Array[(Int32, Int32)] = []
   for edge in edges {
     match (self.to_int.get(edge.from), self.to_int.get(edge.to)) {
       (Some(u), Some(v)) => if u != v { int_edges.push((u, v)) }

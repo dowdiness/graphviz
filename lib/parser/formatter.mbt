@@ -103,12 +103,15 @@ fn format_node_id(node_id : NodeId) -> String {
 }
 
 ///|
-fn format_indent(level : Int) -> String {
+fn format_indent(level : Int32) -> String {
   "  ".repeat(level)
 }
 
 ///|
-fn format_statement_with_indent(stmt : Statement, indent_level : Int) -> String {
+fn format_statement_with_indent(
+  stmt : Statement,
+  indent_level : Int32,
+) -> String {
   match stmt {
     NodeStmt(node_id, attr_list) => {
       let mut result = format_node_id(node_id)

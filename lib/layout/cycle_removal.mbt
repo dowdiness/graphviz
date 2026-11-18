@@ -62,8 +62,8 @@ fn remove_cycles(edges : Array[EdgeData]) -> (Array[EdgeData], Array[Bool]) {
 ///|
 fn build_indexed_outgoing_adjacency(
   edges : Array[EdgeData],
-) -> Map[String, Array[(String, Int)]] {
-  let outgoing : Map[String, Array[(String, Int)]] = Default::default()
+) -> Map[String, Array[(String, Int32)]] {
+  let outgoing : Map[String, Array[(String, Int32)]] = Default::default()
   for i = 0; i < edges.length(); i = i + 1 {
     let edge = edges[i]
     if !outgoing.contains(edge.from) {
@@ -80,7 +80,7 @@ fn build_indexed_outgoing_adjacency(
 ///|
 fn dfs_visit(
   node : String,
-  outgoing : Map[String, Array[(String, Int)]],
+  outgoing : Map[String, Array[(String, Int32)]],
   state : DFSState,
 ) -> Unit {
   state.visited.set(node, true)

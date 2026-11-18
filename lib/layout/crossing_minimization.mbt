@@ -4,7 +4,7 @@
 fn minimize_crossings(
   edges : Array[EdgeData],
   layers : Array[Array[String]],
-  iterations : Int,
+  iterations : Int32,
 ) -> Array[Array[String]] {
   let (incoming, outgoing) = build_adjacency(edges)
   let mut current_layers = copy_layers(layers)
@@ -68,7 +68,7 @@ fn compute_layer_barycenters(
   adjacent_layer : Array[String],
   connections : Map[String, Array[String]],
 ) -> Map[String, Double] {
-  let pos_index : Map[String, Int] = Default::default()
+  let pos_index : Map[String, Int32] = Default::default()
   for i = 0; i < adjacent_layer.length(); i = i + 1 {
     pos_index.set(adjacent_layer[i], i)
   }

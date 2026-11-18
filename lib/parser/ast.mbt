@@ -25,6 +25,7 @@
 // Token types for the DOT language
 
 ///|
+#derive(Eq)
 priv enum Token {
   // Keywords
   Strict
@@ -49,11 +50,12 @@ priv enum Token {
   Arrow // ->
   Line // --
   EOF // End of file
-} derive(Eq)
+}
 
 // AST node types
 
 ///|
+#derive(Eq, Debug)
 pub(all) enum CompassPoint {
   N
   NE
@@ -65,7 +67,7 @@ pub(all) enum CompassPoint {
   NW
   C
   Underscore
-} derive(Eq, Debug)
+}
 
 ///|
 pub impl Show for CompassPoint with fn output(self, logger) {
@@ -73,10 +75,11 @@ pub impl Show for CompassPoint with fn output(self, logger) {
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct Port {
   mut id : String?
   mut compass : CompassPoint?
-} derive(Eq, Debug)
+}
 
 ///|
 pub impl Show for Port with fn output(self, logger) {
@@ -84,27 +87,31 @@ pub impl Show for Port with fn output(self, logger) {
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct NodeId {
   id : String
   port : Port?
-} derive(Eq, Debug)
+}
 
 ///|
+#derive(Eq, Debug)
 pub(all) enum EdgeOp {
   Directed // ->
   Undirected // --
-} derive(Eq, Debug)
+}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct Attribute {
   key : String
   value : String
-} derive(Eq, Debug)
+}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct AttributeList {
   attributes : Array[Attribute]
-} derive(Eq, Debug)
+}
 
 ///|
 pub impl Show for AttributeList with fn output(self, logger) {
@@ -112,11 +119,12 @@ pub impl Show for AttributeList with fn output(self, logger) {
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) enum AttrTarget {
   GraphAttr
   NodeAttr
   EdgeAttr
-} derive(Eq, Debug)
+}
 
 ///|
 pub impl Show for AttrTarget with fn output(self, logger) {
@@ -124,33 +132,37 @@ pub impl Show for AttrTarget with fn output(self, logger) {
 }
 
 ///|
+#derive(Eq, Debug)
 pub(all) enum Statement {
   NodeStmt(NodeId, AttributeList?)
   EdgeStmt(NodeId, Array[(EdgeOp, NodeId)], AttributeList?)
   AttrStmt(AttrTarget, AttributeList)
   Assignment(String, String)
   Subgraph(Subgraph)
-} derive(Eq, Debug)
+}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct Subgraph {
   id : String?
   statements : Array[Statement]
-} derive(Eq, Debug)
+}
 
 ///|
+#derive(Eq, Debug)
 pub(all) struct Graph {
   strict : Bool
   directed : Bool
   id : String?
   statements : Array[Statement]
-} derive(Eq, Debug)
+}
 
 ///|
+#derive(Debug)
 pub(all) struct ParseError {
   message : String
-  position : Int // UTF-16 code unit index
-} derive(Debug)
+  position : Int32 // UTF-16 code unit index
+}
 
 // DOT language keywords — shared by lexer and formatter.
 
